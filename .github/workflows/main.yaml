@@ -1,4 +1,4 @@
-name: Blob storage website CI
+name: Deploy pipeline
 
 env:
   AZURE_SITE_STORAGE_ACCOUNT: learnysite
@@ -108,15 +108,22 @@ jobs:
       with:
         name: functionapp
 
-    - name: 'Run Azure Functions Action'
+    - name: Deploy azure function
       if: github.event.inputs.component == 'backend' || github.event.inputs.component == 'both'
-      uses: Azure/functions-action@v1
-      id: fa
+      uses: azure/CLI@v1
       with:
-        app-name: $AZURE_FUNCTIONAPP_NAME
-        package: functionapp.zip
-        publish-profile: ${{ secrets.AZURE_FUNCTIONAPP_PUBLISH_PROFILE }}
-        respect-pom-xml: false    
+        inlineScript: |
+            az functionapp deployment source config-zip -g $AZURE_RESOURCE_GROUP -n $AZURE_FUNCTIONAPP_NAME --src build.zip --build-remote true
+
+    # - name: 'Run Azure Functions Action'
+    #   if: github.event.inputs.component == 'backend' || github.event.inputs.component == 'both'
+    #   uses: Azure/functions-action@v1
+    #   id: fa
+    #   with:
+    #     app-name: $AZURE_FUNCTIONAPP_NAME
+    #     package: functionapp.zip
+    #     publish-profile: ${{ secrets.AZURE_FUNCTIONAPP_PUBLISH_PROFILE }}
+    #     respect-pom-xml: false    
 
 
   # Azure logout
@@ -124,3 +131,6 @@ jobs:
       run: |
             az logout
       if: always()
+
+
+# az functionapp deployment source config-zip -g rg-learny -n learny-functionapp --src build.zip

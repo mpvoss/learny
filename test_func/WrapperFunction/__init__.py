@@ -17,6 +17,36 @@ async def index():
         "info": "oui",
     }
 
+@app.get("/taco")
+async def index():
+    return {
+        "info": "mmmmm",
+    }
+
+@app.get("/umad")
+async def index():
+    return {
+        "info": "bro",
+    }
+
+@app.get("/pipeline")
+async def index():
+    return {
+        "info": "works",
+    }
+
+
+@app.get("/swag")
+async def index():
+    return {
+        "info": "bet",
+    }
+
+@app.get("/final")
+async def index():
+    return {
+        "info": "countdown",
+    }
 
 @app.get("/hello/{name}")
 async def get_name(name: str):
