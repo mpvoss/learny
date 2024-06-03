@@ -113,7 +113,7 @@ jobs:
       uses: azure/CLI@v1
       with:
         inlineScript: |
-            az functionapp deployment source config-zip -g $AZURE_RESOURCE_GROUP -n $AZURE_FUNCTIONAPP_NAME --src build.zip --build-remote true
+            az functionapp deployment source config-zip -g $AZURE_RESOURCE_GROUP -n $AZURE_FUNCTIONAPP_NAME --src functionapp.zip --build-remote true
 
     # - name: 'Run Azure Functions Action'
     #   if: github.event.inputs.component == 'backend' || github.event.inputs.component == 'both'
