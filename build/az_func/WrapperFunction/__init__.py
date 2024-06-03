@@ -29,6 +29,12 @@ async def index():
         "info": "bro",
     }
 
+@app.get("/pipeline")
+async def index():
+    return {
+        "info": "works",
+    }
+
 
 @app.get("/swag")
 async def index():
