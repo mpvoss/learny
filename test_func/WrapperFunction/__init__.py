@@ -29,6 +29,12 @@ async def index():
         "info": "bro",
     }
 
+@app.get("/matthew")
+async def index():
+    return {
+        "is": "bad at azure",
+    }
+
 # @app.get("/pipeline")
 # async def index():
 #     return {
