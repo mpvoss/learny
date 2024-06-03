@@ -11,6 +11,13 @@ async def index():
     }
 
 
+@app.get("/hola")
+async def index():
+    return {
+        "info": "oui",
+    }
+
+
 @app.get("/hello/{name}")
 async def get_name(name: str):
     return {
