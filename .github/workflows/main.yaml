@@ -78,35 +78,37 @@ jobs:
            az cdn endpoint purge --content-paths  "/*" --profile-name $AZURE_CDN_PROFILE --name $AZURE_CDN_ENDPOINT --resource-group $AZURE_RESOURCE_GROUP
 
 
-    - name: Setup Python
-      if: github.event.inputs.component == 'backend' || github.event.inputs.component == 'both'
-      uses: actions/setup-python@v2
-      with:
-        python-version: 3.11
+    # - name: Setup Python
+    #   if: github.event.inputs.component == 'backend' || github.event.inputs.component == 'both'
+    #   uses: actions/setup-python@v2
+    #   with:
+    #     python-version: 3.11
 
-    - name: Install dependencies
-      if: github.event.inputs.component == 'backend' || github.event.inputs.component == 'both'
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
+    # - name: Install dependencies
+    #   if: github.event.inputs.component == 'backend' || github.event.inputs.component == 'both'
+    #   run: |
+    #     python -m pip install --upgrade pip
+    #     pip install -r requirements.txt
 
     - name: Zip Python directory
       if: github.event.inputs.component == 'backend' || github.event.inputs.component == 'both'
       run: |
-        zip -r functionapp.zip ./test_func
+        cd ./test_func
+        zip -r ../functionapp.zip .
+        cd ..
 
-    - name: Upload artifact
-      if: github.event.inputs.component == 'backend' || github.event.inputs.component == 'both'
-      uses: actions/upload-artifact@v2
-      with:
-        name: functionapp
-        path: functionapp.zip
+    # - name: Upload artifact
+    #   if: github.event.inputs.component == 'backend' || github.event.inputs.component == 'both'
+    #   uses: actions/upload-artifact@v2
+    #   with:
+    #     name: functionapp
+    #     path: functionapp.zip
 
-    - name: Download artifact
-      if: github.event.inputs.component == 'backend' || github.event.inputs.component == 'both'
-      uses: actions/download-artifact@v2
-      with:
-        name: functionapp
+    # - name: Download artifact
+    #   if: github.event.inputs.component == 'backend' || github.event.inputs.component == 'both'
+    #   uses: actions/download-artifact@v2
+    #   with:
+    #     name: functionapp
 
     - name: Deploy azure function
       if: github.event.inputs.component == 'backend' || github.event.inputs.component == 'both'
