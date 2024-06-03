@@ -1,3 +1,5 @@
+from contextlib import asynccontextmanager
+import os
 from typing import Union
 
 from fastapi import FastAPI
@@ -5,14 +7,37 @@ from starlette.middleware.cors import CORSMiddleware
 
 from dotenv import load_dotenv
 
+from backend.service.LocalLLMService import LocalLLMService
+
 load_dotenv()
 
 
-from backend import llmer
 from .routers import discussions, flashcards, notes, util, tags
+from backend.service.GptLLMService import GptLLMService
 
 
-app = FastAPI(root_path="/api")
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    ''' Run at startup
+        Initialise the Client and add it to app.state
+    '''
+    if os.getenv("LLM_BACKEND","local") == 'openai':
+        app.state.llm_service = GptLLMService()
+    else:
+        app.state.llm_service = LocalLLMService()
+    
+    yield
+    ''' Run on shutdown
+        Close the connection
+        Clear variables and release the resources
+    '''
+    app.state.n_client.close()
+
+
+app = FastAPI(lifespan=lifespan, root_path="/api")
+
+
 app.include_router(discussions.router)
 app.include_router(flashcards.router)
 app.include_router(notes.router)
@@ -28,7 +53,6 @@ app.add_middleware(
     allow_headers=["*"],  # Allows all headers
 )
 
-
 #
 # @app.get("/openai")
 # def hit_openai():
@@ -40,25 +64,25 @@ def read_item(item_id: int, q: Union[str, None] = None):
 
 
 
-@app.get("/disciplines")
-def get_disciplines():
-    return llmer.get_disciplines()
+# @app.get("/disciplines")
+# def get_disciplines():
+#     return llmer.get_disciplines()
 
 
-@app.get("/topics")
-def get_topics(discipline:str):
-    return llmer.get_topics(discipline)
+# @app.get("/topics")
+# def get_topics(discipline:str):
+#     return llmer.get_topics(discipline)
 
 
-@app.get("/outline")
-def get_topics(topic: str):
-    return llmer.get_outline(topic)
+# @app.get("/outline")
+# def get_topics(topic: str):
+#     return llmer.get_outline(topic)
 
 
-@app.get("/questions")
-def get_topics(topic: str):
-    # raise HTTPException(status_code=404, detail="Item not found")
-    return llmer.get_questions(topic)
+# @app.get("/questions")
+# def get_topics(topic: str):
+#     # raise HTTPException(status_code=404, detail="Item not found")
+#     return llmer.get_questions(topic)
 
 
 # @app.post("/chat")

@@ -1,18 +1,18 @@
-import { AppBar, Toolbar, IconButton, Typography, Box, Button, Avatar, Container, Menu, MenuItem, Tooltip } from '@mui/material'
+import { AppBar, Toolbar, IconButton, Typography, Box, Avatar, Container, Menu, MenuItem, Tooltip } from '@mui/material'
 import './App.css'
 import Chat from './components/Chat'
-import { Send as SendIcon, Menu as MenuIcon } from "@mui/icons-material";
-import { useState } from 'react';
-import { Route, Routes, Link, BrowserRouter } from 'react-router-dom';
+import { Menu as MenuIcon } from "@mui/icons-material";
+// import { useState } from 'react';
+import { Route, Routes, Link } from 'react-router-dom';
 import MenuBookIcon from '@mui/icons-material/MenuBook';
 import React from 'react';
 import NotesSearch from './components/NotesSearch';
-import FlashCardPage from './components/FlashCardPage';
 import Study from './components/Study';
+import FlashcardHome from './components/FlashcardHome';
 const settings = ['Profile', 'Logout'];
 
 function App() {
-  const [mobileOpen, setMobileOpen] = useState(false);
+  // const [mobileOpen, setMobileOpen] = useState(false);
   const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(null);
   const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(null);
 
@@ -32,9 +32,9 @@ function App() {
   };
 
 
-  const handleDrawerToggle = () => {
-    setMobileOpen(!mobileOpen);
-  };
+  // const handleDrawerToggle = () => {
+  //   setMobileOpen(!mobileOpen);
+  // };
   return (
     <>
       <AppBar
@@ -156,7 +156,8 @@ function App() {
                 <Routes>
                 <Route path="/" element={<Chat />} />
                 <Route path="/notes" element={<NotesSearch />} />
-                <Route path="/flashcards" element={<Study />} />
+                <Route path="/flashcards" element={<FlashcardHome />} />
+                <Route path="/study" element={<Study />} />
                 </Routes>
     </>
   )

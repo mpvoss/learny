@@ -9,7 +9,7 @@ class CreateDiscussionRequest(BaseModel):
 
 class CreateNoteRequest(BaseModel):
     content: str
-    tags: List[int] = []
+    tag: str 
 
 class ChatMessage(BaseModel):
     content: str

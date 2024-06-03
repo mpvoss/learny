@@ -28,5 +28,10 @@ interface SuggestedQuestions {
     questions: string[];
 }
 
+interface Flashcard {
+    term: string;
+    description: string;
+}
 
-export type{LLMResp, Discussion, Message, SuggestedQuestions, Tag, Note}
+
+export type{LLMResp, Discussion, Message, SuggestedQuestions, Tag, Note, Flashcard}

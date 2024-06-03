@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import AddIcon from '@mui/icons-material/Add';
 import CloseIcon from '@mui/icons-material/Close';
 import BookmarksIcon from '@mui/icons-material/Bookmarks';
+import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import QueueIcon from '@mui/icons-material/Queue';
 import {
     Box,
@@ -14,7 +15,6 @@ import {
     TextField,
     Button,
     Toolbar,
-    AppBar,
     Typography,
     DialogTitle,
     Dialog,
@@ -26,25 +26,22 @@ import {
     Alert,
     styled,
     Tooltip,
-    Grid,
-    Divider,
     ListItemButton,
     ListItemIcon
 } from "@mui/material";
-import { Send as SendIcon, Menu as MenuIcon } from "@mui/icons-material";
+import { Send as SendIcon } from "@mui/icons-material";
 import config from '../config.json'
 import { Discussion, Message } from "../models";
-import { useStyles } from "tss-react";
 import NoteSaveDialog from "./NoteSaveDialog";
 import DiscussionCreateDialog from "./DiscussionCreateDialog";
+import FlashCardSaveWizard from "./FlashCardSaveWizard";
 const drawerWidth = 240;
 
 
 const Chat = () => {
     const [activeDiscussionId, setActiveDiscussionId] = useState<number>();
-    const [activeTopic, setActiveTopic] = useState<string>();
-    const [mobileOpen, setMobileOpen] = useState(false);
-    const [selectedChat, setSelectedChat] = useState(0);
+    const [_activeTopic, setActiveTopic] = useState<string>();
+    const [_selectedChat, setSelectedChat] = useState(0);
     const [input, setInput] = useState("");
     const [discussions, setDiscussions] = useState<Discussion[]>([]);
     const [messages, setMessages] = useState<Message[]>([]);
@@ -54,8 +51,9 @@ const Chat = () => {
     const [isThinking, setIsThinking] = React.useState<boolean>(false);
     const [isSnackOpen, setIsSnackOpen] = React.useState<boolean>(false);
     const [snackErrorMsg, setSnackErrorMsg] = React.useState<string>("");
-    const messagesEndRef = useRef(null);
+    const messagesEndRef = useRef<HTMLDivElement>(null);
     const [isNoteSaveDialogOpen, setIsNoteSaveDialogOpen] = useState(false);
+    const [isFlashcardSaveDialogOpen, setIsFlashcardSaveDialogOpen] = useState(false);
     const [isDiscussionCreateDialogOpen, setIsDiscussionCreateDialogOpen] = useState(false);
     const [actionMessageId, setActionMessageId] = useState<number>(-1);
 
@@ -67,7 +65,7 @@ const Chat = () => {
         setOpen(true);
     };
 
-    const handleNoteSaveDialogOpen = (msgId:number) => {
+    const handleNoteSaveDialogOpen = (msgId: number) => {
         setActionMessageId(msgId)
         setIsNoteSaveDialogOpen(true);
     }
@@ -76,12 +74,13 @@ const Chat = () => {
         setIsNoteSaveDialogOpen(false);
     }
 
+    const handleFlashcardSaveDialogOpen = (msgId: number) => {
+        setActionMessageId(msgId)
+        setIsFlashcardSaveDialogOpen(true);
+    }
+
     const handleClose = () => {
         setOpen(false);
-    };
-
-    const handleDrawerToggle = () => {
-        setMobileOpen(!mobileOpen);
     };
 
     const handleTextChange = (event: any) => {
@@ -103,6 +102,7 @@ const Chat = () => {
             backgroundColor: 'rgba(0, 0, 0, 0.04)'  // Subtle hover effect
         }
     });
+
     //-----------------------------------------------------------------
     // Workers
     //-----------------------------------------------------------------
@@ -129,6 +129,7 @@ const Chat = () => {
         }).then(result => {
             setMessages(prevMessages => [...prevMessages, result]);
         }).catch(error => {
+            console.log(error);
             setSnackErrorMsg("Network error occurred")
             setIsSnackOpen(true)
             setIsThinking(false)
@@ -153,6 +154,7 @@ const Chat = () => {
         }).then(result => {
             setMessages(prevMessages => [...prevMessages, result]);
         }).catch(error => {
+            console.log(error);
             setSnackErrorMsg("Network error occurred")
             setIsSnackOpen(true)
             setIsThinking(false)
@@ -174,10 +176,10 @@ const Chat = () => {
         setSuggestedQuestions([])
     }
 
-    
 
 
-    const handleQuestionHelperSubmit = (id: number) => {
+
+    const handleQuestionHelperSubmit = () => {
         setIsThinking(true);
 
         fetch(config.BACKEND_URL + '/api/questions?topic=' + dialogText, {
@@ -196,6 +198,7 @@ const Chat = () => {
             )
             .then(result => setSuggestedQuestions(result['questions']))
             .catch(error => {
+                console.log(error);
                 setSnackErrorMsg("Network error occurred")
                 setIsSnackOpen(true)
             })
@@ -230,7 +233,7 @@ const Chat = () => {
     };
 
 
-    const saveNoteWithTags = (tags: number[]) => {
+    const saveNoteWithTags = (tag: string) => {
         // get message with id equal to actionMessageId
         let msg = messages.find(x => x.id == actionMessageId)
 
@@ -240,7 +243,7 @@ const Chat = () => {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ content: msg?.content, tags: tags })
+            body: JSON.stringify({ content: msg?.content, tag: tag })
         }).then(result => {
             if (!result.ok) {
                 throw new Error("Error from backend")
@@ -249,6 +252,7 @@ const Chat = () => {
         }).then(result => {
             console.log("Note saved with tags", result);
         }).catch(error => {
+            console.log(error);
             setSnackErrorMsg("Network error occurred")
             setIsSnackOpen(true)
         })
@@ -256,15 +260,15 @@ const Chat = () => {
 
     const reloadDiscussions = () => {
         fetch(config.BACKEND_URL + '/api/discussions')
-        .then(result => result.json())
-        .then(result => {
-            setDiscussions(result);
-            if (result.length > 0) {
-                handleChatSelect(result[0].id);
-            }
-        })
+            .then(result => result.json())
+            .then(result => {
+                setDiscussions(result);
+                if (result.length > 0) {
+                    handleChatSelect(result[0].id);
+                }
+            })
     }
-        
+
 
     useEffect(() => {
         reloadDiscussions();
@@ -283,8 +287,11 @@ const Chat = () => {
     //-----------------------------------------------------------------
     return (
         <Box sx={{ display: "flex" }}>
-            <NoteSaveDialog open={isNoteSaveDialogOpen} saveWithTags={saveNoteWithTags} onClose={()=>{handleNoteSaveDialogClose()}}></NoteSaveDialog>
+            <NoteSaveDialog open={isNoteSaveDialogOpen} saveWithTag={saveNoteWithTags} onClose={() => { handleNoteSaveDialogClose() }}></NoteSaveDialog>
 
+            {activeDiscussionId != null &&
+                <FlashCardSaveWizard open={isFlashcardSaveDialogOpen} discussionId={activeDiscussionId} messageId={actionMessageId} setOpen={setIsFlashcardSaveDialogOpen}></FlashCardSaveWizard>
+            }
             <DiscussionCreateDialog open={isDiscussionCreateDialogOpen} setOpen={setIsDiscussionCreateDialogOpen} onDiscussionCreated={reloadDiscussions} ></DiscussionCreateDialog>
 
             <Dialog
@@ -294,9 +301,9 @@ const Chat = () => {
                     component: 'form',
                     onSubmit: (event: React.FormEvent<HTMLFormElement>) => {
                         event.preventDefault();
-                        const formData = new FormData(event.currentTarget);
-                        const formJson = Object.fromEntries((formData as any).entries());
-                        const email = formJson.email;
+                        // const formData = new FormData(event.currentTarget);
+                        // const formJson = Object.fromEntries((formData as any).entries());
+                        // const email = formJson.email;
                         handleClose();
                     },
                 }}
@@ -343,17 +350,17 @@ const Chat = () => {
                 <Toolbar />
                 <Box sx={{ overflow: 'auto' }}>
                     <List>
-                        
+
                         <ListItemButton
-                        divider={true}
-                          onClick={()=>setIsDiscussionCreateDialogOpen(true)}
+                            divider={true}
+                            onClick={() => setIsDiscussionCreateDialogOpen(true)}
                         >
-                                <ListItemIcon>
-                                    <AddIcon></AddIcon>
-                                </ListItemIcon>
-                                    <ListItemText>New Discussion</ListItemText>
-                                </ListItemButton>
-                        
+                            <ListItemIcon>
+                                <AddIcon></AddIcon>
+                            </ListItemIcon>
+                            <ListItemText>New Discussion</ListItemText>
+                        </ListItemButton>
+
                         {discussions.map((discussion) => (
                             <ListItem
                                 key={discussion.id}
@@ -362,7 +369,7 @@ const Chat = () => {
                                 onClick={() => handleChatSelect(discussion.id)}
                             >
                                 <ListItemButton>
-                                <ListItemIcon></ListItemIcon>
+                                    <ListItemIcon></ListItemIcon>
                                     <ListItemText primary={discussion.topic} />
                                 </ListItemButton>
                             </ListItem>
@@ -373,7 +380,7 @@ const Chat = () => {
 
                 </Box>
             </Drawer>
-          
+
 
             <Box
                 component="main"
@@ -399,7 +406,7 @@ const Chat = () => {
                             marginBottom: "8px",
                             // border: "1px solid lightgray",
                             borderRadius: "8px",
-                             padding: "8px"
+                            padding: "8px"
                         }}
                     >
                         {messages.map((msg, index) => (
@@ -429,12 +436,12 @@ const Chat = () => {
                                     {msg.sender != "user" &&
                                         <>
                                             <Tooltip title="Create flashcards">
-                                                <StyledIconButton  >
+                                                <StyledIconButton onClick={() => handleFlashcardSaveDialogOpen(msg.id)}>
                                                     <QueueIcon />
                                                 </StyledIconButton>
                                             </Tooltip>
                                             <Tooltip title="Save note">
-                                                <StyledIconButton  onClick={()=>handleNoteSaveDialogOpen(msg.id)}>
+                                                <StyledIconButton onClick={() => handleNoteSaveDialogOpen(msg.id)}>
                                                     <BookmarksIcon />
                                                 </StyledIconButton >
                                             </Tooltip>
@@ -488,7 +495,7 @@ const Chat = () => {
                         <Button
                             variant="contained"
                             color="primary"
-                            endIcon={<SendIcon />}
+                            endIcon={<AutoAwesomeIcon />}
                             onClick={handleQhelper}
                             sx={{ marginLeft: "8px" }}
                         >
@@ -499,12 +506,6 @@ const Chat = () => {
                     </Box>
                 </Box>
             </Box>
-
-            {/* </Grid>
-
-            </Grid> */}
-
-
 
             <Snackbar
                 anchorOrigin={{

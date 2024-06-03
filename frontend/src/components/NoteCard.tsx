@@ -1,4 +1,6 @@
-import { Card, CardContent, Link, Typography} from '@mui/material';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
+import { Card, CardContent, IconButton, Link, Typography} from '@mui/material';
 import React, { useState } from 'react';
 import { Note } from '../models';
 
@@ -30,11 +32,24 @@ const NoteCard: React.FC<Note> = ({ title, content }) => {
     return (
         <Card style={cardStyle}>
             <CardContent>
-                <Typography style={titleStyle} variant="h4" component="h4" textAlign="left">
+                
+               
+
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Typography style={titleStyle} variant="h4" component="h4">
                     {title}
                 </Typography>
+                <div>
+                    <IconButton>
+                        <EditIcon />
+                    </IconButton>
+                    <IconButton>
+                        <DeleteIcon />
+                    </IconButton>
+                </div>
+            </div>
                 <Typography style={contentStyle} variant="body2" color="textSecondary" textAlign="left">
-                    {showMore ? content : `${content.slice(0, 100)}...`}
+                    {showMore ? content : `${content.slice(0, 200)}...`}
                     {!showMore && (
                         <><br></br><Link component="button" onClick={handleShowMore}>
                             Show more

@@ -3,12 +3,11 @@ from backend.database import get_db
 from backend.models import Discussion, Message
 from typing import List
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, Request
 from requests import Session
 from backend.models import Note, Tag
 from backend.routers.api_models import ChatMessage, CreateDiscussionRequest, CreateMessageRequest, CreateNoteRequest, NoteDisplay
 from sqlalchemy.orm import joinedload
-from backend import llmer
 
 router = APIRouter()
 
@@ -44,10 +43,10 @@ def get_msgs(id: int,db: Session = Depends(get_db)):
 
 
 @router.post("/discussions/{id}/chat")
-def chat(id:int,msg: ChatMessage,db: Session = Depends(get_db)):
-    reply = llmer.chat(msg.content)
+def chat(request: Request, id:int,msg: ChatMessage,db: Session = Depends(get_db)):
+    reply = request.app.state.llm_service.chat(msg.content)
 
-    new_message = Message(content=reply['text'], discussion_id=id, sender="ai")
+    new_message = Message(content=reply, discussion_id=id, sender="ai")
     db.add(new_message)
     db.commit()
     db.refresh(new_message)
@@ -55,7 +54,35 @@ def chat(id:int,msg: ChatMessage,db: Session = Depends(get_db)):
 
 
 @router.post("/discussions/{discussion_id}/messages/{message_id}/flashcards")
-def chat(discussion_id: int, message_id: int, db: Session = Depends(get_db)):
+def chat(request: Request, discussion_id: int, message_id: int, db: Session = Depends(get_db)):
     message = db.query(Message).filter(Message.id == message_id).first()
-    reply = llmer.get_flashcards(message.content)
+    reply = request.app.state.llm_service.get_flashcards(message.content)
     return reply
+
+
+@router.post("/discussions/{discussion_id}/messages/{message_id}/flashcards1")
+def foo():
+    return {
+    "cards": [
+        {
+            "name": "Salvador Dalí",
+            "description": "A famous Spanish painter known for his surrealist works featuring dreamlike imagery and unusual perspectives."
+        },
+        {
+            "name": "Birth Date",
+            "description": "May 11, 1904"
+        },
+        {
+            "name": "Nationality",
+            "description": "Spanish"
+        },
+        {
+            "name": "Art Style",
+            "description": "Surrealism"
+        },
+        {
+            "name": "Characteristics of his works",
+            "description": "Dreamlike imagery and unusual perspectives."
+        }
+    ]
+}

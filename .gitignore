@@ -14,6 +14,15 @@ dist-ssr
 *.pyc
 backend/out
 
+creds.json
+build/build.zip
+infra/terraform.tfstate
+infra/terraform.tfstate.backup
+infra/.terraform/**
+infra/inputs.auto.tfvars
+infra/.terraform.lock.hcl
+
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

@@ -1,4 +1,5 @@
 
+from pydantic import BaseModel
 from backend.models import Discussion, FlashCard, Message
 from typing import List
 from backend.database import get_db
@@ -7,10 +8,16 @@ from requests import Session
 from backend.models import Note, Tag
 from backend.routers.api_models import ChatMessage, CreateDiscussionRequest, CreateMessageRequest, CreateNoteRequest, FlashcardDisplay, NoteDisplay
 from sqlalchemy.orm import joinedload
-from backend import llmer
 
 router = APIRouter()
 
+class FlashcardBase(BaseModel):
+    name: str
+    description: str
+
+class FlashcardSaveRequest(BaseModel):
+    tag: str
+    flashCards: List[FlashcardBase] = []
 
 @router.get("/flashcards", response_model=List[FlashcardDisplay])
 def get_flashcards(db: Session = Depends(get_db), tag: List[str] = Query(None)):
@@ -19,6 +26,25 @@ def get_flashcards(db: Session = Depends(get_db), tag: List[str] = Query(None)):
     else:
         flashcards = db.query(FlashCard).options(joinedload(FlashCard.tags)).all()
     return flashcards
+
+
+@router.post("/flashcards", response_model=str)
+def save_flashcards(flashcardSaveRequest: FlashcardSaveRequest, db: Session = Depends(get_db), tag: List[str] = Query(None)):
+    # if tag doesn't exist, create it
+    new_tag = Tag(name=flashcardSaveRequest.tag)
+    db_tag = db.query(Tag).filter(Tag.name == new_tag.name).first()
+    
+    if not db_tag:
+        db.add(new_tag)
+        db.commit()
+        db.refresh(new_tag)
+
+    for flashcard in flashcardSaveRequest.flashCards:
+        new_flashcard = FlashCard(description=flashcard.description, term=flashcard.name)
+        new_flashcard.tags.append(new_tag)
+        db.add(new_flashcard)
+    db.commit()
+    return 'ok'
 
 
 

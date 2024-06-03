@@ -1,4 +1,4 @@
-import { Dialog, DialogTitle, DialogContent, DialogContentText, TextField, DialogActions, Button } from "@mui/material";
+import { Dialog, DialogTitle, DialogContent, TextField, DialogActions, Button } from "@mui/material";
 import config from '../config.json'
 
 import React, { useState } from 'react';
@@ -16,8 +16,6 @@ const DiscussionCreateDialog: React.FC<DiscussionCreateDialogProps> = ({ onDiscu
     };
 
     const handleQuestionHelperSubmit = () => {
-        const formData = new FormData();
-        
         let body = {
             "topic": discussionName
         }
@@ -31,7 +29,7 @@ const DiscussionCreateDialog: React.FC<DiscussionCreateDialogProps> = ({ onDiscu
             body: JSON.stringify(body)
         })
         .then(response => response.json())
-        .then(data => {
+        .then(_data => {
             // Handle response data here
             onDiscussionCreated();
             setDiscussionName('');
@@ -39,6 +37,7 @@ const DiscussionCreateDialog: React.FC<DiscussionCreateDialogProps> = ({ onDiscu
         })
         .catch(error => {
             // Handle error here
+            console.error('Error creating discussion:', error);
         });
     };
 
@@ -52,9 +51,8 @@ const DiscussionCreateDialog: React.FC<DiscussionCreateDialogProps> = ({ onDiscu
                     component: 'form',
                     onSubmit: (event: React.FormEvent<HTMLFormElement>) => {
                         event.preventDefault();
-                        const formData = new FormData(event.currentTarget);
-                        const formJson = Object.fromEntries((formData as any).entries());
-                        const email = formJson.email;
+                        // const formData = new FormData(event.currentTarget);
+                        // const formJson = Object.fromEntries((formData as any).entries());
                         handleClose();
                     },
                 }}

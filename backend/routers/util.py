@@ -2,12 +2,18 @@
 import random
 import string
 from faker import Faker
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Request
 from requests import Session
 
 from backend.database import get_db
 from backend.models import FlashCard, Note, Tag
 router = APIRouter()
+
+
+@router.get("/questions")
+def get_topics(request: Request, topic: str):
+    return request.app.state.llm_service.get_questions(topic)
+
 
 @router.get("/seed")
 def seed(db: Session = Depends(get_db)):

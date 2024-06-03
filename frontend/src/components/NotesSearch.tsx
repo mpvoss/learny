@@ -1,12 +1,14 @@
-import React, { useEffect, useState } from 'react';
-import { TextField, Autocomplete, Chip, Stack } from '@mui/material';
+
+import AddIcon from '@mui/icons-material/Add';
+import { useEffect, useState } from 'react';
+import { TextField, Autocomplete, Chip, Stack, Fab } from '@mui/material';
 import NoteCard from './NoteCard';
 import config from '../config.json'
 import { Note, Tag } from '../models';
 
 
 const NotesSearch = () => {
-    const [inputValue, setInputValue] = useState('');
+    const [_inputValue, setInputValue] = useState('');
     const [selectedTags, setSelectedTags] = useState<string[]>([]);
     const [notes, setNotes] = useState<Note[]>([]);
 
@@ -22,6 +24,7 @@ const NotesSearch = () => {
         const queryParams = new URLSearchParams();
 
         if (selectedTags.length === 0) {
+            setNotes([]);
             return;
         }
 
@@ -57,15 +60,15 @@ const NotesSearch = () => {
     }, []);
 
     return (
-        <div style={{paddingTop: '64px'}}>
+        <div style={{paddingTop: '64px', maxWidth: '1000px' }}>
             <Autocomplete
                 freeSolo
                 options={tags}
-                onInputChange={(event, newInputValue) => {
+                onInputChange={(_event, newInputValue) => {
                     setInputValue(newInputValue);
                 }}
-                onChange={(event, newValue) => {
-                    if (tags.includes(newValue) && !selectedTags.includes(newValue)) {
+                onChange={(_event, newValue) => {
+                    if (newValue != null && tags.includes(newValue) && !selectedTags.includes(newValue)) {
                         setSelectedTags([...selectedTags, newValue]);
                     }
                 }}
@@ -97,6 +100,15 @@ const NotesSearch = () => {
                     />
                 ))}
             </Stack>
+           
+
+          
+               
+                    <Fab color="primary" aria-label="add" style={{ position: 'fixed', bottom: '16px', right: '16px' }}>
+                        <AddIcon />
+                    </Fab>
+               
+        
         </div>
     );
 };

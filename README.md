@@ -1,20 +1,35 @@
 # TODO   
-2. Save Note workflow will have dialog popup to ask for what tags to apply, then POST to db
 3. Flashcards
-  1. Generate flash card from message endpoint, POST with tags
   1. Flashcard screen has search view based on tags
+  1. Endpoint to count what cards are ready for study
   1. Ability to enter study screen with a tag
   1. Study screen can POST to /flashcards/review, update db
   1. Clean up aesthetics of flashcard screen
-4. Flashcard tag filtering, study mode
+Polish
+- Notes need CRUD on notes screen
+- Flash cards need CRUD on FC screen (import/export)?
+- Notes/flashcards proper search?
+- Mobile friendly...
+
+
+# https://gist.github.com/lAnubisl/817dc46b63905340ad44fd9a85798fd2
+# https://learn.microsoft.com/en-us/azure/storage/blobs/storage-custom-domain-name?tabs=azure-portal
+
+
+Nice to have
+1. Strong need to capture "THEME" or subject of each card. The cards themselves don't have a lot of context in definition alone
 1. Vector db design?
-Message pagination
-Make LLM layer flexible to support chatgpt or local
+1. Message pagination
+1. Ability to generate flashcards from arbitrary topic would be sweet
+  1. Magic buttons? The qhelper could go there too
+
+
 
 
 Development Roadmap
 1. e2e basic functionality, enough to show ppl
 2. Auth, cloud deploy, pipelines, etc
+3. Track token usage in a table
 
 # Cloud architecture
 1. Try out Azure
