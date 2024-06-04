@@ -13,11 +13,13 @@ class LocalLLMService(AbstractLLMService):
         response = ollama.chat(model="eas/nous-hermes-2-solar-10.7b", messages=messages)
         return response['message']['content']
 
+
+
     def structured_call(self, prompt: str, model):
         client = instructor.from_openai(
             OpenAI(
                 base_url="http://localhost:11434/v1",
-                api_key="ollama",  # required, but unused
+                api_key="ollama", 
             ),
             mode=instructor.Mode.JSON,
         )

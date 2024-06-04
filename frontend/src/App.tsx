@@ -9,6 +9,7 @@ import React from 'react';
 import NotesSearch from './components/NotesSearch';
 import Study from './components/Study';
 import FlashcardHome from './components/FlashcardHome';
+import ConceptMap from './components/ConceptMap';
 const settings = ['Profile', 'Logout'];
 
 function App() {
@@ -158,6 +159,7 @@ function App() {
                 <Route path="/notes" element={<NotesSearch />} />
                 <Route path="/flashcards" element={<FlashcardHome />} />
                 <Route path="/study" element={<Study />} />
+                <Route path="/conceptMap" element={<ConceptMap />} />
                 </Routes>
     </>
   )

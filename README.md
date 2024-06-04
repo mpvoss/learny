@@ -1,3 +1,24 @@
+Infra...
+- AWS seems to have best cold start time
+- CDN options for Azure suck/expensive
+- Can't do low traffic serverless cheaply at gcp with good cold start
+Basically all these guys prefer large customers that keep stuff on all the time. AWS is better for small stuff in addition
+- I get cloudfront + cert manage + good low traffic options at AWS
+Open to learning other clouds when I have enough traffic that the providers are more similar in offerings
+Small stuff AWS has advantage
+
+Path forward
+- New AWS account
+- TF for Lambda, s3, cloudfront
+- Pipeline to build docker image, deploy to S3
+
+
+React Flow concept maps!!!!
+- Tell me more button
+- to flash card button
+- Chat screen to concept map link?
+
+
 # TODO   
 3. Flashcards
   1. Flashcard screen has search view based on tags

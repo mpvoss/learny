@@ -15,6 +15,12 @@ def get_topics(request: Request, topic: str):
     return request.app.state.llm_service.get_questions(topic)
 
 
+@router.get("/conceptmap")
+def get_topics(request: Request, topic: str):
+    return request.app.state.llm_service.get_concept_map(topic)
+
+
+
 @router.get("/seed")
 def seed(db: Session = Depends(get_db)):
     fake = Faker()

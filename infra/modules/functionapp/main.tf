@@ -34,7 +34,7 @@ resource "azurerm_linux_function_app" "functionapp" {
   app_settings = {
     # WEBSITE_RUN_FROM_PACKAGE = "1"
     "SCM_DO_BUILD_DURING_DEPLOYMENT"="true"
-    "ENABLE_ORYX_BUILD"="true"
+    # "ENABLE_ORYX_BUILD"="true"
   }
   site_config {
     application_stack {
