@@ -1,12 +1,12 @@
 name: Deploy pipeline
 
-env:
-  AZURE_SITE_STORAGE_ACCOUNT: learnysite
-  AZURE_SITE_CONTAINER: sc-website
-  AZURE_CDN_PROFILE: learny-cdn
-  AZURE_CDN_ENDPOINT: learny-cdn-endpoint
-  AZURE_RESOURCE_GROUP: rg-learny
-  AZURE_FUNCTIONAPP_NAME: learny-functionapp
+# env:
+#   AZURE_SITE_STORAGE_ACCOUNT: learnysite
+#   AZURE_SITE_CONTAINER: sc-website
+#   AZURE_CDN_PROFILE: learny-cdn
+#   AZURE_CDN_ENDPOINT: learny-cdn-endpoint
+#   AZURE_RESOURCE_GROUP: rg-learny
+#   AZURE_FUNCTIONAPP_NAME: learny-functionapp
 
 on:
   workflow_dispatch:
@@ -59,80 +59,89 @@ jobs:
         cd frontend
         npm run build
 
-    - uses: azure/login@v1
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v1
       with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: us-east-2
 
-
-    - name: Upload to blob storage
-      if: github.event.inputs.component == 'frontend' || github.event.inputs.component == 'both'
-      uses: azure/CLI@v1
-      with:
-        inlineScript: |
-            az storage blob upload-batch --account-name $AZURE_SITE_STORAGE_ACCOUNT --source ./frontend/dist --destination $AZURE_SITE_CONTAINER
-    - name: Purge CDN endpoint
-      if: github.event.inputs.component == 'frontend' || github.event.inputs.component == 'both'
-      uses: azure/CLI@v1
-      with:
-        inlineScript: |
-           az cdn endpoint purge --content-paths  "/*" --profile-name $AZURE_CDN_PROFILE --name $AZURE_CDN_ENDPOINT --resource-group $AZURE_RESOURCE_GROUP
-
-
-    # - name: Setup Python
-    #   if: github.event.inputs.component == 'backend' || github.event.inputs.component == 'both'
-    #   uses: actions/setup-python@v2
-    #   with:
-    #     python-version: 3.11
-
-    # - name: Install dependencies
-    #   if: github.event.inputs.component == 'backend' || github.event.inputs.component == 'both'
-    #   run: |
-    #     python -m pip install --upgrade pip
-    #     pip install -r requirements.txt
-
-    - name: Zip Python directory
-      if: github.event.inputs.component == 'backend' || github.event.inputs.component == 'both'
+    - name: Deploy to S3
+      # if: github.event.inputs.component == 'frontend' || github.event.inputs.component == 'both'
       run: |
-        cd ./test_func
-        zip -r ../functionapp.zip .
-        cd ..
-
-    # - name: Upload artifact
-    #   if: github.event.inputs.component == 'backend' || github.event.inputs.component == 'both'
-    #   uses: actions/upload-artifact@v2
-    #   with:
-    #     name: functionapp
-    #     path: functionapp.zip
-
-    # - name: Download artifact
-    #   if: github.event.inputs.component == 'backend' || github.event.inputs.component == 'both'
-    #   uses: actions/download-artifact@v2
-    #   with:
-    #     name: functionapp
-
-    - name: Deploy azure function
-      if: github.event.inputs.component == 'backend' || github.event.inputs.component == 'both'
-      uses: azure/CLI@v1
-      with:
-        inlineScript: |
-            az functionapp deployment source config-zip -g $AZURE_RESOURCE_GROUP -n $AZURE_FUNCTIONAPP_NAME --src functionapp.zip --build-remote true
-
-    # - name: 'Run Azure Functions Action'
-    #   if: github.event.inputs.component == 'backend' || github.event.inputs.component == 'both'
-    #   uses: Azure/functions-action@v1
-    #   id: fa
-    #   with:
-    #     app-name: $AZURE_FUNCTIONAPP_NAME
-    #     package: functionapp.zip
-    #     publish-profile: ${{ secrets.AZURE_FUNCTIONAPP_PUBLISH_PROFILE }}
-    #     respect-pom-xml: false    
+        aws s3 ls
+        # aws s3 sync ./frontend/build s3://learny-frontend --delete
 
 
-  # Azure logout
-    - name: logout
-      run: |
-            az logout
-      if: always()
+#     - name: Upload to blob storage
+#       if: github.event.inputs.component == 'frontend' || github.event.inputs.component == 'both'
+#       uses: azure/CLI@v1
+#       with:
+#         inlineScript: |
+#             az storage blob upload-batch --account-name $AZURE_SITE_STORAGE_ACCOUNT --source ./frontend/dist --destination $AZURE_SITE_CONTAINER
+#     - name: Purge CDN endpoint
+#       if: github.event.inputs.component == 'frontend' || github.event.inputs.component == 'both'
+#       uses: azure/CLI@v1
+#       with:
+#         inlineScript: |
+#            az cdn endpoint purge --content-paths  "/*" --profile-name $AZURE_CDN_PROFILE --name $AZURE_CDN_ENDPOINT --resource-group $AZURE_RESOURCE_GROUP
 
 
-# az functionapp deployment source config-zip -g rg-learny -n learny-functionapp --src build.zip
+#     # - name: Setup Python
+#     #   if: github.event.inputs.component == 'backend' || github.event.inputs.component == 'both'
+#     #   uses: actions/setup-python@v2
+#     #   with:
+#     #     python-version: 3.11
+
+#     # - name: Install dependencies
+#     #   if: github.event.inputs.component == 'backend' || github.event.inputs.component == 'both'
+#     #   run: |
+#     #     python -m pip install --upgrade pip
+#     #     pip install -r requirements.txt
+
+#     - name: Zip Python directory
+#       if: github.event.inputs.component == 'backend' || github.event.inputs.component == 'both'
+#       run: |
+#         cd ./test_func
+#         zip -r ../functionapp.zip .
+#         cd ..
+
+#     # - name: Upload artifact
+#     #   if: github.event.inputs.component == 'backend' || github.event.inputs.component == 'both'
+#     #   uses: actions/upload-artifact@v2
+#     #   with:
+#     #     name: functionapp
+#     #     path: functionapp.zip
+
+#     # - name: Download artifact
+#     #   if: github.event.inputs.component == 'backend' || github.event.inputs.component == 'both'
+#     #   uses: actions/download-artifact@v2
+#     #   with:
+#     #     name: functionapp
+
+#     - name: Deploy azure function
+#       if: github.event.inputs.component == 'backend' || github.event.inputs.component == 'both'
+#       uses: azure/CLI@v1
+#       with:
+#         inlineScript: |
+#             az functionapp deployment source config-zip -g $AZURE_RESOURCE_GROUP -n $AZURE_FUNCTIONAPP_NAME --src functionapp.zip --build-remote true
+
+#     # - name: 'Run Azure Functions Action'
+#     #   if: github.event.inputs.component == 'backend' || github.event.inputs.component == 'both'
+#     #   uses: Azure/functions-action@v1
+#     #   id: fa
+#     #   with:
+#     #     app-name: $AZURE_FUNCTIONAPP_NAME
+#     #     package: functionapp.zip
+#     #     publish-profile: ${{ secrets.AZURE_FUNCTIONAPP_PUBLISH_PROFILE }}
+#     #     respect-pom-xml: false    
+
+
+#   # Azure logout
+#     - name: logout
+#       run: |
+#             az logout
+#       if: always()
+
+
+# # az functionapp deployment source config-zip -g rg-learny -n learny-functionapp --src build.zip
