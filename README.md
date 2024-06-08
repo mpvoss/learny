@@ -1,22 +1,46 @@
-Infra...
-- AWS seems to have best cold start time
-- CDN options for Azure suck/expensive
-- Can't do low traffic serverless cheaply at gcp with good cold start
-Basically all these guys prefer large customers that keep stuff on all the time. AWS is better for small stuff in addition
-- I get cloudfront + cert manage + good low traffic options at AWS
-Open to learning other clouds when I have enough traffic that the providers are more similar in offerings
-Small stuff AWS has advantage
+
+ECR
+Lambda from container
+Cloudfront
+https://medium.com/akava/deploying-containerized-aws-lambda-functions-with-terraform-7147b9815599
+https://github.com/marketplace/actions/s3-deploy
+https://stackoverflow.com/questions/76813384/how-do-you-associate-an-image-lambda-with-cloudfront-distribution-via-terraform
+
+-DELETE INFRA IN AZURE LOL
+
+
+Lambda
+- Alias
+
+Pipeline
+- Push to ECR
+- Update Function
+- Update alias
+
+
+YOU KNOW I'M GONNA HAVE TWO DIFF ONES ANYWAY
+could just use alias latest for both lol
+
+
+
+
+TF flash card notes
+
+
 
 Path forward
-- New AWS account
 - TF for Lambda, s3, cloudfront
 - Pipeline to build docker image, deploy to S3
+
+
 
 
 React Flow concept maps!!!!
 - Tell me more button
 - to flash card button
 - Chat screen to concept map link?
+-- come up with multiple perspectives, draft questions based on those personas
+  
 
 
 # TODO   
@@ -33,8 +57,7 @@ Polish
 - Mobile friendly...
 
 
-# https://gist.github.com/lAnubisl/817dc46b63905340ad44fd9a85798fd2
-# https://learn.microsoft.com/en-us/azure/storage/blobs/storage-custom-domain-name?tabs=azure-portal
+
 
 
 Nice to have

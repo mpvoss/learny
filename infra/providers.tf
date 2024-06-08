@@ -1,16 +1,16 @@
 terraform {
   required_providers {
-    azurerm = {
-      source  = "hashicorp/azurerm"
-      version = "~>3.0"
-    }
-    random = {
-      source  = "hashicorp/random"
-      version = "~>3.0"
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 4.16"
     }
   }
+  required_version = ">= 1.2.0"
 }
 
-provider "azurerm" {
-  features {}
+
+provider "aws" {
+  region  = "us-east-2"
+  shared_credentials_files = ["./aws_creds"]
+  profile = "edtech-tf"
 }

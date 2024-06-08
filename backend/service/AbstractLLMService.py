@@ -20,7 +20,7 @@ class SuggestedQuestions(BaseModel):
 
 
 class Flashcard(BaseModel):
-    name: str
+    term: str
     description: str
 
 

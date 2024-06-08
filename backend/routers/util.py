@@ -4,9 +4,10 @@ import string
 from faker import Faker
 from fastapi import APIRouter, Depends, Request
 from requests import Session
-
+import genanki
 from backend.database import get_db
 from backend.models import FlashCard, Note, Tag
+import csv
 router = APIRouter()
 
 
@@ -64,8 +65,15 @@ def seed(db: Session = Depends(get_db)):
 # def taco():
 #     # ask llm for flash cards
 #     topic = "Industrial Revolution"
-#     flashcard_text = llmer.chat(f"Write 10 flashcards to help a student study {topic}")["text"]
-#     flash_cards = llmer.to_anki(flashcard_text)
+#     # flashcard_text = llmer.chat(f"Write 10 flashcards to help a student study {topic}")["text"]
+#     flash_cards = []
+#     with open('./backend/flash.tsv', 'r') as file:
+#         reader = csv.reader(file)
+#         for row in reader:
+#             flash_cards.append({'name':row[0], 'description': row[1]})
+            
+    
+#     # # flash_cards = llmer.to_anki(flashcard_text)
 #     my_model = genanki.Model(
 #         random.randrange(1 << 30, 1 << 31),
 #         'Simple Model',
@@ -82,12 +90,12 @@ def seed(db: Session = Depends(get_db)):
 #         ])
 #     my_deck = genanki.Deck(
 #         random.randrange(1 << 30, 1 << 31),
-#         topic)
+#         "TFv2")
 
-#     for card in flash_cards.cards:
+#     for card in flash_cards:
 #         my_deck.add_note(genanki.Note(
 #             model=my_model,
-#             fields=[card.name, card.description]))
+#             fields=[card['name'], card['description']]))
 
 #     genanki.Package(my_deck).write_to_file('output.apkg')
 

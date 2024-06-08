@@ -6,13 +6,18 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
-
+infra/.infracost
 node_modules
 dist
 dist-ssr
 *.local
 *.pyc
 backend/out
+infra/aws_creds
+output.apkg
+flash.tsv
+.terraform
+
 
 creds.json
 build/build.zip
@@ -169,3 +174,7 @@ dist
 
 backend/out/2024_04_30T08_50_18_output_maxdocs-2.pdf
 backend/out/2024_04_30T08_53_50_output_maxdocs-2.pdf
+infra/.infracost/pricing.gob
+infra_azure/.terraform.lock.hcl
+infra_azure/terraform.tfstate
+infra_azure/terraform.tfstate.backup
