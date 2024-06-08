@@ -14,3 +14,11 @@ provider "aws" {
   shared_credentials_files = ["./aws_creds"]
   profile = "edtech-tf"
 }
+
+# Needed because acm certs required to be in us-east-1 for cloudfront
+provider "aws" {
+  alias = "virginia"
+  region = "us-east-1"
+  profile = "edtech-tf"
+  shared_credentials_files = ["./aws_creds"]
+}

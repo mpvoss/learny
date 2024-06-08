@@ -1,3 +1,3 @@
 output "function_url" {
-    value = aws_lambda_function.docker_lambda_function.invoke_arn
+    value = aws_lambda_function_url.function_url.function_url
 }

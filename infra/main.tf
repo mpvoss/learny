@@ -8,6 +8,11 @@ module "common"{
   source = "./environments/common"  
   project_name = var.project_name  
   root_domain_name = var.root_domain_name
+
+  # providers = {
+  #   aws = aws
+  # #   aws.virginia = aws.virginia
+  # }
 }
 
 module "prod_env"{  

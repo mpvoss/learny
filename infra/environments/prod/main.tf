@@ -13,4 +13,5 @@ module "cloudfront" {
   lambda_function_url = module.lambda.function_url
   acm_certificate_arn = var.acm_certificate_arn
   route53_zone_id = var.route53_zone_id
+  env = "prod"
 }

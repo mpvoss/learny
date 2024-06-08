@@ -1,3 +1,19 @@
+terraform {
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 4.16"
+    }
+  }
+}
+
+provider "aws" {
+  alias  = "virginia"
+  region = "us-east-1"
+  profile = "edtech-tf"
+  shared_credentials_files = ["./aws_creds"]
+}
+
 // We want AWS to host our zone so its nameservers can point to our CloudFront
 // distribution.
 resource "aws_route53_zone" "zone" {
@@ -9,11 +25,13 @@ resource "aws_acm_certificate" "certificate" {
   validation_method = "DNS"
 
   subject_alternative_names = ["*.${var.root_domain_name}"]
+  provider = aws.virginia
 }
 
 resource "aws_acm_certificate_validation" "certificate_validation" {
   certificate_arn         = aws_acm_certificate.certificate.arn
   validation_record_fqdns = [for record in aws_route53_record.validation_record : record.fqdn]
+  provider = aws.virginia
 }
 
 resource "aws_route53_record" "validation_record" {
@@ -31,4 +49,5 @@ resource "aws_route53_record" "validation_record" {
   ttl             = 60
   type            = each.value.type
   zone_id         = aws_route53_zone.zone.zone_id
+  provider = aws.virginia
 }

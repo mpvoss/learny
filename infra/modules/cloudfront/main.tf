@@ -143,7 +143,7 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
 }
 
 resource "aws_s3_bucket" "cloudfront_logs" {
-  bucket = "${var.project_name}-${var.env}-cloudfront-access-logs"
+  bucket = "${var.project_name}-cloudfront-access-logs-${var.env}"
 }
 
 resource "aws_s3_bucket_lifecycle_configuration" "cloudfront_logs_lifecycle" {

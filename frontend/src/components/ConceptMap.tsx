@@ -1,20 +1,14 @@
 import { Button } from '@mui/material';
 import React, { useState } from 'react';
 import { TextField } from '@mui/material';
-import Dagre from '@dagrejs/dagre';
-import { useCallback } from 'react';
+// import Dagre from '@dagrejs/dagre';
 import ReactFlow, {
   ReactFlowProvider,
-  Panel,
   useNodesState,
   useEdgesState,
-  useReactFlow,
 } from 'reactflow';
 
-import { initialNodes, initialEdges } from '../nodes-edges.js';
 import 'reactflow/dist/style.css';
-import { forceSimulation, forceLink, forceManyBody, forceX, forceY } from 'd3-force';
-import { useEffect, useLayoutEffect, useMemo } from 'react';
 
 
 // import 'reactflow/dist/style.css';
@@ -88,51 +82,14 @@ import { useEffect, useLayoutEffect, useMemo } from 'react';
 // };
 
 
-const g = new Dagre.graphlib.Graph().setDefaultEdgeLabel(() => ({}));
 
-const getLayoutedElements = (nodes, edges, options) => {
-  g.setGraph({ rankdir: options.direction });
-
-  edges.forEach((edge) => g.setEdge(edge.source, edge.target));
-  nodes.forEach((node) => g.setNode(node.id, node));
-
-  Dagre.layout(g);
-
-  return {
-    nodes: nodes.map((node) => {
-      const position = g.node(node.id);
-      // We are shifting the dagre node position (anchor=center center) to the top left
-      // so it matches the React Flow node anchor point (top left).
-      const x = position.x - node.width / 2;
-      const y = position.y - node.height / 2;
-
-      return { ...node, position: { x, y } };
-    }),
-    edges,
-  };
-};
 
 const LayoutFlow = () => {
-    const { fitView } = useReactFlow();
-    const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
-    const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
+    // const { fitView } = useReactFlow();
+    const [nodes, setNodes, onNodesChange] = useNodesState([]);
+    const [edges, setEdges, onEdgesChange] = useEdgesState([]);
     const [inputValue, setInputValue] = useState('ww2');
-    const [responseData, setResponseData] = useState<any>(null);
-
-
-    const onLayout = useCallback(
-      (direction) => {
-        const layouted = getLayoutedElements(nodes, edges, { direction });
-  
-        setNodes([...layouted.nodes]);
-        setEdges([...layouted.edges]);
-  
-        window.requestAnimationFrame(() => {
-          fitView();
-        });
-      },
-      [nodes, edges],
-    );
+    const [responseData, _setResponseData] = useState<any>(null);
 
 
     const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -146,14 +103,14 @@ const LayoutFlow = () => {
            
             // find the max length of all arrays in obj.aspects.items
             let maxLength = 0;
-            obj.aspects.forEach((aspect) => {
+            obj.aspects.forEach((aspect:any) => {
                 if (aspect.items.length > maxLength) {
                     maxLength = aspect.items.length;
                 }
             });
 
-            let new_nodes = []
-            let new_edges = []
+            let new_nodes:any = []
+            let new_edges:any = []
 
             // // create initial node
             let initial = {
@@ -170,11 +127,11 @@ const LayoutFlow = () => {
         
 
         //   const children = obj.aspects.map((aspect: any, idx) => ());
-            let child_ids = []
+            let child_ids:any = []
             // loop over obj.aspects.items
             // create nodes for each item
             // create edges between aspect and item
-            obj.aspects.forEach((child,idx) => {
+            obj.aspects.forEach((child:any,idx:any) => {
 
                 // create group
                 let groupId = ""+Math.floor(Math.random() * 9999999);
@@ -189,7 +146,7 @@ const LayoutFlow = () => {
                 }
                 new_nodes.push(group);
 
-                child.items.forEach((item: any, idx) => {
+                child.items.forEach((item: any, idx:any) => {
                     console.log(item);
                     let grandchild = {
                         parentId: groupId,
@@ -221,7 +178,7 @@ const LayoutFlow = () => {
 
 
             // // create edges between initial node and children
-            child_ids.forEach((child) => {
+            child_ids.forEach((child:any) => {
                 new_edges.push({ id: `e${childIndex}`, source: '0', target: ""+child, animated: true });
                 childIndex++;
             });
@@ -261,10 +218,10 @@ const LayoutFlow = () => {
                 onNodesChange={onNodesChange}
                 onEdgesChange={onEdgesChange}
             >
-                 <Panel position="top-right">
+                 
             {/* <Button variant="outlined" onClick={() => onLayout('TB')}>TB</Button>
             <Button variant="outlined" onClick={() => onLayout('LR')}>LR</Button> */}
-      </Panel>
+      
             </ReactFlow>
         </div>
     );
