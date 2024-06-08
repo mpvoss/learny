@@ -83,7 +83,7 @@ jobs:
       if: github.event.inputs.component == 'frontend' || github.event.inputs.component == 'both'
       run: |
         aws s3 ls
-        aws s3 sync ./frontend/build s3://${{env.AWS_S3_BUCKET}} --delete
+        aws s3 sync ./frontend/dist s3://${{env.AWS_S3_BUCKET}} --delete
 
 
 
