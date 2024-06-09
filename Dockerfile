@@ -1,5 +1,6 @@
 # Use an official Python runtime as a parent image
-FROM python:3.12-slim
+#FROM python:3.12-slim
+FROM public.ecr.aws/lambda/python:3.12
 
 # Set the working directory in the container
 WORKDIR /app
@@ -8,21 +9,18 @@ WORKDIR /app
 COPY ./backend /app/backend
 COPY ./requirements-aws.txt /app
 
-RUN apt-get update && apt-get install -y gcc
+RUN dnf install gcc -y
+
+#RUN apt-get update && apt-get install -y gcc
 
 
 # Install any needed packages specified in requirements.txt
 RUN pip install --no-cache-dir -r requirements-aws.txt
-
-# Make port 8000 available to the world outside this container
-EXPOSE 8000
-
-# Define environment variable
-ENV NAME World
 
 WORKDIR /app
 
 # Run main.py when the container launches
 # CMD ["uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "8000"]
 
-CMD ["python","-m","backend.main"]
+# CMD ["python", "-m", "backend.main"]
+CMD ["backend.main.handler"]
