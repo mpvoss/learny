@@ -32,7 +32,8 @@ async def lifespan(app: FastAPI):
         Close the connection
         Clear variables and release the resources
     '''
-    app.state.n_client.close()
+    
+    # app.state.n_client.close()
 
 
 app = FastAPI(lifespan=lifespan, root_path="/api")
