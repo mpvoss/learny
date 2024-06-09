@@ -2,8 +2,10 @@ from contextlib import asynccontextmanager
 import os
 from typing import Union
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from starlette.middleware.cors import CORSMiddleware
+from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.responses import Response
 
 from dotenv import load_dotenv
 from mangum import Mangum
@@ -36,7 +38,21 @@ async def lifespan(app: FastAPI):
     # app.state.n_client.close()
 
 
+class StripStagePathMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        # Strip '/prod' from the start of the path, API gw forwards this
+        if request.url.path.startswith('/prod') or request.url.path.startswith('/test'):
+            request.scope['path'] = request.url.path[5:]
+        response: Response = await call_next(request)
+        return response
+
+
 app = FastAPI(lifespan=lifespan, root_path="/api")
+
+# Only add the middleware if not running in local testing
+if os.getenv('LOCAL_TESTING') != 'true':
+    app.add_middleware(StripStagePathMiddleware)
+
 
 
 app.include_router(discussions.router)
