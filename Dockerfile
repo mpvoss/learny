@@ -17,10 +17,9 @@ RUN dnf install gcc -y
 # Install any needed packages specified in requirements.txt
 RUN pip install --no-cache-dir -r requirements-aws.txt
 
-WORKDIR /app
-
 # Run main.py when the container launches
 # CMD ["uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "8000"]
 
 # CMD ["python", "-m", "backend.main"]
-CMD ["backend.main.handler"]
+WORKDIR /app/backend
+CMD ["main.handler"]
