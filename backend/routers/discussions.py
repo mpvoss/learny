@@ -1,12 +1,12 @@
 
-from backend.database import get_db
-from backend.models import Discussion, Message
+from database import get_db
+from models import Discussion, Message
 from typing import List
 
 from fastapi import APIRouter, Depends, Query, Request
 from requests import Session
-from backend.models import Note, Tag
-from backend.routers.api_models import ChatMessage, CreateDiscussionRequest, CreateMessageRequest, CreateNoteRequest, NoteDisplay
+from models import Note, Tag
+from routers.api_models import ChatMessage, CreateDiscussionRequest, CreateMessageRequest, CreateNoteRequest, NoteDisplay
 from sqlalchemy.orm import joinedload
 
 router = APIRouter()

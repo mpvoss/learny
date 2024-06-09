@@ -1,10 +1,11 @@
 
 from typing import List
-from backend.database import get_db
+
+from database import get_db
 from fastapi import APIRouter, Depends, Query, Request
+from models import Note, Tag
 from requests import Session
-from backend.models import Note, Tag
-from backend.routers.api_models import CreateNoteRequest, NoteDisplay
+from routers.api_models import CreateNoteRequest, NoteDisplay
 from sqlalchemy.orm import joinedload
 
 router = APIRouter()

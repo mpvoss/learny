@@ -2,7 +2,7 @@ import logging
 import instructor
 import ollama
 from openai import OpenAI
-from backend.service.AbstractLLMService import AbstractLLMService
+from service.AbstractLLMService import AbstractLLMService
 
 
 class LocalLLMService(AbstractLLMService):

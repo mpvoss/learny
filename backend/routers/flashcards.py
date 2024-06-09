@@ -1,12 +1,12 @@
 
-from pydantic import BaseModel
-from backend.models import Discussion, FlashCard, Message
 from typing import List
-from backend.database import get_db
+
+from database import get_db
 from fastapi import APIRouter, Depends, Query
+from models import FlashCard, Tag
+from pydantic import BaseModel
 from requests import Session
-from backend.models import Note, Tag
-from backend.routers.api_models import ChatMessage, CreateDiscussionRequest, CreateMessageRequest, CreateNoteRequest, FlashcardDisplay, NoteDisplay
+from routers.api_models import (FlashcardDisplay)
 from sqlalchemy.orm import joinedload
 
 router = APIRouter()

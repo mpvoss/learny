@@ -6,8 +6,8 @@ FROM public.ecr.aws/lambda/python:3.12
 WORKDIR /app
 
 # Copy the current directory contents into the container at /app
-COPY ./backend /app/backend
-COPY ./requirements-aws.txt /app
+COPY . /app
+#COPY ./requirements.txt /app
 
 RUN dnf install gcc -y
 
@@ -15,11 +15,11 @@ RUN dnf install gcc -y
 
 
 # Install any needed packages specified in requirements.txt
-RUN pip install --no-cache-dir -r requirements-aws.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
 # Run main.py when the container launches
 # CMD ["uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "8000"]
 
 # CMD ["python", "-m", "backend.main"]
-WORKDIR /app/backend
+WORKDIR /app
 CMD ["main.handler"]

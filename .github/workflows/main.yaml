@@ -95,6 +95,7 @@ jobs:
     - name: Build and push the tagged docker image to Amazon ECR
       if: github.event.inputs.component == 'backend' || github.event.inputs.component == 'both'
       run: |
+        cd backend
         docker build -t ${{env.AWS_ECR_REGISTRY}}/${{env.AWS_ECR_REPO}}:${{env.IMAGE_TAG}} .
         docker push ${{env.AWS_ECR_REGISTRY}}/${{env.AWS_ECR_REPO}}:${{env.IMAGE_TAG}}
 

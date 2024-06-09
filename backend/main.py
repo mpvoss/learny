@@ -7,13 +7,13 @@ from starlette.middleware.cors import CORSMiddleware
 
 from dotenv import load_dotenv
 from mangum import Mangum
-from backend.service.LocalLLMService import LocalLLMService
+from service.LocalLLMService import LocalLLMService
 
 load_dotenv()
 
 
-from .routers import discussions, flashcards, notes, util, tags
-from backend.service.GptLLMService import GptLLMService
+from routers import discussions, flashcards, notes, util, tags
+from service.GptLLMService import GptLLMService
 
 
 

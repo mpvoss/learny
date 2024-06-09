@@ -1,7 +1,7 @@
 import logging
 
 import instructor
-from backend.service.AbstractLLMService import AbstractLLMService
+from service.AbstractLLMService import AbstractLLMService
 from openai import OpenAI
 
 

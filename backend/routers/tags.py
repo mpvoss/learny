@@ -1,9 +1,11 @@
 from typing import List
+
+from database import get_db
 from fastapi import APIRouter, Depends
+from models import Tag
 from requests import Session
-from backend.database import get_db
-from backend.models import Tag
-from backend.routers.api_models import CreateTagRequest, TagBase, TagDisplay
+from routers.api_models import CreateTagRequest, TagBase, TagDisplay
+
 router = APIRouter()
 
 @router.get("/tags", response_model=List[TagBase])
