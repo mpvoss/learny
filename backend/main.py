@@ -6,7 +6,7 @@ from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 
 from dotenv import load_dotenv
-
+from mangum import Mangum
 from backend.service.LocalLLMService import LocalLLMService
 
 load_dotenv()
@@ -63,6 +63,8 @@ def read_item(item_id: int, q: Union[str, None] = None):
     return {"item_id": item_id, "q": q}
 
 
+
+handler = Mangum(app)
 
 # @app.get("/disciplines")
 # def get_disciplines():

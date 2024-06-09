@@ -31,6 +31,13 @@ resource "aws_iam_role" "lambda_function_role" {
   })
 }
 
+
+
+resource "aws_iam_role_policy_attachment" "lambda_logs" {
+  role       = aws_iam_role.lambda_function_role.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+}
+
 resource "aws_lambda_function_url" "function_url" {
   function_name      = aws_lambda_function.docker_lambda_function.function_name
   authorization_type = "NONE"

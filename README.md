@@ -1,39 +1,34 @@
+Auth via supabase
+Env vars to connect to db
+initialize supabase db
 
-ECR
-Lambda from container
-Cloudfront
-https://medium.com/akava/deploying-containerized-aws-lambda-functions-with-terraform-7147b9815599
-https://github.com/marketplace/actions/s3-deploy
-https://stackoverflow.com/questions/76813384/how-do-you-associate-an-image-lambda-with-cloudfront-distribution-via-terraform
+
+gotta fix this shit in the docker image
+https://jacobsolawetz.medium.com/how-to-stand-up-fastapi-on-lambda-with-docker-299609323e40
+
+Tutorial
+https://github.com/dair-ai/Prompt-Engineering-Guide
+https://github.com/f/awesome-chatgpt-prompts
+
+
+Vector db prototype??? RAG etc
+
+Data dog???
+
+
+# Check size of deps
+du -sh * | sort -h
+
+
+# Differences in requirements.txt
+-uvicorn (local)
+-lang-chain (local)
+-mangum (aws)
+
 
 -DELETE INFRA IN AZURE LOL
 
-
-Lambda
-- Alias
-
-Pipeline
-- Push to ECR
-- Update Function
-- Update alias
-
-
-YOU KNOW I'M GONNA HAVE TWO DIFF ONES ANYWAY
-could just use alias latest for both lol
-
-
-
-
 TF flash card notes
-
-
-
-Path forward
-- TF for Lambda, s3, cloudfront
-- Pipeline to build docker image, deploy to S3
-
-
-
 
 React Flow concept maps!!!!
 - Tell me more button
