@@ -62,6 +62,9 @@ app.add_middleware(
 def read_item(item_id: int, q: Union[str, None] = None):
     return {"item_id": item_id, "q": q}
 
+@app.get("/test")
+def read_item():
+    return {"item_id": 'ok'}
 
 
 handler = Mangum(app)
