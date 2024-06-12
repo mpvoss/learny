@@ -33,7 +33,7 @@ const FlashcardComponent: React.FC<AuthProps> = ({ session }) => {
         //     queryParams.append('tag', tag);
         // });
 
-        fetch(BACKEND_URL + '/flashcards?' + tagsFromQueryParams,
+        fetch(BACKEND_URL + '/api/flashcards?' + tagsFromQueryParams,
         {
             credentials: 'include',
             headers: {

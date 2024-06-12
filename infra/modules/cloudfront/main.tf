@@ -66,12 +66,12 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
     
   }
 
-  # custom_error_response {
-  #   error_caching_min_ttl = 86400
-  #   error_code            = 403
-  #   response_code         = 200
-  #   response_page_path    = "/index.html"
-  # }
+  custom_error_response {
+    error_caching_min_ttl = 86400
+    error_code            = 403
+    response_code         = 200
+    response_page_path    = "/index.html"
+  }
 
   enabled             = true
   is_ipv6_enabled     = true
@@ -110,7 +110,7 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
       query_string = true
 
       # had to do this to get cloudfront to talk to apigw, unsure if this is going to break auth once I try that, todo revisit
-      headers = [] 
+      headers = ["Authorization"] 
 
       cookies {
         forward = "all"
