@@ -3,17 +3,20 @@ import React, { useState, useEffect } from 'react';
 import { Stepper, Step, StepLabel, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button, LinearProgress, Snackbar, IconButton, Alert, AlertProps } from '@mui/material';
 import { Dialog, DialogContent, DialogTitle } from '@mui/material';
 import { Flashcard } from "../models";
-import config from '../config.json'
 import TagWizard from './TagWizard';
+import { getEnv } from '../utils/EnvUtil';
+import { Session } from '@supabase/supabase-js';
+const BACKEND_URL = getEnv('VITE_BACKEND_URL');
 
 interface FlashCardSaveWizardProps {
     discussionId: number;
     messageId: number | null;
     open: boolean;
     setOpen: (open: boolean) => void;
+    session: Session
 }
 
-const FlashCardSaveWizard: React.FC<FlashCardSaveWizardProps> = ({ discussionId, messageId, open, setOpen }) => {
+const FlashCardSaveWizard: React.FC<FlashCardSaveWizardProps> = ({ discussionId, messageId, open, setOpen, session }) => {
     const [activeStep, setActiveStep] = useState(0);
     const [flashCards, setFlashCards] = useState<Flashcard[]>([]);
     const [selectedFlashCards, setSelectedFlashCards] = useState<number[]>([]);
@@ -41,11 +44,13 @@ const FlashCardSaveWizard: React.FC<FlashCardSaveWizardProps> = ({ discussionId,
         if (messageId == -1 || discussionId == -1) { return }
         setDidGenerateFail(false);
         setIsThinking(true);
-        fetch(config.BACKEND_URL + `/api/discussions/${discussionId}/messages/${messageId}/flashcards`, {
+        fetch(BACKEND_URL + `/api/discussions/${discussionId}/messages/${messageId}/flashcards`, {
             method: "POST",
+            credentials: "include",
             headers: {
                 'Accept': 'application/json',
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${session.access_token}`
             },
         }).then(result => {
             if (!result.ok) {
@@ -107,10 +112,12 @@ const FlashCardSaveWizard: React.FC<FlashCardSaveWizardProps> = ({ discussionId,
             tag: tag,
         };
         try {
-            const response = await fetch(config.BACKEND_URL + '/api/flashcards', {
+            const response = await fetch(BACKEND_URL + '/api/flashcards', {
                 method: 'POST',
+                credentials: 'include',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${session.access_token}`
                 },
                 body: JSON.stringify(data),
             });
@@ -203,7 +210,7 @@ const FlashCardSaveWizard: React.FC<FlashCardSaveWizardProps> = ({ discussionId,
                     {activeStep === 2 && (
                         <div>
                             {/* <TagSaveHelper></TagSaveHelper> */}
-                            <TagWizard updateTag={updateTag}></TagWizard>
+                            <TagWizard session={session} updateTag={updateTag}></TagWizard>
                             {/* Add tag selection or creation logic here */}
                         </div>
                     )}

@@ -30,15 +30,18 @@ import {
     ListItemIcon
 } from "@mui/material";
 import { Send as SendIcon } from "@mui/icons-material";
-import config from '../config.json'
-import { Discussion, Message } from "../models";
+import { AuthProps, Discussion, Message } from "../models";
 import NoteSaveDialog from "./NoteSaveDialog";
 import DiscussionCreateDialog from "./DiscussionCreateDialog";
 import FlashCardSaveWizard from "./FlashCardSaveWizard";
+import { getEnv } from '../utils/EnvUtil';
+const BACKEND_URL = getEnv('VITE_BACKEND_URL');
 const drawerWidth = 240;
 
 
-const Chat = () => {
+
+
+const Chat: React.FC<AuthProps> = ({ session }) => {
     const [activeDiscussionId, setActiveDiscussionId] = useState<number>();
     const [_activeTopic, setActiveTopic] = useState<string>();
     const [_selectedChat, setSelectedChat] = useState(0);
@@ -114,11 +117,13 @@ const Chat = () => {
         let firstMessage = { sender: "user", content: input, discussion_id: activeDiscussionId };
         setIsThinking(true);
         // Save user message to db
-        fetch(config.BACKEND_URL + '/api/discussions/' + activeDiscussionId + '/messages', {
+        fetch(BACKEND_URL + '/api/discussions/' + activeDiscussionId + '/messages', {
             method: "POST",
+            credentials: "include",
             headers: {
                 'Accept': 'application/json',
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${session.access_token}`
             },
             body: JSON.stringify(firstMessage)
         }).then(result => {
@@ -139,11 +144,13 @@ const Chat = () => {
         // Get AI Response
         let secondMessage = { content: input };
 
-        fetch(config.BACKEND_URL + '/api/discussions/' + activeDiscussionId + '/chat', {
+        fetch(BACKEND_URL + '/api/discussions/' + activeDiscussionId + '/chat', {
             method: "POST",
+            credentials: "include",
             headers: {
                 'Accept': 'application/json',
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${session.access_token}`
             },
             body: JSON.stringify(secondMessage)
         }).then(result => {
@@ -182,11 +189,13 @@ const Chat = () => {
     const handleQuestionHelperSubmit = () => {
         setIsThinking(true);
 
-        fetch(config.BACKEND_URL + '/api/questions?topic=' + dialogText, {
+        fetch(BACKEND_URL + '/api/questions?topic=' + dialogText, {
             method: "GET",
+            credentials: "include",
             headers: {
                 'Accept': 'application/json',
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${session.access_token}`
             }
         })
             .then(result => {
@@ -215,7 +224,12 @@ const Chat = () => {
         let asdf = (discussions.find((x) => x.id == chatId));
         setActiveTopic(asdf?.topic);
 
-        fetch(config.BACKEND_URL + '/api/discussions/' + chatId + '/messages')
+        fetch(BACKEND_URL + '/api/discussions/' + chatId + '/messages', {
+            credentials: 'include',
+            headers: {
+                Authorization: `Bearer ${session.access_token}`
+            }
+        })
             .then(result => result.json())
             .then(result => setMessages(result))
 
@@ -237,11 +251,13 @@ const Chat = () => {
         // get message with id equal to actionMessageId
         let msg = messages.find(x => x.id == actionMessageId)
 
-        fetch(config.BACKEND_URL + '/api/notes', {
+        fetch(BACKEND_URL + '/api/notes', {
             method: "POST",
+            credentials: "include",
             headers: {
                 'Accept': 'application/json',
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${session.access_token}`
             },
             body: JSON.stringify({ content: msg?.content, tag: tag })
         }).then(result => {
@@ -259,7 +275,14 @@ const Chat = () => {
     }
 
     const reloadDiscussions = () => {
-        fetch(config.BACKEND_URL + '/api/discussions')
+        fetch(BACKEND_URL + '/api/discussions',
+            {
+                credentials: 'include',
+                headers: {
+                    'Authorization': `Bearer ${session.access_token}`
+                }
+            }
+        )
             .then(result => result.json())
             .then(result => {
                 setDiscussions(result);
@@ -290,9 +313,9 @@ const Chat = () => {
             <NoteSaveDialog open={isNoteSaveDialogOpen} saveWithTag={saveNoteWithTags} onClose={() => { handleNoteSaveDialogClose() }}></NoteSaveDialog>
 
             {activeDiscussionId != null &&
-                <FlashCardSaveWizard open={isFlashcardSaveDialogOpen} discussionId={activeDiscussionId} messageId={actionMessageId} setOpen={setIsFlashcardSaveDialogOpen}></FlashCardSaveWizard>
+                <FlashCardSaveWizard session={session} open={isFlashcardSaveDialogOpen} discussionId={activeDiscussionId} messageId={actionMessageId} setOpen={setIsFlashcardSaveDialogOpen}></FlashCardSaveWizard>
             }
-            <DiscussionCreateDialog open={isDiscussionCreateDialogOpen} setOpen={setIsDiscussionCreateDialogOpen} onDiscussionCreated={reloadDiscussions} ></DiscussionCreateDialog>
+            <DiscussionCreateDialog session={session} open={isDiscussionCreateDialogOpen} setOpen={setIsDiscussionCreateDialogOpen} onDiscussionCreated={reloadDiscussions} ></DiscussionCreateDialog>
 
             <Dialog
                 open={open}

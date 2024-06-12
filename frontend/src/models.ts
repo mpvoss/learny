@@ -1,3 +1,5 @@
+import { Session } from "@supabase/supabase-js";
+
 interface LLMResp {
     text: string; // URL of the backend endpoint
 }
@@ -18,10 +20,10 @@ interface Message {
     id: number;
 }
 
-interface Note{
+interface Note {
     id: number;
     content: string;
-    title   : string;
+    title: string;
 }
 
 interface SuggestedQuestions {
@@ -34,4 +36,17 @@ interface Flashcard {
 }
 
 
-export type{LLMResp, Discussion, Message, SuggestedQuestions, Tag, Note, Flashcard}
+interface UserProps {
+    id: string;
+    first_name: string;
+    last_name: string;
+    email: string;
+    role: string;
+}
+
+type AuthProps = {
+    session: Session;
+};
+
+
+export type { LLMResp, Discussion, Message, SuggestedQuestions, Tag, Note, Flashcard , UserProps, AuthProps }

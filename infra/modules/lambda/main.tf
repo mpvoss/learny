@@ -10,7 +10,14 @@ resource "aws_lambda_function" "docker_lambda_function" {
 
   environment {
     variables = {
-      ENVIRONMENT = var.env
+      DB_HOST = var.db_config.host
+      DB_PORT = var.db_config.port
+      DB_NAME = var.db_config.name
+      DB_PASS = sensitive(var.db_config.pass)
+      DB_USER = var.db_config.user
+
+      SUPABASE_JWT_SECRET_KEY = sensitive(var.supabase_jwt_secret_key)
+      OPENAI_API_KEY = sensitive(var.openai_api_key)
     }
   }
 }
@@ -21,6 +28,7 @@ resource "aws_iam_role" "lambda_function_role" {
   assume_role_policy = jsonencode({
     Statement = [
       {
+        
         Action = "sts:AssumeRole"
         Effect = "Allow"
         Principal = {

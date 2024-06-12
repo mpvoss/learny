@@ -1,12 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { Select, MenuItem, TextField, FormControl, InputLabel } from '@mui/material';
-import config from '../config.json'
+import { getEnv } from '../utils/EnvUtil';
+import { Session } from '@supabase/supabase-js';
+const BACKEND_URL = getEnv('VITE_BACKEND_URL');
 
 interface TagSaveHelperProps {
     updateTag: (tag: string) => void;
+    session: Session
 }
 
-const TagWizard: React.FC<TagSaveHelperProps> = ({ updateTag }) => {
+const TagWizard: React.FC<TagSaveHelperProps> = ({ updateTag, session }) => {
     const [tag, setTag] = useState('');
     const [tags, setTags] = useState([]); // Replace with your tags
     const [isCreatingNew, setIsCreatingNew] = useState(false);
@@ -18,7 +21,14 @@ const TagWizard: React.FC<TagSaveHelperProps> = ({ updateTag }) => {
 
     const fetchTags = async () => {
         try {
-            const response = await fetch(config.BACKEND_URL + '/api/tags');
+            const response = await fetch(BACKEND_URL + '/api/tags',
+            {
+                credentials: 'include',
+                headers: {
+                   'Authorization': `Bearer ${session.access_token}`
+                }
+            }
+            );
             let data = await response.json();
             // extract "name" field out of json array
             data = data.map((tag: { name: any; }) => tag.name);

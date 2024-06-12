@@ -1,6 +1,7 @@
 // import React, { useState, useEffect } from 'react';
 // import { Box, Button, MenuItem, Select, Tab, Tabs, TextField, Typography } from '@mui/material';
-// import config from '../config.json'
+// import { getEnv } from '../utils/EnvUtil';
+// const BACKEND_URL = getEnv('VITE_BACKEND_URL');
 
 // interface Tag {
 //     id: number;
@@ -75,7 +76,7 @@
 //             const tag = {
 //                 name: newTag,
 //             };
-//             fetch(config.BACKEND_URL + '/api/tags', {
+//             fetch(BACKEND_URL + '/api/tags', {
 //                 method: 'POST',
 //                 headers: {
 //                     'Content-Type': 'application/json',
@@ -106,7 +107,7 @@
 
 //     const fetchTags = async () => {
 //         try {
-//             const response = await fetch(config.BACKEND_URL + '/api/tags');
+//             const response = await fetch(BACKEND_URL + '/api/tags');
 //             const data = await response.json();
 //             setTags(data);
 //             if (data.length > 0) {

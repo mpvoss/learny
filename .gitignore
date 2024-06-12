@@ -178,3 +178,6 @@ infra/.infracost/pricing.gob
 infra_azure/.terraform.lock.hcl
 infra_azure/terraform.tfstate
 infra_azure/terraform.tfstate.backup
+frontend/.env.dev
+frontend/.env.prod
+backend/.env.prod

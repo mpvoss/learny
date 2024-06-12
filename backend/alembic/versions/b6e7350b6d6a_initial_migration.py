@@ -1,8 +1,8 @@
-"""init
+"""Initial migration
 
-Revision ID: 3a24f3b82363
+Revision ID: b6e7350b6d6a
 Revises: 
-Create Date: 2024-05-30 10:00:54.433261
+Create Date: 2024-06-11 06:26:02.767313
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '3a24f3b82363'
+revision: str = 'b6e7350b6d6a'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -53,6 +53,16 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('name')
     )
+    op.create_table('users',
+    sa.Column('id', sa.String(), nullable=False),
+    sa.Column('role', sa.String(), nullable=False),
+    sa.Column('email', sa.String(), nullable=False),
+    sa.Column('first_name', sa.String(), nullable=False),
+    sa.Column('last_name', sa.String(), nullable=False),
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('email'),
+    sa.UniqueConstraint('id')
+    )
     op.create_table('flashcard_tag_association',
     sa.Column('flashcard_id', sa.Integer(), nullable=True),
     sa.Column('tag_id', sa.Integer(), nullable=True),
@@ -84,6 +94,7 @@ def downgrade() -> None:
     op.drop_index(op.f('ix_messages_id'), table_name='messages')
     op.drop_table('messages')
     op.drop_table('flashcard_tag_association')
+    op.drop_table('users')
     op.drop_table('tags')
     op.drop_table('notes')
     op.drop_table('flashcards')

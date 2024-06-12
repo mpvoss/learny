@@ -1,6 +1,6 @@
 locals {
   s3_origin_id  = "s3-${var.project_name}.com"
-  lambda_origin_id = "lambda-origin"
+  apigw_origin_id = "${var.env}-apigw"
 }
 
 resource "aws_s3_bucket" "sitebucket" {
@@ -51,24 +51,27 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
   aliases = ["${var.root_domain_name}", "*.${var.root_domain_name}"]
 
   origin {
-    domain_name = replace(var.lambda_function_url, "/^https?://([^/]*).*/", "$1")
-    origin_id   = local.lambda_origin_id
+    //remove https:// from the domain name
+    domain_name = replace(var.apigw_endpoint, "https://", "")
+    origin_id   = local.apigw_origin_id
+    origin_path = "/${var.env}"
 
     custom_origin_config {
       http_port              = 80
       https_port             = 443
       origin_protocol_policy = "https-only" 
-      origin_ssl_protocols   = ["TLSv1.2"]
+      origin_ssl_protocols   = ["TLSv1", "TLSv1.1", "TLSv1.2"]
+
     }
     
   }
 
-  custom_error_response {
-    error_caching_min_ttl = 86400
-    error_code            = 403
-    response_code         = 200
-    response_page_path    = "/index.html"
-  }
+  # custom_error_response {
+  #   error_caching_min_ttl = 86400
+  #   error_code            = 403
+  #   response_code         = 200
+  #   response_page_path    = "/index.html"
+  # }
 
   enabled             = true
   is_ipv6_enabled     = true
@@ -82,6 +85,7 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
 
     forwarded_values {
       query_string = false
+      
 
       cookies {
         forward = "none"
@@ -100,11 +104,13 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
     path_pattern     = "/api/*"
     allowed_methods  = ["GET", "HEAD", "OPTIONS", "POST", "DELETE", "PUT", "PATCH"]
     cached_methods   = ["GET", "HEAD", "OPTIONS"]
-    target_origin_id = local.lambda_origin_id
+    target_origin_id = local.apigw_origin_id
 
     forwarded_values {
       query_string = true
-      headers      = ["*"]
+
+      # had to do this to get cloudfront to talk to apigw, unsure if this is going to break auth once I try that, todo revisit
+      headers = [] 
 
       cookies {
         forward = "all"
@@ -112,8 +118,8 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
     }
 
     min_ttl                = 0
-    default_ttl            = 60 #TODO increase this86400
-    max_ttl                = 60 #TODO increase this31536000
+    default_ttl            = 86400
+    max_ttl                = 31536000
     compress               = true
     viewer_protocol_policy = "redirect-to-https"
   }

@@ -4,28 +4,45 @@ import random
 import string
 
 import genanki
+from pydantic import BaseModel, TypeAdapter
+from utils.utils import get_current_user, get_current_user_simple
 from database import get_db
 from faker import Faker
 from fastapi import APIRouter, Depends, Request
-from models import FlashCard, Note, Tag
+from models import FlashCard, Note, Tag, User
 from requests import Session
 
 router = APIRouter()
 
 
+class UserSchema(BaseModel):
+    first_name: str
+    last_name: str
+    email: str
+    role: str
+
 @router.get("/questions")
-def get_topics(request: Request, topic: str):
+def get_topics(request: Request, topic: str, current_user: User = Depends(get_current_user)):
     return request.app.state.llm_service.get_questions(topic)
 
 
 @router.get("/conceptmap")
-def get_topics(request: Request, topic: str):
+def get_topics(request: Request, topic: str, current_user: User = Depends(get_current_user)):
     return request.app.state.llm_service.get_concept_map(topic)
 
 
+@router.post("/session")
+def create_session(current_user: User = Depends(get_current_user_simple)):
+    ta = TypeAdapter(UserSchema)
+    m = ta.validate_python(current_user.__dict__)
+    # return TypeAdapter.validate_python(UserSchema, current_user)
+    # return parse_obj_as
+    return m
+    
+
 
 @router.get("/seed")
-def seed(db: Session = Depends(get_db)):
+def seed(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     fake = Faker()
 
     # Tags

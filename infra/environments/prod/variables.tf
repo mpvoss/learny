@@ -17,3 +17,32 @@ variable "acm_certificate_arn" {
 variable "route53_zone_id" {
   type = string
 }
+
+variable "apigw_id" {
+  type = string
+}
+
+variable "apigw_arn" {
+  type = string
+}
+
+variable "apigw_execution_arn"{
+    type = string
+}
+
+variable "apigw_endpoint"{
+    type = string
+}
+
+variable "db_config" {
+  description = "Configuration settings for the database"
+  type = map(string)
+}
+
+variable "supabase_jwt_secret_key" {
+  type = string
+}
+
+variable "openai_api_key" {
+  type = string
+}

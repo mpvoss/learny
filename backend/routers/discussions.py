@@ -1,6 +1,7 @@
 
+from utils.utils import get_current_user
 from database import get_db
-from models import Discussion, Message
+from models import Discussion, Message, User
 from typing import List
 
 from fastapi import APIRouter, Depends, Query, Request
@@ -16,8 +17,8 @@ def chat(db: Session = Depends(get_db)):
     return db.query(Discussion).all()
 
 
-@router.post("/discussions", response_model=CreateDiscussionRequest)
-def create_discussion(request: CreateDiscussionRequest, db: Session = Depends(get_db)):
+@router.post("/discussions",  response_model=CreateDiscussionRequest)
+def create_discussion(request: CreateDiscussionRequest, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     # Create a new discussion
     new_discussion = Discussion(topic=request.topic)
     db.add(new_discussion)
@@ -27,8 +28,10 @@ def create_discussion(request: CreateDiscussionRequest, db: Session = Depends(ge
 
 
 @router.post("/discussions/{id}/messages", response_model=CreateMessageRequest)
-def create_message(id: int,request: CreateMessageRequest, db: Session = Depends(get_db)):
+def create_message(id: int,request: CreateMessageRequest, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     # Create a new discussion
+
+    # Continue with creating the new message
     new_message = Message(content=request.content, discussion_id=request.discussion_id, sender=request.sender)
     db.add(new_message)
     db.commit()
@@ -37,13 +40,14 @@ def create_message(id: int,request: CreateMessageRequest, db: Session = Depends(
 
 
 @router.get("/discussions/{id}/messages")
-def get_msgs(id: int,db: Session = Depends(get_db)):
+def get_msgs(request: Request, id: int,db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    print(current_user)
     messages = db.query(Message).filter(Message.discussion_id == id).all()
     return messages
 
 
 @router.post("/discussions/{id}/chat")
-def chat(request: Request, id:int,msg: ChatMessage,db: Session = Depends(get_db)):
+def chat(request: Request, id:int,msg: ChatMessage,db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     reply = request.app.state.llm_service.chat(msg.content)
 
     new_message = Message(content=reply, discussion_id=id, sender="ai")
@@ -54,35 +58,7 @@ def chat(request: Request, id:int,msg: ChatMessage,db: Session = Depends(get_db)
 
 
 @router.post("/discussions/{discussion_id}/messages/{message_id}/flashcards")
-def chat(request: Request, discussion_id: int, message_id: int, db: Session = Depends(get_db)):
+def chat(request: Request, discussion_id: int, message_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     message = db.query(Message).filter(Message.id == message_id).first()
     reply = request.app.state.llm_service.get_flashcards(message.content)
     return reply
-
-
-@router.post("/discussions/{discussion_id}/messages/{message_id}/flashcards1")
-def foo():
-    return {
-    "cards": [
-        {
-            "name": "Salvador Dalí",
-            "description": "A famous Spanish painter known for his surrealist works featuring dreamlike imagery and unusual perspectives."
-        },
-        {
-            "name": "Birth Date",
-            "description": "May 11, 1904"
-        },
-        {
-            "name": "Nationality",
-            "description": "Spanish"
-        },
-        {
-            "name": "Art Style",
-            "description": "Surrealism"
-        },
-        {
-            "name": "Characteristics of his works",
-            "description": "Dreamlike imagery and unusual perspectives."
-        }
-    ]
-}

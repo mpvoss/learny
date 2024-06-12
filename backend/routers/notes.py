@@ -1,9 +1,10 @@
 
 from typing import List
 
+from utils.utils import get_current_user
 from database import get_db
 from fastapi import APIRouter, Depends, Query, Request
-from models import Note, Tag
+from models import Note, Tag, User
 from requests import Session
 from routers.api_models import CreateNoteRequest, NoteDisplay
 from sqlalchemy.orm import joinedload
@@ -11,7 +12,7 @@ from sqlalchemy.orm import joinedload
 router = APIRouter()
 
 @router.get("/notes", response_model=List[NoteDisplay])
-def get_notes(db: Session = Depends(get_db), tag: List[str] = Query(None)):
+def get_notes(db: Session = Depends(get_db), tag: List[str] = Query(None), current_user: User = Depends(get_current_user)):
     if tag:
         notes = db.query(Note).join(Note.tags).filter(Tag.name.in_(tag)).options(joinedload(Note.tags)).all()
     else:
@@ -21,7 +22,7 @@ def get_notes(db: Session = Depends(get_db), tag: List[str] = Query(None)):
 
 
 @router.post("/notes", response_model=NoteDisplay)
-def get_notes(request: Request, create_note_request: CreateNoteRequest, db: Session = Depends(get_db)):
+def get_notes(request: Request, create_note_request: CreateNoteRequest, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     title = request.app.state.llm_service.summarize(create_note_request.content)
 
     new_note = Note(content=create_note_request.content, title=title)

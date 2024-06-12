@@ -3,11 +3,12 @@ import AddIcon from '@mui/icons-material/Add';
 import { useEffect, useState } from 'react';
 import { TextField, Autocomplete, Chip, Stack, Fab } from '@mui/material';
 import NoteCard from './NoteCard';
-import config from '../config.json'
-import { Note, Tag } from '../models';
+import { AuthProps, Note, Tag } from '../models';
+import { getEnv } from '../utils/EnvUtil';
+const BACKEND_URL = getEnv('VITE_BACKEND_URL');
 
 
-const NotesSearch = () => {
+const NotesSearch = ({session}:AuthProps) => {
     const [_inputValue, setInputValue] = useState('');
     const [selectedTags, setSelectedTags] = useState<string[]>([]);
     const [notes, setNotes] = useState<Note[]>([]);
@@ -32,7 +33,13 @@ const NotesSearch = () => {
             queryParams.append('tag', tag);
         });
 
-        fetch(config.BACKEND_URL +'/api/notes?' + queryParams.toString())
+        fetch(BACKEND_URL +'/api/notes?' + queryParams.toString(),
+        {
+            credentials: 'include',
+            headers: {
+               'Authorization': `Bearer ${session.access_token}`
+            }
+        })
             .then((response) => response.json())
             .then((data) => {
                 setNotes(data);
@@ -47,7 +54,14 @@ const NotesSearch = () => {
     }, [selectedTags]);
 
     useEffect(() => {
-        fetch(config.BACKEND_URL + '/api/tags')
+        fetch(BACKEND_URL + '/api/tags',
+        {
+            credentials: 'include',
+            headers: {
+               'Authorization': `Bearer ${session.access_token}`
+            }
+        }
+        )
             .then((response) => response.json())
             
             .then((data) => {

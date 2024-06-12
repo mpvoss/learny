@@ -68,9 +68,13 @@ jobs:
     # build the react app
     - name: Build
       if: github.event.inputs.component == 'frontend' || github.event.inputs.component == 'both'
+      env:
+        VITE_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        VITE_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+        VITE_BACKEND_URL: https://mpvoss.com
       run: |
         cd frontend
-        npm run build
+        npm run build:prod
 
     - name: Configure AWS Credentials
       uses: aws-actions/configure-aws-credentials@v1

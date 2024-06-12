@@ -1,9 +1,13 @@
 import datetime
+import os
 
 from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, create_engine, Table, Float, Date
 from sqlalchemy.orm import relationship, declarative_base, sessionmaker
+from utils.env_init import build_db_url
 
-DATABASE_URL = "postgresql://postgres:postgres@localhost:5433/learny"
+
+
+DATABASE_URL = build_db_url()
 
 engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
@@ -77,3 +81,10 @@ class Tag(Base):
     # flashcard = db.query(Flashcard).options(selectinload(Flashcard.tags)).filter(Flashcard.id == flashcard_id).first()
 
 
+class User(Base):
+    __tablename__ = 'users'
+    id = Column(String, nullable=False,unique=True, primary_key=True)
+    role = Column(String, nullable=False)
+    email = Column(String, nullable=False, unique=True)
+    first_name = Column(String, nullable=False)
+    last_name = Column(String, nullable=False)

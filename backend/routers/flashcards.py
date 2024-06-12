@@ -1,9 +1,10 @@
 
 from typing import List
 
+from utils.utils import get_current_user
 from database import get_db
 from fastapi import APIRouter, Depends, Query
-from models import FlashCard, Tag
+from models import FlashCard, Tag, User
 from pydantic import BaseModel
 from requests import Session
 from routers.api_models import (FlashcardDisplay)
@@ -12,7 +13,7 @@ from sqlalchemy.orm import joinedload
 router = APIRouter()
 
 class FlashcardBase(BaseModel):
-    name: str
+    term: str
     description: str
 
 class FlashcardSaveRequest(BaseModel):
@@ -20,7 +21,7 @@ class FlashcardSaveRequest(BaseModel):
     flashCards: List[FlashcardBase] = []
 
 @router.get("/flashcards", response_model=List[FlashcardDisplay])
-def get_flashcards(db: Session = Depends(get_db), tag: List[str] = Query(None)):
+def get_flashcards(db: Session = Depends(get_db), tag: List[str] = Query(None), current_user: User = Depends(get_current_user)):
     if tag:
         flashcards = db.query(FlashCard).join(FlashCard.tags).filter(Tag.name.in_(tag)).options(joinedload(FlashCard.tags)).all()
     else:
@@ -29,7 +30,7 @@ def get_flashcards(db: Session = Depends(get_db), tag: List[str] = Query(None)):
 
 
 @router.post("/flashcards", response_model=str)
-def save_flashcards(flashcardSaveRequest: FlashcardSaveRequest, db: Session = Depends(get_db), tag: List[str] = Query(None)):
+def save_flashcards(flashcardSaveRequest: FlashcardSaveRequest, db: Session = Depends(get_db), tag: List[str] = Query(None), current_user: User = Depends(get_current_user)):
     # if tag doesn't exist, create it
     new_tag = Tag(name=flashcardSaveRequest.tag)
     db_tag = db.query(Tag).filter(Tag.name == new_tag.name).first()
@@ -40,7 +41,7 @@ def save_flashcards(flashcardSaveRequest: FlashcardSaveRequest, db: Session = De
         db.refresh(new_tag)
 
     for flashcard in flashcardSaveRequest.flashCards:
-        new_flashcard = FlashCard(description=flashcard.description, term=flashcard.name)
+        new_flashcard = FlashCard(description=flashcard.description, term=flashcard.term)
         new_flashcard.tags.append(new_tag)
         db.add(new_flashcard)
     db.commit()

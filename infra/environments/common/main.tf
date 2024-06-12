@@ -31,3 +31,8 @@ module "route53" {
   #   aws.virginia = aws.virginia
   # }
 }
+
+module "apigw"{
+  source = "../../modules/apigw"
+  project_name = var.project_name
+}

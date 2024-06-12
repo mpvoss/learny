@@ -3,8 +3,9 @@ import AddIcon from '@mui/icons-material/Add';
 import  { useEffect, useState } from 'react';
 import { TextField, Autocomplete, Stack, Fab, Button, Box } from '@mui/material';
 import { Link } from 'react-router-dom';
-import config from '../config.json'
-import { Note, Tag } from '../models';
+import { AuthProps, Note, Tag } from '../models';
+import { getEnv } from '../utils/EnvUtil';
+const BACKEND_URL = getEnv('VITE_BACKEND_URL');
 
 
 const cardStyle = {
@@ -35,7 +36,7 @@ const InformationCard = () => {
     );
 };
 
-const FlashcardHome = () => {
+const FlashcardHome = ({session}:AuthProps) => {
     // const [inputValue, setInputValue] = useState('');
     const [selectedTags, setSelectedTags] = useState<string[]>([]);
     const [_notes, setNotes] = useState<Note[]>([]);
@@ -60,7 +61,13 @@ const FlashcardHome = () => {
             queryParams.append('tag', tag);
         });
 
-        fetch(config.BACKEND_URL +'/api/notes?' + queryParams.toString())
+        fetch(BACKEND_URL +'/api/notes?' + queryParams.toString(),
+        {
+            credentials: 'include',
+            headers: {
+               'Authorization': `Bearer ${session.access_token}`
+            }
+        })
             .then((response) => response.json())
             .then((data) => {
                 setNotes(data);
@@ -75,7 +82,14 @@ const FlashcardHome = () => {
     }, [selectedTags]);
 
     useEffect(() => {
-        fetch(config.BACKEND_URL + '/api/tags')
+        fetch(BACKEND_URL + '/api/tags',
+        {
+            credentials: 'include',
+            headers: {
+               'Authorization': `Bearer ${session.access_token}`
+            }
+        }
+        )
             .then((response) => response.json())
             
             .then((data) => {

@@ -21,3 +21,7 @@ variable "route53_zone_id" {
 variable "env" {
   type = string
 }
+
+variable "apigw_endpoint" {
+  type = string
+}

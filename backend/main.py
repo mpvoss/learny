@@ -1,22 +1,19 @@
-from contextlib import asynccontextmanager
 import os
+from contextlib import asynccontextmanager
 from typing import Union
 
 from fastapi import FastAPI, Request
-from starlette.middleware.cors import CORSMiddleware
-from starlette.middleware.base import BaseHTTPMiddleware
-from starlette.responses import Response
-
-from dotenv import load_dotenv
 from mangum import Mangum
 from service.LocalLLMService import LocalLLMService
+from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.middleware.cors import CORSMiddleware
+from starlette.responses import Response
+from utils.env_init import load_deploy_env
 
-load_dotenv()
+load_deploy_env()
 
-
-from routers import discussions, flashcards, notes, util, tags
+from routers import discussions, flashcards, notes, tags, util
 from service.GptLLMService import GptLLMService
-
 
 
 @asynccontextmanager
@@ -24,18 +21,12 @@ async def lifespan(app: FastAPI):
     ''' Run at startup
         Initialise the Client and add it to app.state
     '''
-    if os.getenv("LLM_BACKEND","local") == 'openai':
+    if os.getenv("LLM_BACKEND","openai") == 'openai':
         app.state.llm_service = GptLLMService()
     else:
         app.state.llm_service = LocalLLMService()
     
     yield
-    ''' Run on shutdown
-        Close the connection
-        Clear variables and release the resources
-    '''
-    
-    # app.state.n_client.close()
 
 
 class StripStagePathMiddleware(BaseHTTPMiddleware):
@@ -64,16 +55,12 @@ app.include_router(tags.router)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Allows all origins, replace with your frontend URL for production
+    allow_origins=["http://localhost:5173"],  # Allows all origins, replace with your frontend URL for production
     allow_credentials=True,
     allow_methods=["*"],  # Allows all methods
     allow_headers=["*"],  # Allows all headers
 )
 
-#
-# @app.get("/openai")
-# def hit_openai():
-#     return {"result": llmer.use_web()}
 
 @app.get("/items/{item_id}")
 def read_item(item_id: int, q: Union[str, None] = None):
@@ -86,27 +73,3 @@ def read_item():
 
 handler = Mangum(app)
 
-# @app.get("/disciplines")
-# def get_disciplines():
-#     return llmer.get_disciplines()
-
-
-# @app.get("/topics")
-# def get_topics(discipline:str):
-#     return llmer.get_topics(discipline)
-
-
-# @app.get("/outline")
-# def get_topics(topic: str):
-#     return llmer.get_outline(topic)
-
-
-# @app.get("/questions")
-# def get_topics(topic: str):
-#     # raise HTTPException(status_code=404, detail="Item not found")
-#     return llmer.get_questions(topic)
-
-
-# @app.post("/chat")
-# def chat(msg: Message):
-#     return llmer.chat(msg.text)

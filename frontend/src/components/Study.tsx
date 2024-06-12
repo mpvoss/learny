@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, Button, Typography } from '@mui/material';
 import { Link, useLocation } from 'react-router-dom';
-import config from '../config.json'
-import { Flashcard } from "../models";
+import { AuthProps, Flashcard } from "../models";
 import ReactCardFlip from 'react-card-flip';
+import { getEnv } from '../utils/EnvUtil';
+const BACKEND_URL = getEnv('VITE_BACKEND_URL');
 
 const cardStyle = {
     backgroundColor: '#F5F5F5', // light gray
@@ -15,7 +16,7 @@ const cardStyle = {
 };
 
 
-const FlashcardComponent: React.FC = () => {
+const FlashcardComponent: React.FC<AuthProps> = ({ session }) => {
     const location = useLocation();
     const [flashcards, setFlashcards] = useState<Flashcard[]>([]);
     const [currentCardIndex, setCurrentCardIndex] = useState(0);
@@ -24,15 +25,22 @@ const FlashcardComponent: React.FC = () => {
     useEffect(() => {
         const queryParams = new URLSearchParams(location.search);
         const tagsFromQueryParams = queryParams.getAll('tag');
-        
+
 
 
         // const queryParams = new URLSearchParams();
         // tags.forEach((tag) => {
         //     queryParams.append('tag', tag);
         // });
-        
-        fetch(config.BACKEND_URL + '/flashcards?' + tagsFromQueryParams)
+
+        fetch(BACKEND_URL + '/flashcards?' + tagsFromQueryParams,
+        {
+            credentials: 'include',
+            headers: {
+               'Authorization': `Bearer ${session.access_token}`
+            }
+        }
+        )
             .then(response => response.json())
             .then(data => setFlashcards(data))
             .catch(error => console.error('Error:', error));
@@ -59,43 +67,43 @@ const FlashcardComponent: React.FC = () => {
     const currentCard = flashcards[currentCardIndex];
 
     return (
-<div style={{paddingTop: '64px' }} >
+        <div style={{ paddingTop: '64px' }} >
 
 
-<div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-    
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
 
-    <Button variant="outlined"  to="/flashcards" component={Link}>Back</Button>
 
-    <Typography color='black'>Selected: History</Typography>
-    <Typography color='black'>{currentCardIndex + 1}/{flashcards.length}</Typography>
-</div>
+                <Button variant="outlined" to="/flashcards" component={Link}>Back</Button>
 
-   
-        <ReactCardFlip isFlipped={showDefinition} flipDirection="vertical" >
-        
-        <Card style={cardStyle}>
-            <CardContent>
-                <div onClick={() => setShowDefinition(!showDefinition)}>
-                    { currentCard.term}
-                </div>
-               
-            </CardContent>
-        </Card>
-        <Card style={cardStyle}>
-            <CardContent>
-                <div >
-                    {currentCard.description }
-                </div>
-                <div >
-                    <Button style={{margin: '5px'}} color="error" variant="contained" onClick={() => handleButtonClick('Great')}>IDK</Button>
-                    <Button style={{margin: '5px'}} color="secondary" variant="outlined" onClick={() => handleButtonClick('Great')}>HARD</Button>
-                    <Button style={{margin: '5px'}} color="primary" variant="outlined" onClick={() => handleButtonClick('Great')}>OK</Button>
-                    <Button style={{margin: '5px'}} color="success" variant="contained" onClick={() => handleButtonClick('Great')}>EASY</Button>
-                </div>
-            </CardContent>
-        </Card>
-        </ReactCardFlip> 
+                <Typography color='black'>Selected: History</Typography>
+                <Typography color='black'>{currentCardIndex + 1}/{flashcards.length}</Typography>
+            </div>
+
+
+            <ReactCardFlip isFlipped={showDefinition} flipDirection="vertical" >
+
+                <Card style={cardStyle}>
+                    <CardContent>
+                        <div onClick={() => setShowDefinition(!showDefinition)}>
+                            {currentCard.term}
+                        </div>
+
+                    </CardContent>
+                </Card>
+                <Card style={cardStyle}>
+                    <CardContent>
+                        <div >
+                            {currentCard.description}
+                        </div>
+                        <div >
+                            <Button style={{ margin: '5px' }} color="error" variant="contained" onClick={() => handleButtonClick('Great')}>IDK</Button>
+                            <Button style={{ margin: '5px' }} color="secondary" variant="outlined" onClick={() => handleButtonClick('Great')}>HARD</Button>
+                            <Button style={{ margin: '5px' }} color="primary" variant="outlined" onClick={() => handleButtonClick('Great')}>OK</Button>
+                            <Button style={{ margin: '5px' }} color="success" variant="contained" onClick={() => handleButtonClick('Great')}>EASY</Button>
+                        </div>
+                    </CardContent>
+                </Card>
+            </ReactCardFlip>
         </div>
     );
 };
