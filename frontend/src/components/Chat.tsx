@@ -310,7 +310,7 @@ const Chat: React.FC<AuthProps> = ({ session }) => {
     //-----------------------------------------------------------------
     return (
         <Box sx={{ display: "flex" }}>
-            <NoteSaveDialog open={isNoteSaveDialogOpen} saveWithTag={saveNoteWithTags} onClose={() => { handleNoteSaveDialogClose() }}></NoteSaveDialog>
+            <NoteSaveDialog session={session} open={isNoteSaveDialogOpen} saveWithTag={saveNoteWithTags} onClose={() => { handleNoteSaveDialogClose() }}></NoteSaveDialog>
 
             {activeDiscussionId != null &&
                 <FlashCardSaveWizard session={session} open={isFlashcardSaveDialogOpen} discussionId={activeDiscussionId} messageId={actionMessageId} setOpen={setIsFlashcardSaveDialogOpen}></FlashCardSaveWizard>
