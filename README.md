@@ -1,4 +1,5 @@
 TODO
+- AUDIT ALL ENDPOITNS FOR AUTH DEPENDENCY PROGRAMMATICALLY
 - Env vars to connect to db in lambda
 - react builds in pipeline with new env flags to point at backend
 - deploy frontend and backend, test in aws wuwuwuwuwu

@@ -13,7 +13,7 @@ from sqlalchemy.orm import joinedload
 router = APIRouter()
 
 @router.get("/discussions")
-def chat(db: Session = Depends(get_db)):
+def chat(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     return db.query(Discussion).all()
 
 

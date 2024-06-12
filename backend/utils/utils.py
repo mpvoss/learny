@@ -16,7 +16,7 @@ def get_current_user(request: Request, db: Session = Depends(get_db)):
     token: Optional[str] = request.headers.get('Authorization')
     
     try:
-        user = get_current_user_work(token,db)
+        user = get_current_user_work(token, db)
 
         # TODO add real rbac
         if user.email != 'matthewpvoss@gmail.com':

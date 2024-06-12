@@ -1,8 +1,11 @@
+from functools import partial
+import logging
 import os
 from contextlib import asynccontextmanager
-from typing import Union
+from typing import Callable, Union
 
-from fastapi import FastAPI, Request
+from fastapi import APIRouter, Depends, FastAPI, Request
+from fastapi.routing import APIRoute
 from mangum import Mangum
 from service.LocalLLMService import LocalLLMService
 from starlette.middleware.base import BaseHTTPMiddleware
@@ -14,6 +17,7 @@ load_deploy_env()
 
 from routers import discussions, flashcards, notes, tags, util
 from service.GptLLMService import GptLLMService
+from utils.utils import get_current_user
 
 
 @asynccontextmanager
@@ -52,6 +56,48 @@ app.include_router(notes.router)
 app.include_router(util.router)
 app.include_router(tags.router)
 
+# for route in app.routes:
+#     if isinstance(route, APIRoute):
+#         for dep in route.dependencies:
+#             if dep.dependency == Depends(get_current_user):
+#                 break
+#         else:
+#             logging.error(f"Route {route.path} does not have a Depends(get_current_user) dependency")
+
+# def verify_routes_have_auth_dependency(app: FastAPI, dependency: Callable):
+#     print("booty booty")
+#     missing_auth_routes = []
+#     for route in app.routes:
+
+#         if not hasattr(route, "dependencies"):
+#             print("skippin "+ route.path)
+#             continue
+#         route_deps = [dep.dependency for dep in route.dependencies]
+#         if not any(isinstance(dep, type(dependency)) for dep in route_deps):
+#             missing_auth_routes.append(route.path)
+
+#     if missing_auth_routes:
+#         raise Exception(f"Missing authentication dependency in routes: {missing_auth_routes}")
+
+
+# def verify_routes_have_auth_dependency(app: FastAPI, dependency: Callable):
+#     print("booty booty")
+#     missing_auth_routes = []
+#     for route in app.routes:
+#         if isinstance(route, APIRoute):
+#             route_deps  =route.dependant.dependencies
+#             if not any(isinstance(dep, type(dependency)) for dep in route_deps):
+#                 missing_auth_routes.append(route.path)
+
+#     if missing_auth_routes:
+#         raise Exception(f"Missing authentication dependency in routes: {missing_auth_routes}")
+
+
+# app.add_event_handler("startup", partial(verify_routes_have_auth_dependency, app, get_current_user))
+
+# Place this check at the end of your route definitions before starting the server
+# verify_routes_have_auth_dependency(app, get_current_user)
+
 
 app.add_middleware(
     CORSMiddleware,
@@ -60,15 +106,6 @@ app.add_middleware(
     allow_methods=["*"],  # Allows all methods
     allow_headers=["*"],  # Allows all headers
 )
-
-
-@app.get("/items/{item_id}")
-def read_item(item_id: int, q: Union[str, None] = None):
-    return {"item_id": item_id, "q": q}
-
-@app.get("/test")
-def read_item():
-    return {"item_id": 'ok'}
 
 
 handler = Mangum(app)
