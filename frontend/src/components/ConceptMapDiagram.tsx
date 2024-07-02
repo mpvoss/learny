@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Box, Card, CardContent, IconButton, Tooltip, Typography } from '@mui/material';
-import { ConceptMapDiagramData, ConceptMapEntity, Diagram } from '../models';
+import { ConceptMapEntity, Diagram } from '../models';
 import Masonry from '@mui/lab/Masonry';
 import { Link } from '@mui/material';
 import PeopleIcon from '@mui/icons-material/People';
