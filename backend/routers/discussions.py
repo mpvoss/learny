@@ -1,7 +1,7 @@
 
 from utils.utils import get_current_user
 from database import get_db
-from models import Discussion, Message, User
+from models import Discussion, Message, MessageDiagram, User
 from typing import List
 
 from fastapi import APIRouter, Depends, Query, Request
@@ -19,7 +19,6 @@ def chat(db: Session = Depends(get_db), current_user: User = Depends(get_current
 
 @router.post("/discussions",  response_model=CreateDiscussionRequest)
 def create_discussion(request: CreateDiscussionRequest, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    # Create a new discussion
     new_discussion = Discussion(topic=request.topic)
     db.add(new_discussion)
     db.commit()
@@ -40,9 +39,8 @@ def create_message(id: int,request: CreateMessageRequest, db: Session = Depends(
 
 
 @router.get("/discussions/{id}/messages")
-def get_msgs(request: Request, id: int,db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    print(current_user)
-    messages = db.query(Message).filter(Message.discussion_id == id).all()
+def get_msgs(request: Request, id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    messages = db.query(Message).options(joinedload(Message.diagrams)).filter(Message.discussion_id == id).order_by(Message.created_at).all()
     return messages
 
 
@@ -62,3 +60,43 @@ def chat(request: Request, discussion_id: int, message_id: int, db: Session = De
     message = db.query(Message).filter(Message.id == message_id).first()
     reply = request.app.state.llm_service.get_flashcards(message.content)
     return reply
+
+
+@router.post("/discussions/{discussion_id}/timeline")
+def timeline(request: Request,msg: ChatMessage,  discussion_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    events = request.app.state.llm_service.get_timeline_events(msg.content)
+    res = []
+    
+    for idx,x in enumerate(events.segments):
+        print(str(idx) + "/" + str(len(events.segments)) + ": "  + x)
+        res.append(request.app.state.llm_service.get_timeline_item(x).model_dump(mode='json'))   
+    
+
+    new_message = Message(content=f"Sure, here's a timeline for the topic '{msg.content}'", discussion_id=discussion_id, sender="ai")
+    db.add(new_message)
+    db.commit()
+
+    msg_diagram = MessageDiagram(name = msg.content,type = 'timeline',data = res, message_id = new_message.id)
+    db.add(msg_diagram)
+    db.commit()
+
+    new_message = db.query(Message).options(joinedload(Message.diagrams)).filter(Message.id == new_message.id).first()
+    return new_message
+
+
+@router.post("/discussions/{discussion_id}/concept_map")
+def timeline(request: Request,msg: ChatMessage,  discussion_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    entityList = request.app.state.llm_service.get_concept_mapv2_nodes(msg.content)
+    entity_object_list = request.app.state.llm_service.get_concept_mapv2_node_categories(entityList.entities)
+    
+    
+    new_message = Message(content=f"Sure, here's a concept map for the topic '{msg.content}'. Click any subtopic to learn more.", discussion_id=discussion_id, sender="ai")
+    db.add(new_message)
+    db.commit()
+
+    msg_diagram = MessageDiagram(name = msg.content,type = 'concept_map',data = entity_object_list, message_id = new_message.id)
+    db.add(msg_diagram)
+    db.commit()
+
+    new_message = db.query(Message).options(joinedload(Message.diagrams)).filter(Message.id == new_message.id).first()
+    return new_message

@@ -74,9 +74,7 @@ export default function App() {
     )
   }
   else {
-    // return <p>{userProps?.role}</p>
-    return userProps != null &&
-      <AppHolder session={session} userProps={userProps}></AppHolder>
-
+    return userProps != null && 
+      <AppHolder authProps={{session}} userProps={userProps}></AppHolder>
   }
 }

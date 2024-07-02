@@ -1,15 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { Select, MenuItem, TextField, FormControl, InputLabel } from '@mui/material';
 import { getEnv } from '../utils/EnvUtil';
-import { Session } from '@supabase/supabase-js';
+import { AuthProps } from '../models';
 const BACKEND_URL = getEnv('VITE_BACKEND_URL');
 
 interface TagSaveHelperProps {
     updateTag: (tag: string) => void;
-    session: Session
+    authProps: AuthProps;
 }
 
-const TagWizard: React.FC<TagSaveHelperProps> = ({ updateTag, session }) => {
+const TagWizard: React.FC<TagSaveHelperProps> = ({ updateTag, authProps }) => {
     const [tag, setTag] = useState('');
     const [tags, setTags] = useState([]); // Replace with your tags
     const [isCreatingNew, setIsCreatingNew] = useState(false);
@@ -25,7 +25,7 @@ const TagWizard: React.FC<TagSaveHelperProps> = ({ updateTag, session }) => {
             {
                 credentials: 'include',
                 headers: {
-                   'Authorization': `Bearer ${session.access_token}`
+                   'Authorization': `Bearer ${authProps.session.access_token}`
                 }
             }
             );

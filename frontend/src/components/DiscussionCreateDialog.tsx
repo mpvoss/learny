@@ -3,16 +3,16 @@ import { getEnv } from '../utils/EnvUtil';
 const backendUrl = getEnv('VITE_BACKEND_URL');
 
 import React, { useState } from 'react';
-import { Session } from "@supabase/supabase-js";
+import { AuthProps } from "../models";
 
 interface DiscussionCreateDialogProps {
     onDiscussionCreated: () => void; // Add this prop
     open: boolean;
     setOpen: (open: boolean) => void;
-    session: Session;
+    authProps: AuthProps;
 }
 
-const DiscussionCreateDialog: React.FC<DiscussionCreateDialogProps> = ({ onDiscussionCreated, open, setOpen, session }) => {
+const DiscussionCreateDialog: React.FC<DiscussionCreateDialogProps> = ({ onDiscussionCreated, open, setOpen, authProps }) => {
     const [discussionName, setDiscussionName] = useState(''); 
     const handleClose = () => {
         setOpen(false);
@@ -29,7 +29,7 @@ const DiscussionCreateDialog: React.FC<DiscussionCreateDialogProps> = ({ onDiscu
             headers: {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${session.access_token}`
+                'Authorization': `Bearer ${authProps.session.access_token}`
             },
             body: JSON.stringify(body)
         })

@@ -1,55 +1,34 @@
 import React, { useEffect, useRef, useState } from "react";
-import AddIcon from '@mui/icons-material/Add';
-import CloseIcon from '@mui/icons-material/Close';
-import BookmarksIcon from '@mui/icons-material/Bookmarks';
-import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
-import QueueIcon from '@mui/icons-material/Queue';
 import {
     Box,
     CssBaseline,
-    Drawer,
-    List,
-    ListItem,
-    ListItemText,
     IconButton,
     TextField,
     Button,
     Toolbar,
-    Typography,
-    DialogTitle,
-    Dialog,
-    DialogActions,
-    DialogContent,
-    DialogContentText,
     LinearProgress,
     Snackbar,
     Alert,
-    styled,
-    Tooltip,
-    ListItemButton,
-    ListItemIcon
 } from "@mui/material";
 import { Send as SendIcon } from "@mui/icons-material";
-import { AuthProps, Discussion, Message } from "../models";
+import { AppState, AuthProps, Message } from "../models";
+import CloseIcon from "@mui/icons-material/Close";
 import NoteSaveDialog from "./NoteSaveDialog";
-import DiscussionCreateDialog from "./DiscussionCreateDialog";
 import FlashCardSaveWizard from "./FlashCardSaveWizard";
 import { getEnv } from '../utils/EnvUtil';
+import BasicSpeedDial from "./Speeddial";
+import ChatMessage from "./ChatMessage";
 const BACKEND_URL = getEnv('VITE_BACKEND_URL');
-const drawerWidth = 240;
 
+interface ChatProps {
+    authProps: AuthProps;
+    appState: AppState;
+}
 
+const Chat: React.FC<ChatProps>= ({ authProps, appState }) => {
 
-
-const Chat: React.FC<AuthProps> = ({ session }) => {
-    const [activeDiscussionId, setActiveDiscussionId] = useState<number>();
-    const [_activeTopic, setActiveTopic] = useState<string>();
-    const [_selectedChat, setSelectedChat] = useState(0);
     const [input, setInput] = useState("");
-    const [discussions, setDiscussions] = useState<Discussion[]>([]);
     const [messages, setMessages] = useState<Message[]>([]);
-    const [open, setOpen] = React.useState(false);
-    const [dialogText, setDialogText] = React.useState<string>("");
     const [suggestedQuestions, setSuggestedQuestions] = React.useState<string[]>();
     const [isThinking, setIsThinking] = React.useState<boolean>(false);
     const [isSnackOpen, setIsSnackOpen] = React.useState<boolean>(false);
@@ -57,17 +36,12 @@ const Chat: React.FC<AuthProps> = ({ session }) => {
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const [isNoteSaveDialogOpen, setIsNoteSaveDialogOpen] = useState(false);
     const [isFlashcardSaveDialogOpen, setIsFlashcardSaveDialogOpen] = useState(false);
-    const [isDiscussionCreateDialogOpen, setIsDiscussionCreateDialogOpen] = useState(false);
     const [actionMessageId, setActionMessageId] = useState<number>(-1);
 
 
     //-----------------------------------------------------------------
     // Misc
     //-----------------------------------------------------------------
-    const handleClickOpen = () => {
-        setOpen(true);
-    };
-
     const handleNoteSaveDialogOpen = (msgId: number) => {
         setActionMessageId(msgId)
         setIsNoteSaveDialogOpen(true);
@@ -82,29 +56,10 @@ const Chat: React.FC<AuthProps> = ({ session }) => {
         setIsFlashcardSaveDialogOpen(true);
     }
 
-    const handleClose = () => {
-        setOpen(false);
-    };
-
-    const handleTextChange = (event: any) => {
-        setDialogText(event.target.value);
-    }
-
     const handleSnackClose = () => {
         setIsSnackOpen(false);
     }
 
-    const handleQhelper = () => {
-        handleClickOpen();
-    };
-
-    const StyledIconButton = styled(IconButton)({
-        color: 'rgba(0, 0, 0, 0.54)',  // Subtle color
-        padding: 8,                   // Reduces padding to make it less dominant
-        '&:hover': {
-            backgroundColor: 'rgba(0, 0, 0, 0.04)'  // Subtle hover effect
-        }
-    });
 
     //-----------------------------------------------------------------
     // Workers
@@ -114,16 +69,55 @@ const Chat: React.FC<AuthProps> = ({ session }) => {
     }
 
     const handleSendMessage = (input: string) => {
-        let firstMessage = { sender: "user", content: input, discussion_id: activeDiscussionId };
-        setIsThinking(true);
-        // Save user message to db
-        fetch(BACKEND_URL + '/api/discussions/' + activeDiscussionId + '/messages', {
+        saveUserMessage(input);
+
+
+        // Get AI Response
+        let secondMessage = { content: input };
+
+        fetch(BACKEND_URL + '/api/discussions/' + appState.activeDiscussionId + '/chat', {
             method: "POST",
             credentials: "include",
             headers: {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${session.access_token}`
+                'Authorization': `Bearer ${authProps.session.access_token}`
+            },
+            body: JSON.stringify(secondMessage)
+        }).then(result => {
+            if (!result.ok) {
+                throw new Error("Error from backend")
+            }
+            return result.json()
+        }).then(result => {
+
+            setMessages(prevMessages => [...prevMessages, result]);
+        }).catch(error => {
+            console.log(error);
+            setSnackErrorMsg("Network error occurred")
+            setIsSnackOpen(true)
+            setIsThinking(false)
+        }).finally(
+            () => setIsThinking(false)
+        )
+        setInput("");
+    }
+
+    const handleNewMessage = (result: Message) => {
+        setMessages(prevMessages => [...prevMessages, result]);
+    }
+
+    const saveUserMessage = (input: string) => {
+        let firstMessage = { sender: "user", content: input, discussion_id: appState.activeDiscussionId };
+        setIsThinking(true);
+        // Save user message to db
+        fetch(BACKEND_URL + '/api/discussions/' + appState.activeDiscussionId + '/messages', {
+            method: "POST",
+            credentials: "include",
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${authProps.session.access_token}`
             },
             body: JSON.stringify(firstMessage)
         }).then(result => {
@@ -139,38 +133,6 @@ const Chat: React.FC<AuthProps> = ({ session }) => {
             setIsSnackOpen(true)
             setIsThinking(false)
         })
-
-
-        // Get AI Response
-        let secondMessage = { content: input };
-
-        fetch(BACKEND_URL + '/api/discussions/' + activeDiscussionId + '/chat', {
-            method: "POST",
-            credentials: "include",
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${session.access_token}`
-            },
-            body: JSON.stringify(secondMessage)
-        }).then(result => {
-            if (!result.ok) {
-                throw new Error("Error from backend")
-            }
-            return result.json()
-        }).then(result => {
-            setMessages(prevMessages => [...prevMessages, result]);
-        }).catch(error => {
-            console.log(error);
-            setSnackErrorMsg("Network error occurred")
-            setIsSnackOpen(true)
-            setIsThinking(false)
-        }).finally(
-            () => setIsThinking(false)
-        )
-
-
-        setInput("");
     }
 
     // ai reply from button click causes purge
@@ -184,56 +146,6 @@ const Chat: React.FC<AuthProps> = ({ session }) => {
     }
 
 
-
-
-    const handleQuestionHelperSubmit = () => {
-        setIsThinking(true);
-
-        fetch(BACKEND_URL + '/api/questions?topic=' + dialogText, {
-            method: "GET",
-            credentials: "include",
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${session.access_token}`
-            }
-        })
-            .then(result => {
-                if (!result.ok) {
-                    throw new Error("Error from backend")
-                }
-                return result.json()
-            }
-            )
-            .then(result => setSuggestedQuestions(result['questions']))
-            .catch(error => {
-                console.log(error);
-                setSnackErrorMsg("Network error occurred")
-                setIsSnackOpen(true)
-            })
-            .finally(
-                () => setIsThinking(false)
-            )
-
-    }
-
-    const handleChatSelect = (chatId: number) => {
-        setSelectedChat(chatId);
-
-        setActiveDiscussionId(chatId);
-        let asdf = (discussions.find((x) => x.id == chatId));
-        setActiveTopic(asdf?.topic);
-
-        fetch(BACKEND_URL + '/api/discussions/' + chatId + '/messages', {
-            credentials: 'include',
-            headers: {
-                Authorization: `Bearer ${session.access_token}`
-            }
-        })
-            .then(result => result.json())
-            .then(result => setMessages(result))
-
-    };
 
     const handleKeyPress = (event: any) => {
         if (event.key === 'Enter') {
@@ -257,7 +169,7 @@ const Chat: React.FC<AuthProps> = ({ session }) => {
             headers: {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${session.access_token}`
+                'Authorization': `Bearer ${authProps.session.access_token}`
             },
             body: JSON.stringify({ content: msg?.content, tag: tag })
         }).then(result => {
@@ -274,294 +186,183 @@ const Chat: React.FC<AuthProps> = ({ session }) => {
         })
     }
 
-    const reloadDiscussions = () => {
-        fetch(BACKEND_URL + '/api/discussions',
-            {
-                credentials: 'include',
-                headers: {
-                    'Authorization': `Bearer ${session.access_token}`
-                }
-            }
-        )
-            .then(result => result.json())
-            .then(result => {
-                setDiscussions(result);
-                if (result.length > 0) {
-                    handleChatSelect(result[0].id);
-                }
-            })
-    }
-
-
-    useEffect(() => {
-        reloadDiscussions();
-    }, []);
-
     // Scroll to the bottom every time messages change
     useEffect(() => {
+        // setSelectedChat(chatId);
+
+        // setActiveDiscussionId(chatId);
+        // let asdf = (discussions.find((x) => x.id == chatId));
+        // setActiveTopic(asdf?.topic);
         if (messagesEndRef.current) {
             messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
         }
     }, [messages]);
 
 
+    useEffect(() => {
+        console.log("APP STATE CHANGED")
+        console.log(messages)
+        if (appState == null || appState.activeDiscussionId == null) {
+            console.log("BRO IDK WHAT DISCUSSION IS");
+            return;
+        }
+        fetch(BACKEND_URL + '/api/discussions/' + appState.activeDiscussionId + '/messages', {
+            credentials: 'include',
+            headers: {
+                'Authorization': `Bearer ${authProps.session.access_token}`
+            }
+        })
+            .then(result => result.json())
+            .then(result => setMessages(result))
+    }, [appState])
+
+
     //-----------------------------------------------------------------
     // Render
     //-----------------------------------------------------------------
     return (
-        <Box sx={{ display: "flex" }}>
-            <NoteSaveDialog session={session} open={isNoteSaveDialogOpen} saveWithTag={saveNoteWithTags} onClose={() => { handleNoteSaveDialogClose() }}></NoteSaveDialog>
 
-            {activeDiscussionId != null &&
-                <FlashCardSaveWizard session={session} open={isFlashcardSaveDialogOpen} discussionId={activeDiscussionId} messageId={actionMessageId} setOpen={setIsFlashcardSaveDialogOpen}></FlashCardSaveWizard>
-            }
-            <DiscussionCreateDialog session={session} open={isDiscussionCreateDialogOpen} setOpen={setIsDiscussionCreateDialogOpen} onDiscussionCreated={reloadDiscussions} ></DiscussionCreateDialog>
+        appState ? (
+            <Box sx={{ display: "flex" }}>
+                <NoteSaveDialog authProps={authProps} open={isNoteSaveDialogOpen} saveWithTag={saveNoteWithTags} onClose={() => { handleNoteSaveDialogClose() }}></NoteSaveDialog>
 
-            <Dialog
-                open={open}
-                onClose={handleClose}
-                PaperProps={{
-                    component: 'form',
-                    onSubmit: (event: React.FormEvent<HTMLFormElement>) => {
-                        event.preventDefault();
-                        // const formData = new FormData(event.currentTarget);
-                        // const formJson = Object.fromEntries((formData as any).entries());
-                        // const email = formJson.email;
-                        handleClose();
-                    },
-                }}
-            >
-                <DialogTitle>Question Helper</DialogTitle>
-                <DialogContent>
-                    <DialogContentText>
-                        Let the AI suggest questions you can ask about the topic below
-                    </DialogContentText>
-                    <TextField
-                        autoFocus
-                        required
-                        margin="dense"
-                        id="name"
-                        name="email"
-                        // label="Email Address"
-                        // value={activeTopic}
-                        onChange={handleTextChange}
-
-                        fullWidth
-                        variant="standard"
-                    />
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={handleClose}>Cancel</Button>
-                    <Button onClick={handleQuestionHelperSubmit} type="submit">Submit</Button>
-                </DialogActions>
-            </Dialog>
-
-
-            <CssBaseline />
-            {/* https://mui.com/material-ui/react-drawer/ */}
-
-            {/* <Grid container>
-                <Grid item xs={4} > */}
-            <Drawer
-                variant="permanent"
-                sx={{
-                    width: drawerWidth,
-                    flexShrink: 0,
-                    [`& .MuiDrawer-paper`]: { width: drawerWidth, boxSizing: 'border-box' },
-                }}
-            >
-                <Toolbar />
-                <Box sx={{ overflow: 'auto' }}>
-                    <List>
-
-                        <ListItemButton
-                            divider={true}
-                            onClick={() => setIsDiscussionCreateDialogOpen(true)}
-                        >
-                            <ListItemIcon>
-                                <AddIcon></AddIcon>
-                            </ListItemIcon>
-                            <ListItemText>New Discussion</ListItemText>
-                        </ListItemButton>
-
-                        {discussions.map((discussion) => (
-                            <ListItem
-                                key={discussion.id}
-                                disablePadding
-                                // selected={selectedChat === discussion.id}
-                                onClick={() => handleChatSelect(discussion.id)}
-                            >
-                                <ListItemButton>
-                                    <ListItemIcon></ListItemIcon>
-                                    <ListItemText primary={discussion.topic} />
-                                </ListItemButton>
-                            </ListItem>
-                        ))}
-                    </List>
-
-
-
-                </Box>
-            </Drawer>
-
-
-            <Box
-                component="main"
-                sx={{
-                    flexGrow: 1,
-                    p: 3,
-                    // width: { sm: `calc(100% - ${drawerWidth}px)` }
-                }}
-            >
-                <Toolbar />
+                {appState.activeDiscussionId != null &&
+                    <FlashCardSaveWizard authProps={authProps} open={isFlashcardSaveDialogOpen} discussionId={appState.activeDiscussionId} messageId={actionMessageId} setOpen={setIsFlashcardSaveDialogOpen}></FlashCardSaveWizard>
+                }
+                <CssBaseline />
                 <Box
+                    component="main"
                     sx={{
-                        display: "flex",
-                        flexDirection: "column",
-                        justifyContent: "space-between",
-                        // height: "calc(100vh - 112px)"
+                        flexGrow: 1,
+                        p: 3,
+                        //  width: { sm: `calc(100% - ${drawerWidth}px)` }
                     }}
                 >
-                    <Box
-                        sx={{
-                            flexGrow: 1,
-                            overflowY: "auto",
-                            marginBottom: "8px",
-                            // border: "1px solid lightgray",
-                            borderRadius: "8px",
-                            padding: "8px"
-                        }}
-                    >
-                        {messages.map((msg, index) => (
-                            <Box
-                                key={index}
-                                sx={{
-                                    display: "flex",
-                                    justifyContent: msg.sender === "user" ? "flex-end" : "flex-start",
-                                    marginBottom: "8px"
-                                }}
-                            >
-                                <Box
-                                    sx={{
-                                        backgroundColor: msg.sender === "user" ? "#3f51b5" : "#e0e0e0",
-                                        color: msg.sender === "user" ? "white" : "black",
-                                        padding: "8px 12px",
-                                        borderRadius: "16px",
-                                        maxWidth: "60%",
-                                        whiteSpace: "pre-wrap",
-                                        textAlign: "left",
-
-                                        display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', width: '100%'
-                                    }}
-                                >
-
-                                    <Typography>{msg.content}</Typography>
-                                    {msg.sender != "user" &&
-                                        <>
-                                            <Tooltip title="Create flashcards">
-                                                <StyledIconButton onClick={() => handleFlashcardSaveDialogOpen(msg.id)}>
-                                                    <QueueIcon />
-                                                </StyledIconButton>
-                                            </Tooltip>
-                                            <Tooltip title="Save note">
-                                                <StyledIconButton onClick={() => handleNoteSaveDialogOpen(msg.id)}>
-                                                    <BookmarksIcon />
-                                                </StyledIconButton >
-                                            </Tooltip>
-                                        </>
-                                    }
-
-                                </Box>
-                            </Box>
-                        ))}
-                        {suggestedQuestions?.map((msg, index) => (
-                            <Button
-                                variant="contained"
-                                color="primary"
-                                onClick={() => handleSuggestedQuestionClick(index)}
-                                sx={{ marginLeft: "8px", marginTop: "8px" }}
-                            >
-                                {msg}
-                            </Button>))}
-                        <div ref={messagesEndRef} />
-                        {isThinking &&
-                            <LinearProgress sx={{ marginTop: 2 }} />
-                        }
-                    </Box>
-
+                    <Toolbar />
                     <Box
                         sx={{
                             display: "flex",
-                            alignItems: "center",
-                            // border: "1px solid lightgray",
-                            borderRadius: "8px",
-                            padding: "8px"
+                            flexDirection: "column",
+                            justifyContent: "space-between",
+                            // height: "calc(100vh - 112px)"
                         }}
                     >
-                        <TextField
-                            fullWidth
-                            placeholder="Type a message..."
-                            variant="outlined"
-                            value={input}
-                            onKeyPress={handleKeyPress}
-                            onChange={(e) => setInput(e.target.value)}
-                        />
-                        <Button
-                            variant="contained"
-                            color="primary"
-                            endIcon={<SendIcon />}
-                            onClick={handleSendMessageBtn}
-                            sx={{ marginLeft: "8px" }}
+                        <Box
+                            sx={{
+                                flexGrow: 1,
+                                overflowY: "auto",
+                                marginBottom: "8px",
+                                // border: "1px solid lightgray",
+                                borderRadius: "8px",
+                                padding: "8px"
+                            }}
                         >
-                            Send
-                        </Button>
-                        <Button
-                            variant="contained"
-                            color="primary"
-                            endIcon={<AutoAwesomeIcon />}
-                            onClick={handleQhelper}
-                            sx={{ marginLeft: "8px" }}
+                            {messages.map((msg, index) => (
+                                <ChatMessage
+                                    msg={msg}
+                                    index={index}
+                                    handleFlashcardSaveDialogOpen={handleFlashcardSaveDialogOpen}
+                                    handleNoteSaveDialogOpen={handleNoteSaveDialogOpen}
+                                    handleSendMessage={handleSendMessage}
+                                ></ChatMessage>
+                            ))}
+                            {suggestedQuestions?.map((msg, index) => (
+                                <Button
+                                    variant="contained"
+                                    color="primary"
+                                    onClick={() => handleSuggestedQuestionClick(index)}
+                                    sx={{ marginLeft: "8px", marginTop: "8px" }}
+                                >
+                                    {msg}
+                                </Button>))}
+                            <div ref={messagesEndRef} />
+                            {isThinking &&
+                                <LinearProgress sx={{ marginTop: 2 }} />
+                            }
+                        </Box>
+
+                        <Box
+                            sx={{
+                                display: "flex",
+                                alignItems: "center",
+                                // border: "1px solid lightgray",
+                                borderRadius: "8px",
+                                padding: "8px"
+                            }}
                         >
-                            QHelper
-                        </Button>
+                            <TextField
+                                fullWidth
+                                placeholder="Type a message..."
+                                variant="outlined"
+                                value={input}
+                                onKeyPress={handleKeyPress}
+                                onChange={(e) => setInput(e.target.value)}
+                            />
 
-
+                            <IconButton
+                                color="primary"
+                                aria-label="delete"
+                                size="large"
+                                onClick={handleSendMessageBtn}
+                                sx={{
+                                    marginLeft: "8px",
+                                    // marginRight: "70px",
+                                    backgroundColor: theme => theme.palette.primary.main, // set background color to primary color
+                                    color: theme => theme.palette.common.white, // set icon color to white
+                                    '&:hover': {
+                                        backgroundColor: theme => theme.palette.primary.dark, // change background color on hover
+                                    },
+                                }}
+                            >
+                                <SendIcon fontSize="inherit" />
+                            </IconButton>
+                            <BasicSpeedDial
+                                authProps={authProps}
+                                setIsThinking={setIsThinking}
+                                setSuggestedQuestions={setSuggestedQuestions}
+                                setSnackErrorMsg={setSnackErrorMsg}
+                                setIsSnackOpen={setIsSnackOpen}
+                                saveUserMessage={saveUserMessage}
+                                activeDiscussionId={appState.activeDiscussionId}
+                                handleNewMessage={handleNewMessage}
+                            ></BasicSpeedDial>
+                        </Box>
                     </Box>
                 </Box>
-            </Box>
 
-            <Snackbar
-                anchorOrigin={{
-                    vertical: 'bottom',
-                    horizontal: 'left',
-                }}
-                open={isSnackOpen}
-                autoHideDuration={6000}
-                onClose={handleSnackClose}
-                action={
-                    <>
-                        <IconButton
-                            size="small"
-                            aria-label="close"
-                            color="inherit"
-                            onClick={handleSnackClose}
-                        >
-                            <CloseIcon fontSize="small" />
-                        </IconButton>
-                    </>
-                }
-            >
-                <Alert
+                <Snackbar
+                    anchorOrigin={{
+                        vertical: 'bottom',
+                        horizontal: 'left',
+                    }}
+                    open={isSnackOpen}
+                    autoHideDuration={6000}
                     onClose={handleSnackClose}
-                    severity="error"
-                    variant="filled"
-                    sx={{ width: '100%' }}
+                    action={
+                        <>
+                            <IconButton
+                                size="small"
+                                aria-label="close"
+                                color="inherit"
+                                onClick={handleSnackClose}
+                            >
+                                <CloseIcon fontSize="small" />
+                            </IconButton>
+                        </>
+                    }
                 >
-                    {snackErrorMsg}
-                </Alert>
-            </Snackbar>
+                    <Alert
+                        onClose={handleSnackClose}
+                        severity="error"
+                        variant="filled"
+                        sx={{ width: '100%' }}
+                    >
+                        {snackErrorMsg}
+                    </Alert>
+                </Snackbar>
 
-        </Box>
+            </Box>
+        ) : null
     );
 };
 

@@ -11,6 +11,7 @@ from faker import Faker
 from fastapi import APIRouter, Depends, Request
 from models import FlashCard, Note, Tag, User
 from requests import Session
+import datetime
 
 router = APIRouter()
 
@@ -26,9 +27,45 @@ def get_topics(request: Request, topic: str, current_user: User = Depends(get_cu
     return request.app.state.llm_service.get_questions(topic)
 
 
+
+# TODO re-add get_current_user
+@router.get("/conceptmapv2a")
+def get_catgs(request: Request, topic: str, current_user: User = Depends(get_current_user)):
+    entityList = request.app.state.llm_service.get_concept_mapv2_nodes(topic)
+    return request.app.state.llm_service.get_concept_mapv2_node_categories(entityList.entities)
+
+
+
+# THIS IS THE HUGE ONE THAT TAKES FOREVER....don't like
+# TODO re-add get_current_user
+@router.get("/conceptmapv2")
+def get_topics(request: Request, topic: str, current_user: User = Depends(get_current_user)):
+    # step 2, get concept map
+    # return request.app.state.llm_service.get_concept_mapv2(summary)
+    entityList = request.app.state.llm_service.get_concept_mapv2_nodes(topic)
+
+    entity_list_resp = request.app.state.llm_service.get_concept_mapv2_node_categories(entityList.entities)
+
+    all_relationships = []
+
+    for idx, item in enumerate(entityList.entities):
+        # ','.join(entityList.entities)
+        # entityList.entities
+        print(f'Processing {idx} of {len(entityList.entities)}')
+        sublist = entityList.entities.copy()
+        sublist.remove(item)
+        entities_serialized = ','.join(sublist)
+        
+        all_relationships.extend(request.app.state.llm_service.get_concept_mapv2_relationships(item, entities_serialized).relationships)
+
+    return {
+        'relationships': all_relationships,
+        'entities': entity_list_resp.entities
+    }
+
 @router.get("/conceptmap")
 def get_topics(request: Request, topic: str, current_user: User = Depends(get_current_user)):
-    return request.app.state.llm_service.get_concept_map(topic)
+    return request.app.state.llm_service.chat(topic)
 
 
 @router.post("/session")
@@ -38,7 +75,6 @@ def create_session(current_user: User = Depends(get_current_user_simple)):
     # return TypeAdapter.validate_python(UserSchema, current_user)
     # return parse_obj_as
     return m
-    
 
 
 @router.get("/seed")
@@ -74,48 +110,15 @@ def seed(db: Session = Depends(get_db), current_user: User = Depends(get_current
     db.add_all(flashcards)
     db.commit()
 
-
     return "OK"
 
 
-
-
-# @router.get("/exportFlashcards")
-# def taco():
-#     # ask llm for flash cards
-#     topic = "Industrial Revolution"
-#     # flashcard_text = llmer.chat(f"Write 10 flashcards to help a student study {topic}")["text"]
-#     flash_cards = []
-#     with open('./backend/flash.tsv', 'r') as file:
-#         reader = csv.reader(file)
-#         for row in reader:
-#             flash_cards.append({'name':row[0], 'description': row[1]})
-            
+@router.get("/timeline")
+def timeline(request: Request, topic: str, current_user: User = Depends(get_current_user)):
+    events = request.app.state.llm_service.get_timeline_events(topic)
+    res = []
     
-#     # # flash_cards = llmer.to_anki(flashcard_text)
-#     my_model = genanki.Model(
-#         random.randrange(1 << 30, 1 << 31),
-#         'Simple Model',
-#         fields=[
-#             {'name': 'Question'},
-#             {'name': 'Answer'},
-#         ],
-#         templates=[
-#             {
-#                 'name': 'Card 1',
-#                 'qfmt': '{{Question}}',
-#                 'afmt': '{{FrontSide}}<hr id="answer">{{Answer}}',
-#             },
-#         ])
-#     my_deck = genanki.Deck(
-#         random.randrange(1 << 30, 1 << 31),
-#         "TFv2")
-
-#     for card in flash_cards:
-#         my_deck.add_note(genanki.Note(
-#             model=my_model,
-#             fields=[card['name'], card['description']]))
-
-#     genanki.Package(my_deck).write_to_file('output.apkg')
-
-#     return 'ok'
+    for idx,x in enumerate(events.segments):
+        print(str(idx) + "/" + str(len(events.segments)) + ": "  + x)
+        res.append(request.app.state.llm_service.get_timeline_item(x))
+    return res

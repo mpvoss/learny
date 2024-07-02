@@ -2,10 +2,9 @@ import CloseIcon from '@mui/icons-material/Close';
 import React, { useState, useEffect } from 'react';
 import { Stepper, Step, StepLabel, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button, LinearProgress, Snackbar, IconButton, Alert, AlertProps } from '@mui/material';
 import { Dialog, DialogContent, DialogTitle } from '@mui/material';
-import { Flashcard } from "../models";
+import { AuthProps, Flashcard } from "../models";
 import TagWizard from './TagWizard';
 import { getEnv } from '../utils/EnvUtil';
-import { Session } from '@supabase/supabase-js';
 const BACKEND_URL = getEnv('VITE_BACKEND_URL');
 
 interface FlashCardSaveWizardProps {
@@ -13,10 +12,10 @@ interface FlashCardSaveWizardProps {
     messageId: number | null;
     open: boolean;
     setOpen: (open: boolean) => void;
-    session: Session
+    authProps: AuthProps;
 }
 
-const FlashCardSaveWizard: React.FC<FlashCardSaveWizardProps> = ({ discussionId, messageId, open, setOpen, session }) => {
+const FlashCardSaveWizard: React.FC<FlashCardSaveWizardProps> = ({ discussionId, messageId, open, setOpen, authProps }) => {
     const [activeStep, setActiveStep] = useState(0);
     const [flashCards, setFlashCards] = useState<Flashcard[]>([]);
     const [selectedFlashCards, setSelectedFlashCards] = useState<number[]>([]);
@@ -50,7 +49,7 @@ const FlashCardSaveWizard: React.FC<FlashCardSaveWizardProps> = ({ discussionId,
             headers: {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${session.access_token}`
+                'Authorization': `Bearer ${authProps.session.access_token}`
             },
         }).then(result => {
             if (!result.ok) {
@@ -117,7 +116,7 @@ const FlashCardSaveWizard: React.FC<FlashCardSaveWizardProps> = ({ discussionId,
                 credentials: 'include',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${session.access_token}`
+                    'Authorization': `Bearer ${authProps.session.access_token}`
                 },
                 body: JSON.stringify(data),
             });
@@ -210,7 +209,7 @@ const FlashCardSaveWizard: React.FC<FlashCardSaveWizardProps> = ({ discussionId,
                     {activeStep === 2 && (
                         <div>
                             {/* <TagSaveHelper></TagSaveHelper> */}
-                            <TagWizard session={session} updateTag={updateTag}></TagWizard>
+                            <TagWizard authProps={authProps} updateTag={updateTag}></TagWizard>
                             {/* Add tag selection or creation logic here */}
                         </div>
                     )}

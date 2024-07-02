@@ -2,7 +2,7 @@
 
 resource "aws_lambda_function" "docker_lambda_function" {
   function_name = "${var.project_name}-docker-lambda-${var.env}"
-  timeout       = 5 # seconds
+  timeout       = 10 # seconds
   image_uri     = "${var.ecr_repository_url}:${var.image_tag}"
   package_type  = "Image"
 

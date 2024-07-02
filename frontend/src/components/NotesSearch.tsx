@@ -1,45 +1,42 @@
 
 import AddIcon from '@mui/icons-material/Add';
 import { useEffect, useState } from 'react';
-import { TextField, Autocomplete, Chip, Stack, Fab } from '@mui/material';
+import { TextField, Autocomplete, Chip, Stack, Fab, Container } from '@mui/material';
 import NoteCard from './NoteCard';
 import { AuthProps, Note, Tag } from '../models';
 import { getEnv } from '../utils/EnvUtil';
 const BACKEND_URL = getEnv('VITE_BACKEND_URL');
 
 
-const NotesSearch = ({session}:AuthProps) => {
+interface NotesSearchProps{
+    authProps: AuthProps;
+
+}
+
+const NotesSearch:React.FC<NotesSearchProps> = ({ authProps }) => {
     const [_inputValue, setInputValue] = useState('');
     const [selectedTags, setSelectedTags] = useState<string[]>([]);
     const [notes, setNotes] = useState<Note[]>([]);
-
     const [tags, setTags] = useState<string[]>([]);
 
-
-    const handleTagDelete = (tagToDelete:any) => () => {
+    const handleTagDelete = (tagToDelete: any) => () => {
         setSelectedTags((tags) => tags.filter((tag) => tag !== tagToDelete));
     };
 
-
     const loadNotes = () => {
         const queryParams = new URLSearchParams();
-
-        if (selectedTags.length === 0) {
-            setNotes([]);
-            return;
-        }
 
         selectedTags.forEach((tag) => {
             queryParams.append('tag', tag);
         });
 
-        fetch(BACKEND_URL +'/api/notes?' + queryParams.toString(),
-        {
-            credentials: 'include',
-            headers: {
-               'Authorization': `Bearer ${session.access_token}`
-            }
-        })
+        fetch(BACKEND_URL + '/api/notes?' + queryParams.toString(),
+            {
+                credentials: 'include',
+                headers: {
+                    'Authorization': `Bearer ${authProps.session.access_token}`
+                }
+            })
             .then((response) => response.json())
             .then((data) => {
                 setNotes(data);
@@ -55,15 +52,15 @@ const NotesSearch = ({session}:AuthProps) => {
 
     useEffect(() => {
         fetch(BACKEND_URL + '/api/tags',
-        {
-            credentials: 'include',
-            headers: {
-               'Authorization': `Bearer ${session.access_token}`
+            {
+                credentials: 'include',
+                headers: {
+                    'Authorization': `Bearer ${authProps.session.access_token}`
+                }
             }
-        }
         )
             .then((response) => response.json())
-            
+
             .then((data) => {
                 const tagsData: Tag[] = data;
                 setTags(tagsData.map(tag => tag.name));
@@ -71,10 +68,15 @@ const NotesSearch = ({session}:AuthProps) => {
             .catch((error) => {
                 console.error('Error fetching tags:', error);
             });
+
+
+loadNotes();
+
+
     }, []);
 
     return (
-        <div style={{paddingTop: '64px', maxWidth: '1000px' }}>
+        <Container style={{paddingTop: '90px'}}>
             <Autocomplete
                 freeSolo
                 options={tags}
@@ -106,24 +108,19 @@ const NotesSearch = ({session}:AuthProps) => {
             </Stack>
             <Stack direction="column" spacing={1} style={{ marginTop: '10px' }}>
                 {notes.map((note) => (
-                    <NoteCard 
+                    <NoteCard
                         key={note.id}
                         id={note.id}
                         content={note.content}
                         title={note.title}
+                        tags={note.tags}
                     />
                 ))}
             </Stack>
-           
-
-          
-               
-                    <Fab color="primary" aria-label="add" style={{ position: 'fixed', bottom: '16px', right: '16px' }}>
-                        <AddIcon />
-                    </Fab>
-               
-        
-        </div>
+            <Fab color="primary" aria-label="add" style={{ position: 'fixed', bottom: '16px', right: '16px' }}>
+                <AddIcon />
+            </Fab>
+        </Container>
     );
 };
 

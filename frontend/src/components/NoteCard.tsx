@@ -1,6 +1,6 @@
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { Card, CardContent, IconButton, Link, Typography} from '@mui/material';
+import { Box, Card, CardContent, Chip, IconButton, Link, Typography} from '@mui/material';
 import React, { useState } from 'react';
 import { Note } from '../models';
 
@@ -22,7 +22,7 @@ const contentStyle = {
     fontSize: '16px',
 };
 
-const NoteCard: React.FC<Note> = ({ title, content }) => {
+const NoteCard: React.FC<Note> = ({ title, content, tags }) => {
     const [showMore, setShowMore] = useState(false);
 
     const handleShowMore = () => {
@@ -56,6 +56,11 @@ const NoteCard: React.FC<Note> = ({ title, content }) => {
                         </Link></>
                     )}
                 </Typography>
+                <Box display="flex" paddingTop={1} flexDirection="row" flexWrap="wrap" alignItems="flex-start">
+                {tags.map((tag) => (
+                    <Chip label={tag.name} variant="outlined" style={{ margin: '4px' }} />
+                ))}
+            </Box>
             </CardContent>
         </Card>
     );

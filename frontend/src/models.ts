@@ -14,16 +14,56 @@ interface Tag {
     id: number;
 }
 
+interface TimelineData {
+    name: string;
+    start_year: number;
+    end_year: number;
+    region: string;
+}
+
+interface Diagram {
+    data: any;
+    type: string;
+    id: number;
+    name: string;
+}
+
+interface ConceptMapEntity {
+    name: string;
+    category: string;
+}
+
+interface ConceptMapDiagramData {
+    entities: ConceptMapEntity
+}
+
+interface Event {
+    name: string;
+    start_year: number;
+    end_year: number;
+    region: string;
+}
+
+interface TimelineDiagramData {
+    data: Event[];
+    type: string;
+    id: number;
+    name: string;
+}
+
 interface Message {
     content: string;
     sender: string;
     id: number;
+    diagrams: Diagram[];
+
 }
 
 interface Note {
     id: number;
     content: string;
     title: string;
+    tags: Tag[];
 }
 
 interface SuggestedQuestions {
@@ -33,6 +73,8 @@ interface SuggestedQuestions {
 interface Flashcard {
     term: string;
     description: string;
+    id: number;
+    tags: Tag[];
 }
 
 
@@ -48,5 +90,37 @@ type AuthProps = {
     session: Session;
 };
 
+interface GanttData {
+    group: string;
+    startYear: number;
+    endYear: number;
+    color: string;
+}
 
-export type { LLMResp, Discussion, Message, SuggestedQuestions, Tag, Note, Flashcard , UserProps, AuthProps }
+interface GanttProps {
+    data: GanttData[];
+}
+
+interface AppState {
+    activeDiscussionId: number;
+}
+
+export type {
+    LLMResp,
+    Discussion,
+    Message,
+    SuggestedQuestions,
+    Tag,
+    Note,
+    Flashcard,
+    UserProps,
+    AuthProps,
+    GanttData,
+    GanttProps,
+    Diagram,
+    TimelineData,
+    AppState,
+    TimelineDiagramData,
+    ConceptMapDiagramData,
+    ConceptMapEntity
+}

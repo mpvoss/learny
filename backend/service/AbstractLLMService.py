@@ -29,9 +29,6 @@ class AspectItem(BaseModel):
     summary: str
 
 
-
-
-
 class Aspect(BaseModel):
     name: str
     items: List[str]
@@ -42,6 +39,40 @@ class Concept(BaseModel):
     aspects: List[Aspect]
 
 
+class Relationship(BaseModel):
+    label: str
+    source_entity: str
+    target_entity: str
+
+class Ecosystem(BaseModel):
+    entities: List[str]
+    relationships: List[Relationship]
+
+class EntityList(BaseModel):
+    entities: List[str]
+
+class Entity(BaseModel):
+    name: str
+    category: str
+
+class EntityObjList(BaseModel):
+    entities: List[Entity]
+
+class RelationshipList(BaseModel):
+    relationships: List[Relationship]
+
+
+class TimelineItem(BaseModel):
+    name: str
+    start_year: int
+    end_year: int
+    region: str
+
+class Timeline(BaseModel):
+    events: List[TimelineItem]
+
+class SegmentList(BaseModel):
+    segments: List[str]
 
 # class AspectItem(BaseModel):
 #     name: str
@@ -101,6 +132,24 @@ class AbstractLLMService(ABC):
     def get_concept_map(self, info: str):
         return self.structured_call(f'Your goal is to break down this concept into its constituent parts, identify the relations between these parts, and show how they connect to related concepts in the broader knowledge domain. You are working on a Large Language Model (LLM) that has been trained on diverse sources, including scientific papers, books, articles, and other texts. The topic that you should decompose is {info}', Concept)
 
+    def get_concept_mapv2(self, summary: str):
+        return self.structured_call(f'''Summarize the following information while keeping as many details as possible: {summary}''', Ecosystem)
+
+    def get_concept_mapv2_nodes(self, topic: str) -> EntityList:
+        return self.structured_call(f'''Your goal is to identify all the important relationships with other entities, concepts, or phenomena that you can for this topic: {topic}. Please be exhaustive''', EntityList)
+
+    def get_concept_mapv2_relationships(self, subject: str, objects:str) -> RelationshipList:
+        return self.structured_call(f'''Your goal is to identify all the important relationships between {subject} and entities in this list: {objects}. Please be exhaustive''', RelationshipList)
+
+    def get_concept_mapv2_node_categories(self, objects:str) -> EntityObjList:
+        return self.structured_call(f'''Your goal is to label each of the following into categories so it's clear which are in like groups: {objects}. Examples include People (George Washington, Cleopatra), Places/Countries/Empires (Persian Empire, Germany), Technology/Innovation (Steam Engine, Internet), Movement (Enlightenment, Civil Rights Movement), Event (Renaissance, Industrial Revolution)''', EntityObjList)
+
+    def get_timeline_item(self, topic:str) -> TimelineItem:
+        return self.structured_call(f'''Your goal is to provide information on this event, use succint names: {topic}''', TimelineItem)
+
+    def get_timeline_events(self, topic:str) -> SegmentList:
+        return self.structured_call(f'''Your goal is to list the important events or periods of which would provide a comprehensive understanding of the following topic: {topic}. Please be exhaustive.''', SegmentList)
+
     def get_flashcards(self, info: str):
         return self.structured_call(f'Generate flashcards based on the following info: {info}', FlashcardResponse)
 
@@ -113,23 +162,3 @@ class AbstractLLMService(ABC):
     def structured_call(self, prompt: str):
         raise Exception("Not implemented")
 
-
-# def get_disciplines():
-#     return call('Provide a list of 15 core disciplines I could study as an adult, include no whitespace in your answer only json', Fields)
-
-# def get_topics(discipline: str):
-#     return call(f'Provide a list of 10 topics I could study as an adult in the discipline of {discipline}, include no whitespace in your answer only json', Topics)
-
-
-
-
-# def get_outline(topic: str):
-#     return call(f'Provide an outline of the most important ideas in the topic of {topic} I could study as an adult, include no whitespace in your answer only json', Outline)
-
-
-
-    # @abstractmethod
-    # def to_anki(self, flashcard_text: str):
-    #     pass
-
-    

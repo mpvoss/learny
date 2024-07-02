@@ -101,7 +101,7 @@ app.include_router(tags.router)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],  # Allows all origins, replace with your frontend URL for production
+    allow_origins=["http://localhost:3000"],  # Allows all origins, replace with your frontend URL for production
     allow_credentials=True,
     allow_methods=["*"],  # Allows all methods
     allow_headers=["*"],  # Allows all headers

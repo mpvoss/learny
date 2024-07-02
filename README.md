@@ -1,12 +1,87 @@
+MVP
+- Vector DB minimal RAG (can load document, talk to document)
+- App should be user-sensitive (different data for different users)
+- Mobile friendly??
+- Prototype new timeline library
+- Diagrams screen? Able to save from chat
+- initial page load bug
+- Code Cleanup
+- Readme with diagrams
+- Video demo
+- AI messages should know if they render the "flashcard wizard or save note" btns", looks dumb in some situations
+
+
+Demo Wish list
+- Quiz generation...
+- ELI5 mode
+- Socratic mode... Questions generated after each response? 
+- Want to show rag
+- Want to show timeline, ability to save and review later
+- Question suggester, concept map, timeline, make flash cards, use them
+- Save notes, edit
+- Tagging 
+- Perspective enhancer question maker 
+- Perspective enhancer - user gives their understanding and AI can give feedback
+
+
+CRUD screens for Notes, Flashcards...
+- Edit button, delete button, ADD workflow
+- Fix the prompts for flash card generation. Question, topic if possible, short answers, many questions over single large answers
+- Help pop up for Study screen, explain ANKII spaced repitition
+- what are we doing with settings btn when on non chat screens? Seems like that would be needed always
+- formatting for Notes list? 
+
+
+RAG design
+- Brainstorm
+  - Is this a special interface? 
+  - I mean we really just want to talk to our own docs
+  - Maybe it's a flag in the regualr chat ui
+- Spec
+  - NEW SCREEN: DOCS
+  - Chat can now leverage docs...maybe it's a toggle?
+  - All regular features still work, notes, flash cards etc
+  - User actions: Upload doc, talk to it, etc
+- Steps to prototype
+  - Ability to upload file, send through idx
+  - API endpoint which uses doc as ctx
+
+
+
+Lacedb vs pgvector
+I don't want to introduce a new vector db
+So the next step would be
+- Llama Index
+- PG Vector
+- Rerank model
+- Embeddings model
+
+
+
+
+
+
 TODO
+- legit 404 page
+- Stand up test env
+- Force diagram with concepts - let it imagine the names of lines, then draw them for arbitraty concept maps
+- clean way to show toast for errors
 - AUDIT ALL ENDPOITNS FOR AUTH DEPENDENCY PROGRAMMATICALLY
-- Env vars to connect to db in lambda
-- react builds in pipeline with new env flags to point at backend
-- deploy frontend and backend, test in aws wuwuwuwuwu
-- DELETE INFRA IN AZURE LOL
 - Vector db prototype??? RAG etc
 - Data dog???
-- Mobile friendly??
+
+iterative timeline builder needed. Probably iterative everything diagram builder.
+-Add this empire, add other etc. Maybe option to remove also?
+
+image support for ankii cards
+https://github.com/kerrickstaley/genanki?tab=readme-ov-file#media-files
+
+Visuals
+- Concept map
+- Period analysis (gantt)
+- Timeline with dots
+- Explore with react elements sequentially
+VECTOR STOREEEEEE
 
 
 Tutorial
@@ -14,8 +89,6 @@ https://github.com/dair-ai/Prompt-Engineering-Guide
 https://github.com/f/awesome-chatgpt-prompts
 
 
-
-npm run build --mode prod
 
 
 React Flow concept maps!!!!
@@ -38,7 +111,6 @@ Polish
 - Flash cards need CRUD on FC screen (import/export)?
 - Notes/flashcards proper search?
 - Mobile friendly...
-
 
 
 

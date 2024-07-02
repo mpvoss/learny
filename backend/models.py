@@ -1,7 +1,7 @@
 import datetime
 import os
 
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, create_engine, Table, Float, Date
+from sqlalchemy import JSON, Column, Integer, String, DateTime, ForeignKey, create_engine, Table, Float, Date
 from sqlalchemy.orm import relationship, declarative_base, sessionmaker
 from utils.env_init import build_db_url
 
@@ -28,10 +28,21 @@ class Message(Base):
     discussion_id = Column(Integer, ForeignKey("discussions.id"))
     sender = Column(String)  # "user" or "ai"
     content = Column(String)
-    created_at = Column(DateTime, default=datetime.datetime.now(datetime.UTC))
+    created_at = Column(DateTime, default=lambda: datetime.datetime.now(datetime.UTC))
 
     discussion = relationship("Discussion", back_populates="messages")
+    diagrams = relationship("MessageDiagram", back_populates="message")
 
+
+class MessageDiagram(Base):
+    __tablename__ = "message_diagrams"
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String)
+    type = Column(String)
+    data = Column(JSON)
+    message_id = Column(Integer, ForeignKey("messages.id"))
+
+    message = relationship("Message", back_populates="diagrams")
 
 note_tag_association_table = Table(
     'note_tag_association', Base.metadata,
@@ -65,7 +76,7 @@ class FlashCard(Base):
     repetition = Column(Integer, default=0)
     easiness_factor = Column(Float, default=2.5)
     interval = Column(Integer, default=1)
-    last_reviewed_date = Column(Date, default=datetime.datetime.now(datetime.UTC))
+    last_reviewed_date = Column(Date)
     quality_of_last_review = Column(Integer, default=0)
     created_date = Column(Date, default=datetime.datetime.now(datetime.UTC))
 

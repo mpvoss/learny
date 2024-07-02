@@ -38,5 +38,3 @@ def get_notes(request: Request, create_note_request: CreateNoteRequest, db: Sess
     db.commit()
     db.refresh(new_note)
     return new_note
-
-
