@@ -1,7 +1,7 @@
 import datetime
 import os
 
-from sqlalchemy import JSON, Column, Integer, String, DateTime, ForeignKey, create_engine, Table, Float, Date
+from sqlalchemy import JSON, Boolean, Column, Integer, String, DateTime, ForeignKey, create_engine, Table, Float, Date
 from sqlalchemy.orm import relationship, declarative_base, sessionmaker
 from utils.env_init import build_db_url
 
@@ -29,7 +29,7 @@ class Message(Base):
     sender = Column(String)  # "user" or "ai"
     content = Column(String)
     created_at = Column(DateTime, default=lambda: datetime.datetime.now(datetime.UTC))
-
+    show_actions = Column(Boolean, default=False, nullable=False)
     discussion = relationship("Discussion", back_populates="messages")
     diagrams = relationship("MessageDiagram", back_populates="message")
 

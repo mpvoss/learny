@@ -2,7 +2,9 @@ MVP
 - Vector DB minimal RAG (can load document, talk to document)
 - App should be user-sensitive (different data for different users)
 - Mobile friendly??
-- Prototype new timeline library
+- Auto reload fix on chat?
+- chat url to save path and refresh
+- Timeline -> give min width and scroll
 - Diagrams screen? Able to save from chat
 - initial page load bug
 - Code Cleanup
@@ -144,6 +146,9 @@ https://learn.microsoft.com/en-us/azure/storage/blobs/storage-quickstart-static-
 
 
 ## DB commands
+Might need this first
+`export ENV=PROD`
+
 Create migration 
 
 `alembic revision --autogenerate -m "Initial migration"`  

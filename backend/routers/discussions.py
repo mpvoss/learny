@@ -48,7 +48,7 @@ def get_msgs(request: Request, id: int, db: Session = Depends(get_db), current_u
 def chat(request: Request, id:int,msg: ChatMessage,db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     reply = request.app.state.llm_service.chat(msg.content)
 
-    new_message = Message(content=reply, discussion_id=id, sender="ai")
+    new_message = Message(content=reply, discussion_id=id, sender="ai", show_actions=True)
     db.add(new_message)
     db.commit()
     db.refresh(new_message)

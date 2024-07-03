@@ -1,7 +1,7 @@
-import { Box, IconButton, Tooltip, Typography } from "@mui/material";
+import { Box, IconButton, Stack, Tooltip, Typography } from "@mui/material";
 import BookmarksIcon from '@mui/icons-material/Bookmarks';
 import QueueIcon from '@mui/icons-material/Queue';
-import {styled} from "@mui/material";
+import { styled } from "@mui/material";
 import { Message } from "../models";
 import MessageDiagram from "./MessageDiagram";
 
@@ -21,7 +21,7 @@ interface ChatMessageProps {
     handleSendMessage: (msg: string) => void;
 }
 
-const ChatMessage: React.FC<ChatMessageProps> = ({msg,index,handleFlashcardSaveDialogOpen,handleNoteSaveDialogOpen, handleSendMessage}) => {
+const ChatMessage: React.FC<ChatMessageProps> = ({ msg, index, handleFlashcardSaveDialogOpen, handleNoteSaveDialogOpen, handleSendMessage }) => {
 
     return (
         <>
@@ -39,37 +39,44 @@ const ChatMessage: React.FC<ChatMessageProps> = ({msg,index,handleFlashcardSaveD
                         color: msg.sender === "user" ? "white" : "black",
                         padding: "8px 12px",
                         borderRadius: "16px",
-                        maxWidth: "60%",
+                        maxWidth: {
+                            xs: "85%", // 80% on small screens
+                            sm: "60%", // 60% from sm breakpoint and up
+                        },
                         whiteSpace: "pre-wrap",
                         textAlign: "left",
 
                         display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', width: '100%'
                     }}
                 >
-                    
 
-                    <Typography>{msg.content}</Typography>
-                    {msg.sender != "user" &&
-                        <>
-                            <Tooltip title="Create flashcards">
-                                <StyledIconButton onClick={() => handleFlashcardSaveDialogOpen(msg.id)}>
-                                    <QueueIcon />
-                                </StyledIconButton>
-                            </Tooltip>
-                            <Tooltip title="Save note">
-                                <StyledIconButton onClick={() => handleNoteSaveDialogOpen(msg.id)}>
-                                    <BookmarksIcon />
-                                </StyledIconButton >
-                            </Tooltip>
-                        </>
-                    }
+                    <Stack direction="column">
 
+
+
+                        <Typography>{msg.content}</Typography>
+                        {msg.sender != "user" && msg.show_actions &&
+                            <Stack direction="row" justifyContent="flex-end">
+
+                                <Tooltip title="Create flashcards">
+                                    <StyledIconButton onClick={() => handleFlashcardSaveDialogOpen(msg.id)}>
+                                        <QueueIcon />
+                                    </StyledIconButton>
+                                </Tooltip>
+                                <Tooltip title="Save note">
+                                    <StyledIconButton onClick={() => handleNoteSaveDialogOpen(msg.id)}>
+                                        <BookmarksIcon />
+                                    </StyledIconButton >
+                                </Tooltip>
+                            </Stack>
+                        }
+                    </Stack>
                 </Box>
             </Box>
             {msg.diagrams && msg.diagrams.length > 0 && msg.diagrams.map((diagram, _index) => {
-                        return <MessageDiagram diagram={diagram} handleSendMessage={handleSendMessage}></MessageDiagram>
-                    }
-                    )}
+                return <MessageDiagram diagram={diagram} handleSendMessage={handleSendMessage}></MessageDiagram>
+            }
+            )}
         </>);
 }
 

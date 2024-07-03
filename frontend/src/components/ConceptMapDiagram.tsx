@@ -114,9 +114,9 @@ const ConceptMapDiagram: React.FC<ConceptMapDiagramProps> = ({ diagram, handleSe
             {mapData && Object.entries(mapData).map(([key, value]) => (
                 <Card key={key} style={{ textAlign: "left" }}>
                     <CardContent>
-                        <Typography variant="h5" component="div">
+                        <Typography variant="h6" component="div" >
                             <Box display="flex" justifyContent="space-between" alignItems="center">
-                                <Box display="flex" alignItems="center">
+                                <Box display="flex" alignItems="center" >
                                     {value.icon && <value.icon style={{ marginRight: 10 }} />}
                                     {key}
                                 </Box>

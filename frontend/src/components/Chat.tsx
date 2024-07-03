@@ -234,7 +234,7 @@ const Chat: React.FC<ChatProps>= ({ authProps, appState }) => {
                     component="main"
                     sx={{
                         flexGrow: 1,
-                        p: 3,
+                        // p: 3,
                         //  width: { sm: `calc(100% - ${drawerWidth}px)` }
                     }}
                 >
@@ -248,13 +248,24 @@ const Chat: React.FC<ChatProps>= ({ authProps, appState }) => {
                         }}
                     >
                         <Box
+                        
                             sx={{
                                 flexGrow: 1,
                                 overflowY: "auto",
                                 marginBottom: "8px",
                                 // border: "1px solid lightgray",
                                 borderRadius: "8px",
-                                padding: "8px"
+                                
+                                "@media (min-width: 1024px)": {
+                                    padding: "16px",
+                                    maxWidth: "1200px",
+                                    margin: "auto"
+                                },
+
+                                
+                                  
+                                
+                                // padding: "8px"
                             }}
                         >
                             {messages.map((msg, index) => (

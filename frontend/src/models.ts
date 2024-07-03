@@ -53,6 +53,7 @@ interface TimelineDiagramData {
 
 interface Message {
     content: string;
+    show_actions: boolean;
     sender: string;
     id: number;
     diagrams: Diagram[];
