@@ -59,7 +59,12 @@ def chat(request: Request, id:int,msg: ChatMessage,db: Session = Depends(get_db)
 def chat(request: Request, discussion_id: int, message_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     message = db.query(Message).filter(Message.id == message_id).first()
     reply = request.app.state.llm_service.get_flashcards(message.content)
-    return reply
+    asdf = []
+    for x in reply.cards:
+        asdf.append({'term':x.question,'description':x.answer})
+
+
+    return {'cards':asdf}
 
 
 @router.post("/discussions/{discussion_id}/timeline")

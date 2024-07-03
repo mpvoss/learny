@@ -45,7 +45,7 @@ def get_flashcards(db: Session = Depends(get_db), tag: List[str] = Query(None), 
     return to_review
 
 
-@router.post("/flashcards", response_model=str)
+@router.post("/flashcards")
 def save_flashcards(flashcardSaveRequest: FlashcardSaveRequest, db: Session = Depends(get_db), tag: List[str] = Query(None), current_user: User = Depends(get_current_user)):
     # if tag doesn't exist, create it
     new_tag = Tag(name=flashcardSaveRequest.tag)
@@ -55,6 +55,8 @@ def save_flashcards(flashcardSaveRequest: FlashcardSaveRequest, db: Session = De
         db.add(new_tag)
         db.commit()
         db.refresh(new_tag)
+    else:
+        new_tag = db_tag
 
     for flashcard in flashcardSaveRequest.flashCards:
         new_flashcard = FlashCard(description=flashcard.description, term=flashcard.term)

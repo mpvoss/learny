@@ -20,8 +20,8 @@ class SuggestedQuestions(BaseModel):
 
 
 class Flashcard(BaseModel):
-    term: str
-    description: str
+    question: str
+    answer: str
 
 
 class AspectItem(BaseModel):
@@ -151,7 +151,7 @@ class AbstractLLMService(ABC):
         return self.structured_call(f'''Your goal is to list the important events or periods of which would provide a comprehensive understanding of the following topic: {topic}. Please be exhaustive.''', SegmentList)
 
     def get_flashcards(self, info: str):
-        return self.structured_call(f'Generate flashcards based on the following info: {info}', FlashcardResponse)
+        return self.structured_call(f'You are an expert tutor and your goal is to help students better understand the topics they study using flashcards. Generate flashcards based on the following info: {info}', FlashcardResponse)
 
     def get_questions(self, topic: str):
         return self.structured_call(f'Provide a list of 5 questions I could study on the topic of {topic}', SuggestedQuestions)
