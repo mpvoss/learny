@@ -145,8 +145,6 @@ const Chat: React.FC<ChatProps>= ({ authProps, appState }) => {
         setSuggestedQuestions([])
     }
 
-
-
     const handleKeyPress = (event: any) => {
         if (event.key === 'Enter') {
             event.preventDefault();
@@ -157,7 +155,6 @@ const Chat: React.FC<ChatProps>= ({ authProps, appState }) => {
             setInput("tell me an interesting fact I've never heard before");
         }
     };
-
 
     const saveNoteWithTags = (tag: string) => {
         // get message with id equal to actionMessageId
@@ -200,8 +197,6 @@ const Chat: React.FC<ChatProps>= ({ authProps, appState }) => {
 
 
     useEffect(() => {
-        console.log("APP STATE CHANGED")
-        console.log(messages)
         if (appState == null || appState.activeDiscussionId == null) {
             console.log("BRO IDK WHAT DISCUSSION IS");
             return;

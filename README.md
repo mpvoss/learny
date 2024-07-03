@@ -10,7 +10,6 @@ MVP
 - Code Cleanup
 - Readme with diagrams
 - Video demo
-- AI messages should know if they render the "flashcard wizard or save note" btns", looks dumb in some situations
 
 
 Demo Wish list

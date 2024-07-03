@@ -12,21 +12,31 @@ import supabase from '../utils/supabase';
 import { AppState, AuthProps, UserProps } from '../models';
 import PendingUserScreen from './PendingUserScreen';
 import AppDrawer from './AppDrawer';
-import { useTheme } from '@mui/material/styles';
+import { Theme, useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
 
+const DrawerWidth = 240;
+interface MainContentProps {
+    theme: Theme;
+    isSmallScreen: boolean;
+}
+
+const MainContent = styled('main')<MainContentProps>(({ theme, isSmallScreen }) => ({
+    flexGrow: 1,
+    padding: theme.spacing(3),
+    marginLeft: (!isSmallScreen) ? DrawerWidth:0,
+}));
 
 function AppHolder({ authProps, userProps }: { authProps: AuthProps, userProps: UserProps }) {
-    const [_anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(null);
+    const [_anchorElNav, _setAnchorElNav] = React.useState<null | HTMLElement>(null);
     const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(null);
     const [appState, setAppState] = React.useState<AppState>({activeDiscussionId:-1});
     const [drawerOpen, setDrawerOpen] = React.useState(false);
     const navigate = useNavigate();
-    const DrawerWidth = 240;
 
-    const handleOpenNavMenu = (event: React.MouseEvent<HTMLElement>) => {
+    const handleOpenNavMenu = () => {
         setDrawerOpen(!drawerOpen);
-        setAnchorElNav(event.currentTarget);
+        // setAnchorElNav(event.currentTarget);
     }
 
     const handleOpenUserMenu = (event: React.MouseEvent<HTMLElement>) => {
@@ -51,11 +61,7 @@ function AppHolder({ authProps, userProps }: { authProps: AuthProps, userProps: 
     const theme = useTheme();
     const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
     
-    const MainContent = styled('main')(({ theme }) => ({
-        flexGrow: 1,
-        padding: theme.spacing(3),
-        marginLeft: (!isSmallScreen) ? DrawerWidth:0,
-    }));
+
 
     return (
         <>
@@ -185,11 +191,11 @@ function AppHolder({ authProps, userProps }: { authProps: AuthProps, userProps: 
 
             <AppDrawer authProps={authProps} userProps={userProps} appState={appState} setAppState={setAppState} drawerOpen={drawerOpen} setDrawerOpen={setDrawerOpen}></AppDrawer>
 
+            <MainContent theme={theme} isSmallScreen={isSmallScreen}>
 
-            <MainContent>
 
                 <Routes>
-                    <Route path="/" element={<Chat authProps={authProps} appState={appState} />} />
+                    <Route path="/" element={<Chat authProps={authProps} appState={appState} />} /> 
                     <Route path="/notes" element={<NotesSearch authProps={authProps} />} />
                     <Route path="/flashcards" element={<FlashcardHome authProps={authProps} />} />
                     <Route path="/study" element={<Study authProps={authProps} />} />
