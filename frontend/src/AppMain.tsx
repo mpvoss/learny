@@ -10,16 +10,18 @@ import { Session } from '@supabase/supabase-js'
 import { getEnv } from './utils/EnvUtil';
 const backendUrl = getEnv('VITE_BACKEND_URL');
 
-export default function App() {
+export default function AppMain() {
   const [session, setSession] = useState<Session>()
   const [userProps, setUserProps] = useState<UserProps>()
+  const [isLoading,setIsLoading] = useState(true);
 
   useEffect(() => {
     console.log(backendUrl);
     supabase.auth.getSession().then(({ data: { session } }) => {
 
       if (session != null) {
-      setSession(session);
+        setSession(session);
+        setIsLoading(false);
       }
 
       fetch(backendUrl + '/api/session', {
@@ -36,10 +38,12 @@ export default function App() {
           // Handle the response data
           const userPropsData = data as UserProps;
           setUserProps(userPropsData);
+          setIsLoading(false);
         })
         .catch(error => {
           // Handle any errors
           console.error('Error:', error);
+          setIsLoading(false);
         });
 
     })
@@ -55,7 +59,7 @@ export default function App() {
     return () => subscription.unsubscribe()
   }, [])
 
-  if (!session) {
+  if (!session && !isLoading) {
     return (
       <Box
         display="flex"
@@ -74,7 +78,7 @@ export default function App() {
     )
   }
   else {
-    return userProps != null && 
-      <AppHolder authProps={{session}} userProps={userProps}></AppHolder>
+    return userProps != null && session!=null &&
+      <AppHolder authProps={{ token:session.access_token }} userProps={userProps}></AppHolder>
   }
 }

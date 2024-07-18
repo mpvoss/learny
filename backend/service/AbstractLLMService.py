@@ -74,6 +74,18 @@ class Timeline(BaseModel):
 class SegmentList(BaseModel):
     segments: List[str]
 
+class Problem(BaseModel):
+    question: str
+    answer: str
+
+class Quiz(BaseModel):
+    problems: List[Problem]
+
+class IncorrectResponses(BaseModel):
+    response1:str
+    response2:str
+    response3:str
+
 # class AspectItem(BaseModel):
 #     name: str
 #     summary: str
@@ -128,6 +140,12 @@ class AbstractLLMService(ABC):
         ]
         return self.call(messages)
 
+
+    def get_quiz(self, draft: str) -> Quiz:
+        return self.structured_call(f'Your goal is to create a quiz from the following information: {draft}', Quiz)
+
+    def get_wrong_answers(self, question: str, answer:str) -> IncorrectResponses:
+        return self.structured_call(f'The following question is on a test: {question}. The following is the correct answer: {answer}. Provide several incorrect options for the same question, including ur mom jokes wherever possible, as well as snarky or sarcastic options that fit the theme.', IncorrectResponses)
 
     def get_concept_map(self, info: str):
         return self.structured_call(f'Your goal is to break down this concept into its constituent parts, identify the relations between these parts, and show how they connect to related concepts in the broader knowledge domain. You are working on a Large Language Model (LLM) that has been trained on diverse sources, including scientific papers, books, articles, and other texts. The topic that you should decompose is {info}', Concept)

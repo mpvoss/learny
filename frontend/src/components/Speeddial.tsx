@@ -1,17 +1,20 @@
 import AccountTreeIcon from '@mui/icons-material/AccountTree';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import PsychologyAltIcon from '@mui/icons-material/PsychologyAlt';
+import FolderSpecialIcon from '@mui/icons-material/FolderSpecial';
 import ViewTimelineIcon from '@mui/icons-material/ViewTimeline';
 import SpeedDial from '@mui/material/SpeedDial';
 import SpeedDialAction from '@mui/material/SpeedDialAction';
-import { AuthProps, Message } from '../models';
+import { AppState, AuthProps, Message } from '../models';
 import { getEnv } from '../utils/EnvUtil';
 import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, TextField } from '@mui/material';
-import React from 'react';
+import React, { useEffect } from 'react';
 const BACKEND_URL = getEnv('VITE_BACKEND_URL');
 
 interface BasicSpeedDialProps {
     authProps: AuthProps;
+    appState: AppState;
+    setAppState: (appState: AppState) => void;
     setIsThinking: (isThinking: boolean) => void;
     setSuggestedQuestions: (suggestedQuestions: string[]) => void;
     setSnackErrorMsg: (msg: string) => void;
@@ -21,13 +24,16 @@ interface BasicSpeedDialProps {
     handleNewMessage: (message: Message) => void;
 }
 
-const BasicSpeedDial: React.FC<BasicSpeedDialProps> = ({ authProps, setIsThinking, setSuggestedQuestions, setSnackErrorMsg, setIsSnackOpen, saveUserMessage, activeDiscussionId,handleNewMessage }) => {
+const BasicSpeedDial: React.FC<BasicSpeedDialProps> = ({ authProps, setIsThinking, appState, setSuggestedQuestions,setAppState, setSnackErrorMsg, setIsSnackOpen, saveUserMessage, activeDiscussionId, handleNewMessage }) => {
 
     const [open, setOpen] = React.useState(false);
+    const [documentDialogOpen, setDocumentDialogOpen] = React.useState(false);
     const [dialogInput, setDialogInput] = React.useState('');
     const [dialogTitle, setDialogTitle] = React.useState('');
     const [dialogDesc, setDialogDesc] = React.useState('');
     const [activeDialog, setActiveDialog] = React.useState('');
+    const [docChatEnabled, setDocChatEnabled] = React.useState(false);
+    // const [isSwitchOn, setIsSwitchOn] = React.useState(false);
 
     const handleTextChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setDialogInput(event.target.value);
@@ -47,19 +53,38 @@ const BasicSpeedDial: React.FC<BasicSpeedDialProps> = ({ authProps, setIsThinkin
         }
     }
 
+    useEffect(() => {
+        fetch(BACKEND_URL + '/api/documents', {
+            method: "GET",
+            credentials: "include",
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${authProps.token}`
+            },
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (Array.isArray(data) && data.length > 0) {
+
+                    setDocChatEnabled(true);
+                }
+            })
+            .catch(error => console.error('Error:', error));
+    }, []);
 
     const getTimeline = () => {
         saveUserMessage("Can you make a timeline diagram over this topic? " + dialogInput)
-        
+
         fetch(BACKEND_URL + '/api/discussions/' + activeDiscussionId + '/timeline', {
             method: "POST",
             credentials: "include",
             headers: {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${authProps.session.access_token}`
+                'Authorization': `Bearer ${authProps.token}`
             },
-            body: JSON.stringify({'content':dialogInput})
+            body: JSON.stringify({ 'content': dialogInput })
         }).then(result => {
             if (!result.ok) {
                 throw new Error("Error from backend")
@@ -76,7 +101,7 @@ const BasicSpeedDial: React.FC<BasicSpeedDialProps> = ({ authProps, setIsThinkin
             () => setIsThinking(false)
         )
     }
-    
+
     const getDiagram = () => {
         console.log(authProps);
         saveUserMessage("Can you make a concept map over this topic: " + dialogInput + "?")
@@ -86,9 +111,9 @@ const BasicSpeedDial: React.FC<BasicSpeedDialProps> = ({ authProps, setIsThinkin
             headers: {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${authProps.session.access_token}`
+                'Authorization': `Bearer ${authProps.token}`
             },
-            body: JSON.stringify({'content':dialogInput})
+            body: JSON.stringify({ 'content': dialogInput })
         }).then(result => {
             if (!result.ok) {
                 throw new Error("Error from backend")
@@ -113,7 +138,7 @@ const BasicSpeedDial: React.FC<BasicSpeedDialProps> = ({ authProps, setIsThinkin
             headers: {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${authProps.session.access_token}`
+                'Authorization': `Bearer ${authProps.token}`
             }
         })
             .then(result => {
@@ -148,6 +173,19 @@ const BasicSpeedDial: React.FC<BasicSpeedDialProps> = ({ authProps, setIsThinkin
         setOpen(true);
     }
 
+    // const handleDocsClick = () => {
+    //     setActiveDialog("docs")
+    //     setDialogTitle("DocChat");
+    //     setDialogDesc("todo write docs stuff");
+    //     setDocumentDialogOpen(true);
+    // }
+
+    const handleDocsClick = () =>{
+        console.log("want to set to " + !appState.isDocChatActive)
+        setAppState({...appState, isDocChatActive: !appState.isDocChatActive});
+        // setIsSwitchOn(!isSwitchOn);
+    }
+
     const handleDiagramClick = () => {
         setActiveDialog("diagram")
         setDialogTitle("Generate Diagram");
@@ -157,6 +195,13 @@ const BasicSpeedDial: React.FC<BasicSpeedDialProps> = ({ authProps, setIsThinkin
 
     const handleClose = () => {
         setOpen(false);
+    }
+    const handleDocDialogClose = () => {
+        setDocumentDialogOpen(false);
+    }
+
+    const handleDocDialogSubmit = () => {
+        // todo
     }
 
     return (
@@ -193,6 +238,53 @@ const BasicSpeedDial: React.FC<BasicSpeedDialProps> = ({ authProps, setIsThinkin
                     <Button onClick={handleSubmit} type="submit">Submit</Button>
                 </DialogActions>
             </Dialog>
+
+
+
+
+            <Dialog
+                open={documentDialogOpen}
+                onClose={handleDocDialogClose}
+                PaperProps={{
+                    component: 'form',
+                    onSubmit: (event: React.FormEvent<HTMLFormElement>) => {
+                        event.preventDefault();
+                        handleClose();
+                    },
+                }}
+            >
+                <DialogTitle>DocChat</DialogTitle>
+                <DialogContent>
+                    <DialogContentText>
+                        Pick the doc to talk to, also on button
+                    </DialogContentText>
+{/* 
+                    {docChatEnabled && (
+                        <FormControlLabel
+                            control={<Switch 
+                                checked={isSwitchOn} 
+                                onChange={handleSwitchChange} 
+                                color="primary" />}
+                            label="On/Off"
+                        />
+                    )} */}
+                    {!docChatEnabled && (
+                       <p>bro you don't have docs</p>
+                    )}
+
+
+
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleDocDialogClose}>Cancel</Button>
+                    <Button onClick={handleDocDialogSubmit} type="submit">Submit</Button>
+                </DialogActions>
+            </Dialog>
+
+
+
+
+
             <SpeedDial
                 ariaLabel="SpeedDial basic example"
                 sx={{ position: 'fixed', bottom: 100, right: 32 }}
@@ -219,7 +311,19 @@ const BasicSpeedDial: React.FC<BasicSpeedDialProps> = ({ authProps, setIsThinkin
                     onClick={handleDiagramClick}
                     tooltipTitle="Diagram"
                 />
-            </SpeedDial>
+                 <SpeedDialAction
+                    key="docs"
+                    icon={<FolderSpecialIcon />}
+                    tooltipOpen
+                    onClick={handleDocsClick}
+                    tooltipTitle={(!appState.isDocChatActive ? "Start":"Stop") + " DocChat"}
+                    FabProps={{
+                        style: {
+                            backgroundColor: appState.isDocChatActive ? 'red' : 'green',
+                        },
+                    }}
+                />
+            </SpeedDial> 
         </>
     );
 }

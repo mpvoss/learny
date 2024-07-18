@@ -88,8 +88,8 @@ interface UserProps {
 }
 
 type AuthProps = {
-    session: Session;
-};
+    token: string;
+}
 
 interface GanttData {
     group: string;
@@ -104,6 +104,7 @@ interface GanttProps {
 
 interface AppState {
     activeDiscussionId: number;
+    isDocChatActive: boolean;
 }
 
 export type {

@@ -25,7 +25,7 @@ const TagWizard: React.FC<TagSaveHelperProps> = ({ updateTag, authProps }) => {
             {
                 credentials: 'include',
                 headers: {
-                   'Authorization': `Bearer ${authProps.session.access_token}`
+                   'Authorization': `Bearer ${authProps.token}`
                 }
             }
             );

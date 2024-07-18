@@ -22,7 +22,7 @@ class FlashcardSaveRequest(BaseModel):
     flashCards: List[FlashcardBase] = []
 
 
-@router.get("/flashcards", response_model=List[FlashcardDisplay])
+@router.get("/flashcards", response_model=List[FlashcardDisplay], tags=["Flashcards"])
 def get_flashcards(db: Session = Depends(get_db), tag: List[str] = Query(None), due_filter: bool=False, current_user: User = Depends(get_current_user)):
     if tag:
         flashcards = db.query(FlashCard).join(FlashCard.tags).filter(Tag.name.in_(tag)).options(joinedload(FlashCard.tags)).all()
@@ -45,7 +45,7 @@ def get_flashcards(db: Session = Depends(get_db), tag: List[str] = Query(None), 
     return to_review
 
 
-@router.post("/flashcards")
+@router.post("/flashcards", tags=["Flashcards"])
 def save_flashcards(flashcardSaveRequest: FlashcardSaveRequest, db: Session = Depends(get_db), tag: List[str] = Query(None), current_user: User = Depends(get_current_user)):
     # if tag doesn't exist, create it
     new_tag = Tag(name=flashcardSaveRequest.tag)
@@ -66,7 +66,7 @@ def save_flashcards(flashcardSaveRequest: FlashcardSaveRequest, db: Session = De
     return {"message": "Flashcard review saved successfully"}
 
 
-@router.post("/flashcards/{id}/review")
+@router.post("/flashcards/{id}/review", tags=["Flashcards"])
 def review_flashcard(id: int, flascardReview: FlashcardReview, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     flashcard = db.query(FlashCard).filter(FlashCard.id == id).first()
     quality = flascardReview.quality

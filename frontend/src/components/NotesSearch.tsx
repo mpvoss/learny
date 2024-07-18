@@ -34,7 +34,7 @@ const NotesSearch:React.FC<NotesSearchProps> = ({ authProps }) => {
             {
                 credentials: 'include',
                 headers: {
-                    'Authorization': `Bearer ${authProps.session.access_token}`
+                    'Authorization': `Bearer ${authProps.token}`
                 }
             })
             .then((response) => response.json())
@@ -55,7 +55,7 @@ const NotesSearch:React.FC<NotesSearchProps> = ({ authProps }) => {
             {
                 credentials: 'include',
                 headers: {
-                    'Authorization': `Bearer ${authProps.session.access_token}`
+                    'Authorization': `Bearer ${authProps.token}`
                 }
             }
         )

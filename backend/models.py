@@ -99,3 +99,11 @@ class User(Base):
     email = Column(String, nullable=False, unique=True)
     first_name = Column(String, nullable=False)
     last_name = Column(String, nullable=False)
+
+
+class Document(Base):
+    __tablename__ = 'documents'
+    id = Column(Integer, primary_key=True)
+    # user = Column(Integer, nullable=False)
+    name = Column(String, nullable=False)
+    created_date = Column(DateTime, default=datetime.datetime.now(datetime.UTC))

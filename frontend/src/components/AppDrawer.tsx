@@ -4,7 +4,10 @@ import { Link } from 'react-router-dom';
 import React, { useEffect, useState } from 'react';
 import ChatIcon from '@mui/icons-material/Chat';
 import DescriptionIcon from '@mui/icons-material/Description';
+import AccountTreeIcon from '@mui/icons-material/AccountTree';
+import RuleIcon from '@mui/icons-material/Rule';
 import AddIcon from '@mui/icons-material/Add';
+import FolderCopyIcon from '@mui/icons-material/FolderCopy';
 import FilterNoneIcon from '@mui/icons-material/FilterNone';
 import { getEnv } from '../utils/EnvUtil';
 import DiscussionCreateDialog from './DiscussionCreateDialog';
@@ -16,7 +19,7 @@ const drawerWidth = 240;
 interface DrawerProps {
     authProps: AuthProps;
     userProps: UserProps;
-    appState: AppState | null | undefined;
+    appState: AppState;
     setAppState: (appState: AppState) => void;
     drawerOpen: boolean;
     setDrawerOpen: (drawerOpen: boolean) => void;
@@ -37,19 +40,13 @@ const AppDrawer: React.FC<DrawerProps> = ({ authProps, appState, setAppState, dr
             {
                 credentials: 'include',
                 headers: {
-                    'Authorization': `Bearer ${authProps.session.access_token}`
+                    'Authorization': `Bearer ${authProps.token}`
                 }
             }
         )
             .then(result => result.json())
             .then(result => {
-                console.log(result)
-                console.log(discussions)
-
-
-
                 if (discussions != result) {
-                    console.log("NOT EQUAL BRO");
                     setDiscussions(result);
                     if (result.length > 0) {
                         handleChatSelect(result[0].id);
@@ -61,7 +58,6 @@ const AppDrawer: React.FC<DrawerProps> = ({ authProps, appState, setAppState, dr
 
     const handleChatSelect = (chatId: number) => {
         setSelectedChat(chatId);
-        console.log("I'm GONNA SET THE APP STATE BRO")
         setAppState({ ...appState, activeDiscussionId: chatId });
         // setActiveDiscussionId(chatId);
         let asdf = (discussions.find((x) => x.id == chatId));
@@ -70,7 +66,7 @@ const AppDrawer: React.FC<DrawerProps> = ({ authProps, appState, setAppState, dr
         // fetch(BACKEND_URL + '/api/discussions/' + chatId + '/messages', {
         //     credentials: 'include',
         //     headers: {
-        //         Authorization: `Bearer ${session.access_token}`
+        //         Authorization: `Bearer ${authProps.token}`
         //     }
         // })
         //     .then(result => result.json())
@@ -98,6 +94,29 @@ const AppDrawer: React.FC<DrawerProps> = ({ authProps, appState, setAppState, dr
                     </ListItemIcon>
                     <ListItemText>Flash Cards</ListItemText>
                 </ListItemButton>
+
+
+                <ListItemButton to="/documents" component={Link}>
+                    <ListItemIcon>
+                        <FolderCopyIcon></FolderCopyIcon>
+                    </ListItemIcon>
+                    <ListItemText>Documents</ListItemText>
+                </ListItemButton>
+
+                <ListItemButton to="/quizzes" component={Link}>
+                    <ListItemIcon>
+                        <RuleIcon></RuleIcon>
+                    </ListItemIcon>
+                    <ListItemText>Quizzes</ListItemText>
+                </ListItemButton>
+
+                <ListItemButton to="/diagrams" component={Link}>
+                    <ListItemIcon>
+                        <AccountTreeIcon></AccountTreeIcon>
+                    </ListItemIcon>
+                    <ListItemText>Diagrams</ListItemText>
+                </ListItemButton>
+
                 <ListItemButton to="/notes" component={Link} divider={true}>
                     <ListItemIcon>
                         <DescriptionIcon></DescriptionIcon>

@@ -41,7 +41,7 @@ const FlashcardComponent: React.FC<FlashcardComponentProps> = ({ authProps }) =>
             {
                 credentials: 'include',
                 headers: {
-                    'Authorization': `Bearer ${authProps.session.access_token}`
+                    'Authorization': `Bearer ${authProps.token}`
                 }
             }
         )
@@ -58,7 +58,7 @@ const FlashcardComponent: React.FC<FlashcardComponentProps> = ({ authProps }) =>
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${authProps.session.access_token}`
+                'Authorization': `Bearer ${authProps.token}`
             },
             body: JSON.stringify({ quality: score })
         })

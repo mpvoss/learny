@@ -11,7 +11,7 @@ from sqlalchemy.orm import joinedload
 
 router = APIRouter()
 
-@router.get("/notes", response_model=List[NoteDisplay])
+@router.get("/notes", response_model=List[NoteDisplay], tags=["Notes"])
 def get_notes(db: Session = Depends(get_db), tag: List[str] = Query(None), current_user: User = Depends(get_current_user)):
     if tag:
         notes = db.query(Note).join(Note.tags).filter(Tag.name.in_(tag)).options(joinedload(Note.tags)).all()
@@ -21,7 +21,7 @@ def get_notes(db: Session = Depends(get_db), tag: List[str] = Query(None), curre
 
 
 
-@router.post("/notes", response_model=NoteDisplay)
+@router.post("/notes", response_model=NoteDisplay, tags=["Notes"])
 def get_notes(request: Request, create_note_request: CreateNoteRequest, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     title = request.app.state.llm_service.summarize(create_note_request.content)
 

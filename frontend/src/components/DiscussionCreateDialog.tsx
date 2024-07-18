@@ -29,7 +29,7 @@ const DiscussionCreateDialog: React.FC<DiscussionCreateDialogProps> = ({ onDiscu
             headers: {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${authProps.session.access_token}`
+                'Authorization': `Bearer ${authProps.token}`
             },
             body: JSON.stringify(body)
         })

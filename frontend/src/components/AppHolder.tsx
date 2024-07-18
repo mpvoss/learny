@@ -14,6 +14,10 @@ import PendingUserScreen from './PendingUserScreen';
 import AppDrawer from './AppDrawer';
 import { Theme, useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
+import DocumentManager from './DocumentManager';
+import QuizListView from './QuizListView';
+import QuizTakeView from './QuizTakeView';
+import DiagramList from './DiagramList';
 
 const DrawerWidth = 240;
 interface MainContentProps {
@@ -30,7 +34,7 @@ const MainContent = styled('main')<MainContentProps>(({ theme, isSmallScreen }) 
 function AppHolder({ authProps, userProps }: { authProps: AuthProps, userProps: UserProps }) {
     const [_anchorElNav, _setAnchorElNav] = React.useState<null | HTMLElement>(null);
     const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(null);
-    const [appState, setAppState] = React.useState<AppState>({activeDiscussionId:-1});
+    const [appState, setAppState] = React.useState<AppState>({activeDiscussionId:-1, isDocChatActive:false});
     const [drawerOpen, setDrawerOpen] = React.useState(false);
     const navigate = useNavigate();
 
@@ -195,10 +199,14 @@ function AppHolder({ authProps, userProps }: { authProps: AuthProps, userProps: 
 
 
                 <Routes>
-                    <Route path="/" element={<Chat authProps={authProps} appState={appState} />} /> 
+                    <Route path="/" element={<Chat authProps={authProps} appState={appState} setAppState={setAppState} />} /> 
                     <Route path="/notes" element={<NotesSearch authProps={authProps} />} />
                     <Route path="/flashcards" element={<FlashcardHome authProps={authProps} />} />
+                    <Route path="/documents" element={<DocumentManager authProps={authProps} />} />
+                    <Route path="/diagrams" element={<DiagramList authProps={authProps} />} />
                     <Route path="/study" element={<Study authProps={authProps} />} />
+                    <Route path="/quizzes" element={<QuizListView  />} />
+                    <Route path="/quizzes/:id" element={<QuizTakeView  />} />
                     <Route path="/pendingAccess" element={<PendingUserScreen />} />
                 </Routes>
             </MainContent>

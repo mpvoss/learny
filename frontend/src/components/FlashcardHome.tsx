@@ -78,7 +78,7 @@ const FlashcardHome:React.FC<FlashcardHomeProps> = ({ authProps }) => {
             {
                 credentials: 'include',
                 headers: {
-                    'Authorization': `Bearer ${authProps.session.access_token}`
+                    'Authorization': `Bearer ${authProps.token}`
                 }
             })
             .then((response) => response.json())
@@ -99,7 +99,7 @@ const FlashcardHome:React.FC<FlashcardHomeProps> = ({ authProps }) => {
             {
                 credentials: 'include',
                 headers: {
-                    'Authorization': `Bearer ${authProps.session.access_token}`
+                    'Authorization': `Bearer ${authProps.token}`
                 }
             }
         )

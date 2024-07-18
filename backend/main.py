@@ -6,7 +6,9 @@ from typing import Callable, Union
 
 from fastapi import APIRouter, Depends, FastAPI, Request
 from fastapi.routing import APIRoute
+from fastapi_pagination import add_pagination
 from mangum import Mangum
+from service.QdrantService import QDrantService
 from service.LocalLLMService import LocalLLMService
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.middleware.cors import CORSMiddleware
@@ -15,7 +17,7 @@ from utils.env_init import load_deploy_env
 
 load_deploy_env()
 
-from routers import discussions, flashcards, notes, tags, util
+from routers import discussions, flashcards, notes, tags, util, documents, quizzes
 from service.GptLLMService import GptLLMService
 from utils.utils import get_current_user
 
@@ -29,6 +31,9 @@ async def lifespan(app: FastAPI):
         app.state.llm_service = GptLLMService()
     else:
         app.state.llm_service = LocalLLMService()
+
+
+    # app.state.qdrant_service = QDrantService()
     
     yield
 
@@ -43,6 +48,7 @@ class StripStagePathMiddleware(BaseHTTPMiddleware):
 
 
 app = FastAPI(lifespan=lifespan, root_path="/api")
+add_pagination(app)
 
 # Only add the middleware if not running in local testing
 if os.getenv('LOCAL_TESTING') != 'true':
@@ -55,6 +61,9 @@ app.include_router(flashcards.router)
 app.include_router(notes.router)
 app.include_router(util.router)
 app.include_router(tags.router)
+app.include_router(documents.router)
+app.include_router(quizzes.router)
+
 
 # for route in app.routes:
 #     if isinstance(route, APIRoute):

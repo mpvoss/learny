@@ -9,7 +9,7 @@ from utils.utils import get_current_user, get_current_user_simple
 from database import get_db
 from faker import Faker
 from fastapi import APIRouter, Depends, Request
-from models import FlashCard, Note, Tag, User
+from models import Discussion, FlashCard, Message, Note, Tag, User
 from requests import Session
 import datetime
 
@@ -22,14 +22,14 @@ class UserSchema(BaseModel):
     email: str
     role: str
 
-@router.get("/questions")
+@router.get("/questions", tags=["Util"])
 def get_topics(request: Request, topic: str, current_user: User = Depends(get_current_user)):
     return request.app.state.llm_service.get_questions(topic)
 
 
 
 # TODO re-add get_current_user
-@router.get("/conceptmapv2a")
+@router.get("/conceptmapv2a", tags=["Util"])
 def get_catgs(request: Request, topic: str, current_user: User = Depends(get_current_user)):
     entityList = request.app.state.llm_service.get_concept_mapv2_nodes(topic)
     return request.app.state.llm_service.get_concept_mapv2_node_categories(entityList.entities)
@@ -38,7 +38,7 @@ def get_catgs(request: Request, topic: str, current_user: User = Depends(get_cur
 
 # THIS IS THE HUGE ONE THAT TAKES FOREVER....don't like
 # TODO re-add get_current_user
-@router.get("/conceptmapv2")
+@router.get("/conceptmapv2", tags=["Util"])
 def get_topics(request: Request, topic: str, current_user: User = Depends(get_current_user)):
     # step 2, get concept map
     # return request.app.state.llm_service.get_concept_mapv2(summary)
@@ -63,12 +63,12 @@ def get_topics(request: Request, topic: str, current_user: User = Depends(get_cu
         'entities': entity_list_resp.entities
     }
 
-@router.get("/conceptmap")
+@router.get("/conceptmap", tags=["Util"])
 def get_topics(request: Request, topic: str, current_user: User = Depends(get_current_user)):
     return request.app.state.llm_service.chat(topic)
 
 
-@router.post("/session")
+@router.post("/session", tags=["Auth"])
 def create_session(current_user: User = Depends(get_current_user_simple)):
     ta = TypeAdapter(UserSchema)
     m = ta.validate_python(current_user.__dict__)
@@ -77,7 +77,7 @@ def create_session(current_user: User = Depends(get_current_user_simple)):
     return m
 
 
-@router.get("/seed")
+@router.get("/seed", tags=["Util"])
 def seed(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     fake = Faker()
 
@@ -113,7 +113,7 @@ def seed(db: Session = Depends(get_db), current_user: User = Depends(get_current
     return "OK"
 
 
-@router.get("/timeline")
+@router.get("/timeline", tags=["Util"])
 def timeline(request: Request, topic: str, current_user: User = Depends(get_current_user)):
     events = request.app.state.llm_service.get_timeline_events(topic)
     res = []

@@ -1,5 +1,8 @@
-from sqlalchemy import create_engine
+import os
+from qdrant_client import QdrantClient
+from sqlalchemy import create_engine, make_url
 from sqlalchemy.orm import sessionmaker
+from llama_index.vector_stores.qdrant import QdrantVectorStore
 import json
 import pydantic.json
 
@@ -13,6 +16,11 @@ def _custom_json_serializer(*args, **kwargs) -> str:
 
 engine = create_engine(DATABASE_URL, json_serializer=_custom_json_serializer)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
+
+
+
+
 
 def get_db():
     db = SessionLocal()

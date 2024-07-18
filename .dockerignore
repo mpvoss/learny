@@ -1,0 +1,6 @@
+frontend/node_modules
+infra/
+build/
+test_func/
+docs
+qdrant_test_data

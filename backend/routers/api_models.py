@@ -14,6 +14,10 @@ class CreateNoteRequest(BaseModel):
 class ChatMessage(BaseModel):
     content: str
 
+class QuizDraftRequest(BaseModel):
+    type: str
+    topic: str
+
 class FlashcardReview(BaseModel):
     quality: int
 

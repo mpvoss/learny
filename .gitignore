@@ -182,3 +182,4 @@ frontend/.env.dev
 frontend/.env.prod
 backend/.env.prod
 qdrant_test_data/**
+backend/learny.db

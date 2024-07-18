@@ -1,9 +1,13 @@
-
+from fastapi.encoders import jsonable_encoder
+from fastapi_pagination import Page
+from llama_index.core import VectorStoreIndex, StorageContext
+from pydantic import BaseModel
 from utils.utils import get_current_user
 from database import get_db
 from models import Discussion, Message, MessageDiagram, User
 from typing import List
 
+from fastapi_pagination.ext.sqlalchemy import paginate
 from fastapi import APIRouter, Depends, Query, Request
 from requests import Session
 from models import Note, Tag
@@ -12,12 +16,12 @@ from sqlalchemy.orm import joinedload
 
 router = APIRouter()
 
-@router.get("/discussions")
+@router.get("/discussions", tags=["Chat"])
 def chat(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     return db.query(Discussion).all()
 
 
-@router.post("/discussions",  response_model=CreateDiscussionRequest)
+@router.post("/discussions",  response_model=CreateDiscussionRequest, tags=["Chat"])
 def create_discussion(request: CreateDiscussionRequest, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     new_discussion = Discussion(topic=request.topic)
     db.add(new_discussion)
@@ -26,7 +30,7 @@ def create_discussion(request: CreateDiscussionRequest, db: Session = Depends(ge
     return new_discussion
 
 
-@router.post("/discussions/{id}/messages", response_model=CreateMessageRequest)
+@router.post("/discussions/{id}/messages", response_model=CreateMessageRequest, tags=["Chat"])
 def create_message(id: int,request: CreateMessageRequest, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     # Create a new discussion
 
@@ -38,13 +42,22 @@ def create_message(id: int,request: CreateMessageRequest, db: Session = Depends(
     return new_message
 
 
-@router.get("/discussions/{id}/messages")
-def get_msgs(request: Request, id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+
+class MessageDto(BaseModel):
+    content: str
+    sender: str
+    show_actions: bool
+
+@router.get("/discussions/{id}/messages", tags=["Chat"])
+def get_msgs(request: Request, id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):#-> Page[MessageDto]:
     messages = db.query(Message).options(joinedload(Message.diagrams)).filter(Message.discussion_id == id).order_by(Message.created_at).all()
     return messages
+    # query = db.query(Message).options(joinedload(Message.diagrams)).filter(Message.discussion_id == id).order_by(Message.created_at.desc())
+    
+    # return paginate(query)
 
 
-@router.post("/discussions/{id}/chat")
+@router.post("/discussions/{id}/chat", tags=["Chat"])
 def chat(request: Request, id:int,msg: ChatMessage,db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     reply = request.app.state.llm_service.chat(msg.content)
 
@@ -55,7 +68,7 @@ def chat(request: Request, id:int,msg: ChatMessage,db: Session = Depends(get_db)
     return new_message
 
 
-@router.post("/discussions/{discussion_id}/messages/{message_id}/flashcards")
+@router.post("/discussions/{discussion_id}/messages/{message_id}/flashcards", tags=["Chat"])
 def chat(request: Request, discussion_id: int, message_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     message = db.query(Message).filter(Message.id == message_id).first()
     reply = request.app.state.llm_service.get_flashcards(message.content)
@@ -67,7 +80,26 @@ def chat(request: Request, discussion_id: int, message_id: int, db: Session = De
     return {'cards':asdf}
 
 
-@router.post("/discussions/{discussion_id}/timeline")
+# @router.post("/discussions/{discussion_id}/docchat")
+# def doc_chat(request: Request, discussion_id: int, msg: ChatMessage,db: Session = Depends(get_db)):
+#     # reply = request.app.state.llm_service.chat(msg.content)    
+#     index = VectorStoreIndex.from_vector_store(request.app.state.qdrant_service.vector_store)
+
+#     # Note: Can pass in LLM here
+#     query_engine = index.as_query_engine(
+#         similarity_top_k=2, sparse_top_k=12, vector_store_query_mode="hybrid",
+#     )
+
+#     response= query_engine.query(msg.content)
+
+#     msg = Message(content=response.response, discussion_id=discussion_id, sender="ai", show_actions=True)
+#     db.add(msg)
+#     db.commit()
+#     db.refresh(msg)
+#     return msg
+
+
+@router.post("/discussions/{discussion_id}/timeline", tags=["Chat"])
 def timeline(request: Request,msg: ChatMessage,  discussion_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     events = request.app.state.llm_service.get_timeline_events(msg.content)
     res = []
@@ -89,7 +121,7 @@ def timeline(request: Request,msg: ChatMessage,  discussion_id: int, db: Session
     return new_message
 
 
-@router.post("/discussions/{discussion_id}/concept_map")
+@router.post("/discussions/{discussion_id}/concept_map", tags=["Chat"])
 def timeline(request: Request,msg: ChatMessage,  discussion_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     entityList = request.app.state.llm_service.get_concept_mapv2_nodes(msg.content)
     entity_object_list = request.app.state.llm_service.get_concept_mapv2_node_categories(entityList.entities)

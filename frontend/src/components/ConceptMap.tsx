@@ -86,7 +86,7 @@ const BACKEND_URL = getEnv('VITE_BACKEND_URL');
 
 
 
-export default function ConceptMap({session}:AuthProps) {
+export default function ConceptMap({authProps}:AuthProps) {
   // const { fitView } = useReactFlow();
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
@@ -104,7 +104,7 @@ export default function ConceptMap({session}:AuthProps) {
         {
           credentials: 'include',
           headers: {
-            'Authorization': `Bearer ${session.access_token}`
+            'Authorization': `Bearer ${authProps.token}`
           }
         }
       );

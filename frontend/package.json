@@ -5,8 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "vite --mode dev",
+    "devdocker": "vite --mode docker",
     "build:prod": "tsc && vite build --mode prod",
     "build:dev": "tsc && vite build --mode dev",
+    "build:docker": "tsc && vite build --mode docker",
     "build": "tsc && vite build",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview"
@@ -22,6 +24,7 @@
     "d3": "^7.9.0",
     "d3-force": "^3.0.0",
     "d3-hierarchy": "^3.1.2",
+    "jsrsasign": "^11.1.0",
     "react": "^18.2.0",
     "react-card-flip": "^1.2.3",
     "react-dom": "^18.2.0",

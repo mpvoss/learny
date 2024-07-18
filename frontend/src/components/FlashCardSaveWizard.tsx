@@ -49,7 +49,7 @@ const FlashCardSaveWizard: React.FC<FlashCardSaveWizardProps> = ({ discussionId,
             headers: {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${authProps.session.access_token}`
+                'Authorization': `Bearer ${authProps.token}`
             },
         }).then(result => {
             if (!result.ok) {
@@ -116,7 +116,7 @@ const FlashCardSaveWizard: React.FC<FlashCardSaveWizardProps> = ({ discussionId,
                 credentials: 'include',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${authProps.session.access_token}`
+                    'Authorization': `Bearer ${authProps.token}`
                 },
                 body: JSON.stringify(data),
             });
