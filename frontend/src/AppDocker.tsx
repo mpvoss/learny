@@ -1,15 +1,8 @@
 import './index.css'
 import { useState, useEffect } from 'react'
-import { Auth } from '@supabase/auth-ui-react'
-import { ThemeSupa } from '@supabase/auth-ui-shared'
-import supabase from './utils/supabase'
 import AppHolder from './components/AppHolder'
 import { KJUR } from 'jsrsasign';
 import { AuthProps, UserProps } from './models'
-import { Box } from '@mui/material'
-import { Session } from '@supabase/supabase-js'
-import { getEnv } from './utils/EnvUtil';
-const backendUrl = getEnv('VITE_BACKEND_URL');
 
 const createUserProps= () => {
   return {
@@ -24,7 +17,7 @@ const createUserProps= () => {
 
 export default function AppDocker() {
   // const [session, setSession] = useState<Session>()
-  const [userProps, setUserProps] = useState<UserProps>(createUserProps())
+  const [userProps, _setUserProps] = useState<UserProps>(createUserProps())
   const [isLoading,setIsLoading] = useState(true);
   const [authProps, setAuthProps] = useState<AuthProps>();
 

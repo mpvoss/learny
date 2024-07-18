@@ -27,7 +27,9 @@ def upgrade() -> None:
     op.execute('UPDATE messages SET show_actions = false')  # or true, depending on your needs
 
     # Step 3: Alter the column to be non-nullable
-    op.alter_column('messages', 'show_actions', nullable=False)
+    with op.batch_alter_table("messages") as batch_op:
+        batch_op.alter_column('show_actions', nullable=False)
+   
     # ### end Alembic commands ###
 
 

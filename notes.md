@@ -1,3 +1,6 @@
+GIVE USER ABILITY TO MODIFY ALL PROMPTS???? that would be swag
+doc
+
 Matthew as a User
 - Page load flash thingy
 - Pagination

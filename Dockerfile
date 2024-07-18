@@ -10,18 +10,27 @@ RUN npm run build:docker
 FROM tiangolo/uvicorn-gunicorn-fastapi:python3.11
 WORKDIR /app
 
+RUN apt-get update && apt-get install -y nginx
+
 # Copy the static React site to the appropriate directory
-COPY --from=build /app/dist /app/static
+COPY --from=build /app/dist /var/www/html
+
+# Copy the nginx configuration file
+COPY nginx.conf /etc/nginx/sites-available/default
 
 # # Install FastAPI and any other dependencies
 COPY backend/requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy the FastAPI application
-# COPY ./backend /app
+COPY ./backend /app
 
-# Copy the SQLite database
-# COPY ./database.db /app/database.db
 
-# Set the API module
-# ENV MODULE_NAME=main
+# run docker_entrypoint.sh
+COPY ./docker_entrypoint.sh /app/docker_entrypoint.sh
+RUN chmod +x /app/docker_entrypoint.sh
+
+# Expose the port that the FastAPI application will run on
+EXPOSE 8005
+
+CMD service nginx start && /app/docker_entrypoint.sh

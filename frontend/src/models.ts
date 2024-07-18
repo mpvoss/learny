@@ -1,5 +1,3 @@
-import { Session } from "@supabase/supabase-js";
-
 interface LLMResp {
     text: string; // URL of the backend endpoint
 }

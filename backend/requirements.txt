@@ -38,6 +38,7 @@ eventlet==0.36.1
 Faker==25.2.0
 fastapi==0.111.0
 fastapi-cli==0.0.4
+fastapi-pagination==0.12.26
 fastembed==0.3.1
 fasteners==0.19
 filelock==3.14.0

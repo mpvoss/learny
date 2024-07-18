@@ -1,15 +1,42 @@
-import React, { useEffect, useState } from 'react';
+import  { useEffect, useState } from 'react';
 import { Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material';
+import { AuthProps } from '../models';
+// import { getEnv } from '../utils/EnvUtil';
+// const BACKEND_URL = getEnv('VITE_BACKEND_URL');
 
-const Diagram: React.FC = () => {
-    const [documents, setDocuments] = useState([]);
+interface DiagramListProps {
+    authProps: AuthProps;
+}
 
-    // useEffect(() => {
-    //     fetch('/api/documents')
-    //         .then(response => response.json())
-    //         .then(data => setDocuments(data))
-    //         .catch(error => console.error(error));
-    // }, []);
+const DiagramList: React.FC<DiagramListProps> = ({ authProps }) => {
+    const [documents, _setDocuments] = useState([]);
+
+
+    useEffect(() => {
+        console.log(authProps);
+        // fetch(BACKEND_URL + '/api/tags',
+        //     {
+        //         credentials: 'include',
+        //         headers: {
+        //             'Authorization': `Bearer ${authProps.token}`
+        //         }
+        //     }
+        // )
+        //     .then((response) => response.json())
+
+        //     .then((data) => {
+        //         const tagsData: Tag[] = data;
+        //         setTags(tagsData.map(tag => tag.name));
+        //     })
+        //     .catch((error) => {
+        //         console.error('Error fetching tags:', error);
+        //     });
+
+
+// loadNotes();
+
+
+    }, []);
 
     return (
         <div>
@@ -40,4 +67,4 @@ const Diagram: React.FC = () => {
     );
 };
 
-export default Demo;
+export default DiagramList;

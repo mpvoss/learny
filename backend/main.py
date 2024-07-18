@@ -25,7 +25,6 @@ from utils.utils import get_current_user
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     ''' Run at startup
-        Initialise the Client and add it to app.state
     '''
     if os.getenv("LLM_BACKEND","openai") == 'openai':
         app.state.llm_service = GptLLMService()
@@ -34,7 +33,6 @@ async def lifespan(app: FastAPI):
 
 
     # app.state.qdrant_service = QDrantService()
-    
     yield
 
 

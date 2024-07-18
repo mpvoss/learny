@@ -57,7 +57,6 @@ def get_current_user_work( token: Optional[str], db: Session):
         email = payload['email']
         uuid = payload['sub']
 
-        # db = get_db().session
         user = db.query(User).filter(User.id == uuid).first()
 
         if not user:
