@@ -3,6 +3,7 @@ from fastapi.encoders import jsonable_encoder
 from fastapi_pagination import Page
 from llama_index.core import VectorStoreIndex, StorageContext
 from pydantic import BaseModel
+from llama_index.core import Settings
 from utils.utils import get_current_user
 from database import get_db
 from models import Discussion, Message, MessageDiagram, RagSnippet, User
@@ -89,7 +90,7 @@ def chat(request: Request, discussion_id: int, message_id: int, db: Session = De
 
 @router.post("/discussions/{discussion_id}/docchat")
 def doc_chat(request: Request, discussion_id: int, msg: ChatMessage, db: Session = Depends(get_db)):
-    index = VectorStoreIndex.from_vector_store(request.app.state.qdrant_service.vector_store)
+    index = VectorStoreIndex.from_vector_store(request.app.state.qdrant_service.vector_store,  embed_model=Settings.embed_model)
 
     # Note: Can pass in LLM here
     query_engine = index.as_query_engine(

@@ -25,4 +25,3 @@ class QDrantService():
 
         self.storage_context = StorageContext.from_defaults(vector_store=self.vector_store)
         Settings.chunk_size = 512
-        print('done')

@@ -46,5 +46,6 @@ def get_notes(db: Session = Depends(get_db), tag: List[str] = Query(None), curre
 #         index = VectorStoreIndex.from_documents(
 #             documents,
 #             storage_context=request.app.state.qdrant_service.storage_context,
+                # ,  embed_model=Settings.embed_model
 #         )
 #     return 'ok'

@@ -8,12 +8,15 @@ from fastapi import APIRouter, Depends, FastAPI, Request
 from fastapi.routing import APIRoute
 from fastapi_pagination import add_pagination
 from mangum import Mangum
+from llama_index.embeddings.openai import OpenAIEmbedding
 from service.QdrantService import QDrantService
 from service.LocalLLMService import LocalLLMService
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.middleware.cors import CORSMiddleware
 from starlette.responses import Response
+from llama_index.core import Settings
 from utils.env_init import load_deploy_env
+
 
 load_deploy_env()
 
@@ -31,7 +34,7 @@ async def lifespan(app: FastAPI):
     else:
         app.state.llm_service = LocalLLMService()
 
-
+    Settings.embed_model = OpenAIEmbedding()
     if os.getenv("QDRANT_API_KEY", None) != None:
         app.state.qdrant_service = QDrantService()
     yield
