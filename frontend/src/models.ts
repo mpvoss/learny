@@ -49,11 +49,19 @@ interface TimelineDiagramData {
     name: string;
 }
 
+interface RagSnippet {
+    document_name: string;
+    page_id: string;
+    snippet:string;
+    id: number;
+}
+
 interface Message {
     content: string;
     show_actions: boolean;
     sender: string;
     id: number;
+    rag_snippets: RagSnippet[];
     diagrams: Diagram[];
 
 }

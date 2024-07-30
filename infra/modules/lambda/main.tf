@@ -18,6 +18,8 @@ resource "aws_lambda_function" "docker_lambda_function" {
 
       SUPABASE_JWT_SECRET_KEY = sensitive(var.supabase_jwt_secret_key)
       OPENAI_API_KEY = sensitive(var.openai_api_key)
+      QDRANT_API_KEY = sensitive(var.qdrant_api_key)
+      QDRANT_URL = sensitive(var.qdrant_url)
     }
   }
 }

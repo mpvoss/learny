@@ -32,7 +32,8 @@ async def lifespan(app: FastAPI):
         app.state.llm_service = LocalLLMService()
 
 
-    # app.state.qdrant_service = QDrantService()
+    if os.getenv("QDRANT_API_KEY", None) != None:
+        app.state.qdrant_service = QDrantService()
     yield
 
 

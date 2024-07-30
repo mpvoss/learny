@@ -32,6 +32,7 @@ class Message(Base):
     show_actions = Column(Boolean, default=False, nullable=False)
     discussion = relationship("Discussion", back_populates="messages")
     diagrams = relationship("MessageDiagram", back_populates="message")
+    rag_snippets = relationship("RagSnippet", back_populates="message")
 
 
 class MessageDiagram(Base):
@@ -41,7 +42,6 @@ class MessageDiagram(Base):
     type = Column(String)
     data = Column(JSON)
     message_id = Column(Integer, ForeignKey("messages.id"))
-
     message = relationship("Message", back_populates="diagrams")
 
 note_tag_association_table = Table(
@@ -107,3 +107,13 @@ class Document(Base):
     # user = Column(Integer, nullable=False)
     name = Column(String, nullable=False)
     created_date = Column(DateTime, default=datetime.datetime.now(datetime.UTC))
+
+
+class RagSnippet(Base):
+    __tablename__ = 'rag_snippets'
+    id = Column(Integer, primary_key=True)
+    message_id = Column(Integer, ForeignKey('messages.id'))
+    snippet = Column(String)
+    page_id = Column(String)
+    document_name = Column(String)
+    message = relationship("Message", back_populates="rag_snippets")

@@ -1,10 +1,11 @@
+import json
 from fastapi.encoders import jsonable_encoder
 from fastapi_pagination import Page
 from llama_index.core import VectorStoreIndex, StorageContext
 from pydantic import BaseModel
 from utils.utils import get_current_user
 from database import get_db
-from models import Discussion, Message, MessageDiagram, User
+from models import Discussion, Message, MessageDiagram, RagSnippet, User
 from typing import List
 
 from fastapi_pagination.ext.sqlalchemy import paginate
@@ -50,7 +51,13 @@ class MessageDto(BaseModel):
 
 @router.get("/discussions/{id}/messages", tags=["Chat"])
 def get_msgs(request: Request, id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):#-> Page[MessageDto]:
-    messages = db.query(Message).options(joinedload(Message.diagrams)).filter(Message.discussion_id == id).order_by(Message.created_at).all()
+    messages = (
+        db.query(Message)
+        .options(joinedload(Message.diagrams), joinedload(Message.rag_snippets))  # Add joinedload for rag_snippets
+        .filter(Message.discussion_id == id)
+        .order_by(Message.created_at)
+        .all()
+    )
     return messages
     # query = db.query(Message).options(joinedload(Message.diagrams)).filter(Message.discussion_id == id).order_by(Message.created_at.desc())
     
@@ -80,23 +87,35 @@ def chat(request: Request, discussion_id: int, message_id: int, db: Session = De
     return {'cards':asdf}
 
 
-# @router.post("/discussions/{discussion_id}/docchat")
-# def doc_chat(request: Request, discussion_id: int, msg: ChatMessage,db: Session = Depends(get_db)):
-#     # reply = request.app.state.llm_service.chat(msg.content)    
-#     index = VectorStoreIndex.from_vector_store(request.app.state.qdrant_service.vector_store)
+@router.post("/discussions/{discussion_id}/docchat")
+def doc_chat(request: Request, discussion_id: int, msg: ChatMessage, db: Session = Depends(get_db)):
+    index = VectorStoreIndex.from_vector_store(request.app.state.qdrant_service.vector_store)
 
-#     # Note: Can pass in LLM here
-#     query_engine = index.as_query_engine(
-#         similarity_top_k=2, sparse_top_k=12, vector_store_query_mode="hybrid",
-#     )
+    # Note: Can pass in LLM here
+    query_engine = index.as_query_engine(
+        similarity_top_k=2, sparse_top_k=12, vector_store_query_mode="hybrid",
+    )
 
-#     response= query_engine.query(msg.content)
+    response= query_engine.query(msg.content)
+    print(response.source_nodes)
 
-#     msg = Message(content=response.response, discussion_id=discussion_id, sender="ai", show_actions=True)
-#     db.add(msg)
-#     db.commit()
-#     db.refresh(msg)
-#     return msg
+    msg = Message(content=response.response, discussion_id=discussion_id, sender="ai", show_actions=True)
+    db.add(msg)
+    db.flush()
+
+    for snippet in response.source_nodes:
+        rag_snippet = RagSnippet(snippet=snippet.text, document_name='N/A',page_id='N/A',message_id=msg.id)
+        
+        if hasattr(snippet, 'metadata'):
+            rag_snippet.page_id = snippet.metadata.get('page_label', 'N/A')
+            rag_snippet.document_name = snippet.metadata.get('file_name', 'N/A')
+
+        db.add(rag_snippet)
+    db.commit()
+    db.refresh(msg)
+
+    new_message = db.query(Message).options(joinedload(Message.rag_snippets)).filter(Message.id == msg.id).first()
+    return new_message
 
 
 @router.post("/discussions/{discussion_id}/timeline", tags=["Chat"])

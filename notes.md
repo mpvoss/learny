@@ -1,3 +1,5 @@
+Need to purge .env.docker etc from repo....api keys
+
 GIVE USER ABILITY TO MODIFY ALL PROMPTS???? that would be swag
 doc
 
@@ -5,7 +7,25 @@ Matthew as a User
 - Page load flash thingy
 - Pagination
 - Chat have URL path thingy
-- 
+- FC
+  - Card is not center aligned
+  - Buttons are not in line correctly
+  - Flip is ugly
+  - Not paginated
+  - Drop down + study button ugly, lookup stuff to steal for UI
+  - Plus button doesn't work, disable or add feature
+  - Not using last studied to pull cards
+  - Change design of page? list of cards with answers not that helpful...maybe pick a category and it tells you how many are there and due for study?? 
+
+
+Deploy latest to AWS
+- Enable RAG features?
+- Credentials for Qdrant in tf
+- Code review
+- Deploy
+- usage limits....? how to control budget NEVERMIND...just let Openai rate limit me, add feature later
+
+
 
 Features
 -> Would be cool to go straight to flashcards instead of having to go thru conversation

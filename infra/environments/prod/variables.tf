@@ -46,3 +46,11 @@ variable "supabase_jwt_secret_key" {
 variable "openai_api_key" {
   type = string
 }
+
+variable "qdrant_api_key" {
+  type = string
+}
+
+variable "qdrant_url" {
+  type = string
+}

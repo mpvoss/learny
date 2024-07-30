@@ -7,6 +7,8 @@ module "lambda" {
   db_config = var.db_config
   supabase_jwt_secret_key = var.supabase_jwt_secret_key
   openai_api_key = var.openai_api_key
+  qdrant_api_key = var.qdrant_api_key
+  qdrant_url = var.qdrant_url
 }
 
 module "cloudfront" {
