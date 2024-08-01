@@ -16,6 +16,7 @@ Matthew as a User
   - Plus button doesn't work, disable or add feature
   - Not using last studied to pull cards
   - Change design of page? list of cards with answers not that helpful...maybe pick a category and it tells you how many are there and due for study?? 
+- File upload needs more user feedback on success/fail
 
 
 Deploy latest to AWS
@@ -38,6 +39,32 @@ RAG
 - Upload button has progress, closes itself, refreshes list
 - Request routing logic in chat screen about doc vs free form target
 - Backend update to integrate RAG on new endpoint
+
+
+>>> More RAG
+- Qdrant seems to require fastembed
+- Can't fit that in lambda
+- Sure do like having easy lambda arch
+- If I could just do the embed from qdrant without fastembed it'd be cool...but doesn't seem possible
+- Alternate BM25 hybrid impl needed in this case
+
+------> OIGAN
+- Lancedb was suggestion from RAG expert bro
+- Super easy setup
+- Their cloud offering is cheap, don't have to host
+- Might need cohere rerank but that ok
+
+
+Using flashcards from learny
+-> Ability to import from my sheet...or at least sync
+- Can do that with python
+two way sync bro
+
+
+ALSO
+- Regarding personal project with AI journal stuff
+- 
+
 
 //-------------------------
 Quiz TODO

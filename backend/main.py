@@ -9,7 +9,6 @@ from fastapi.routing import APIRoute
 from fastapi_pagination import add_pagination
 from mangum import Mangum
 from llama_index.embeddings.openai import OpenAIEmbedding
-from service.QdrantService import QDrantService
 from service.LocalLLMService import LocalLLMService
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.middleware.cors import CORSMiddleware
@@ -21,8 +20,12 @@ from utils.env_init import load_deploy_env
 load_deploy_env()
 
 from routers import discussions, flashcards, notes, tags, util, documents, quizzes
+from service.QdrantService import QDrantService
 from service.GptLLMService import GptLLMService
 from utils.utils import get_current_user
+import tiktoken
+
+logging.basicConfig(level=logging.DEBUG)
 
 
 @asynccontextmanager
@@ -33,6 +36,8 @@ async def lifespan(app: FastAPI):
         app.state.llm_service = GptLLMService()
     else:
         app.state.llm_service = LocalLLMService()
+
+    Settings.tokenizer = tiktoken.encoding_for_model("gpt-3.5-turbo").encode
 
     Settings.embed_model = OpenAIEmbedding()
     if os.getenv("QDRANT_API_KEY", None) != None:
