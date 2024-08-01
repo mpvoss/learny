@@ -114,7 +114,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ msg, index, handleFlashcardSa
 
                         <Typography>{msg.content}</Typography>
 
-                        {msg.sender != "user" && msg.rag_snippets.length != 0 &&
+                        {msg.sender != "user" && msg.rag_snippets != null && msg.rag_snippets.length != 0 &&
                             <Box mt={2}>
                                 <Link align="left" component="button" variant="body2" onClick={() => toggleSnippet()}>
                                     Show References

@@ -25,7 +25,7 @@ from service.GptLLMService import GptLLMService
 from utils.utils import get_current_user
 import tiktoken
 
-logging.basicConfig(level=logging.DEBUG)
+# logging.basicConfig(level=logging.DEBUG)
 
 
 @asynccontextmanager
