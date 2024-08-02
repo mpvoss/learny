@@ -106,7 +106,7 @@ class Document(Base):
     id = Column(Integer, primary_key=True)
     # user = Column(Integer, nullable=False)
     name = Column(String, nullable=False)
-    created_date = Column(DateTime, default=datetime.datetime.now(datetime.UTC))
+    created_date = Column(DateTime, default=lambda: datetime.datetime.now(datetime.UTC))
 
 
 class RagSnippet(Base):

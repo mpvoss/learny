@@ -12,12 +12,16 @@ import {
     DialogTitle,
     DialogContent,
     DialogActions,
-    TextField,
     Container,
     Checkbox,
     Stack,
+    Snackbar,
+    Alert,
+    IconButton,
+    LinearProgress,
+    AlertProps,
 } from '@mui/material';
-
+import CloseIcon from "@mui/icons-material/Close";
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { AuthProps } from '../models';
@@ -38,8 +42,14 @@ interface DocManagerProps {
 const DocumentManager: React.FC<DocManagerProps> = ({ authProps }) => {
     const [documents, setDocuments] = useState<Document[]>([]);
     const [openDialog, setOpenDialog] = useState(false);
+    const [isSnackOpen, setIsSnackOpen] = React.useState<boolean>(false);
+    const [snackErrorMsg, setSnackErrorMsg] = React.useState<string>("");
     const [fileName, setFileName] = useState('');
     const [_selectedIds, setSelectedIds] = useState<string[]>([]);
+    const [reloadToggle, setReloadToggle] = useState<boolean>(false);
+    // const [buttonsEnabled, setButtonsEnabled] = useState<boolean>(true);
+    const [snackSeverity, setSnackSeverity] = useState('error');
+    const [isThinking, setIsThinking] = useState<boolean>(false);
 
     <TableCell>
         <Checkbox
@@ -47,6 +57,7 @@ const DocumentManager: React.FC<DocManagerProps> = ({ authProps }) => {
             inputProps={{ 'aria-label': 'secondary checkbox' }}
         />
     </TableCell>
+
     useEffect(() => {
         fetch(BACKEND_URL + '/api/documents',
             {
@@ -58,7 +69,11 @@ const DocumentManager: React.FC<DocManagerProps> = ({ authProps }) => {
         )
             .then((response) => response.json())
             .then((data) => setDocuments(data));
-    }, []);
+    }, [reloadToggle]);
+
+    const handleSnackClose = () => {
+        setIsSnackOpen(false);
+    }
 
     const handleCheckboxChange = (event: React.ChangeEvent<HTMLInputElement>, documentId: string) => {
         if (event.target.checked) {
@@ -69,6 +84,8 @@ const DocumentManager: React.FC<DocManagerProps> = ({ authProps }) => {
     };
 
     const handleOpenDialog = () => {
+        setIsThinking(false);
+
         setOpenDialog(true);
     };
 
@@ -85,9 +102,10 @@ const DocumentManager: React.FC<DocManagerProps> = ({ authProps }) => {
     };
 
     const handleSubmit = () => {
+        setIsThinking(true)
         if (fileName) {
-            const fileInput = document.querySelector('input[type="file"]')as HTMLInputElement;
-            if (fileInput && fileInput.files && (fileInput ).files.length > 0) {
+            const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
+            if (fileInput && fileInput.files && (fileInput).files.length > 0) {
                 const file = fileInput.files[0];
                 const formData = new FormData();
                 formData.append('file', file);
@@ -103,13 +121,34 @@ const DocumentManager: React.FC<DocManagerProps> = ({ authProps }) => {
                     .then((response) => response.json())
                     .then((_data) => {
                         // Handle the response data
+                        setOpenDialog(false);
+                        setReloadToggle(!reloadToggle);
+                        setIsSnackOpen(true)
+                        setSnackErrorMsg("Upload successful!")
+                        setIsThinking(true)
+
+                        setSnackSeverity('success')
+
                     })
-                    .catch((_error) => {
-                        // Handle the error
+                    .catch((error) => {
+                        console.log(error);
+                        setSnackErrorMsg("Network error occurred")
+                        setSnackSeverity('error')
+                        setIsSnackOpen(true)
+                        setOpenDialog(false);
+                        setIsThinking(false)
                     });
             }
         }
     };
+
+    const getUTCTimestamp = (dateIn:Date)=> {
+        const d = dateIn.toISOString().split('T')
+        const date = d[0];
+        const time = d[1].split('.')[0];
+        
+        return `${date} ${time}`
+    }
 
     return (
         <Container maxWidth="lg" style={{ paddingTop: '90px' }}>
@@ -130,6 +169,7 @@ const DocumentManager: React.FC<DocManagerProps> = ({ authProps }) => {
                                 <TableCell></TableCell>
                                 <TableCell>ID</TableCell>
                                 <TableCell>Name</TableCell>
+                                <TableCell>Status</TableCell>
                                 <TableCell>Upload Timestamp</TableCell>
                             </TableRow>
                         </TableHead>
@@ -140,12 +180,16 @@ const DocumentManager: React.FC<DocManagerProps> = ({ authProps }) => {
                                         <Checkbox
                                             color="primary"
                                             inputProps={{ 'aria-label': 'secondary checkbox' }}
-                                            onChange={(event) => handleCheckboxChange(event, ''+document.id)}
+                                            onChange={(event) => handleCheckboxChange(event, '' + document.id)}
                                         />
                                     </TableCell>
                                     <TableCell>{document.id}</TableCell>
                                     <TableCell>{document.name}</TableCell>
-                                    <TableCell>{document.created_date}</TableCell>
+                                    <TableCell>TODO</TableCell>
+                                    <TableCell>
+                                        {getUTCTimestamp(new Date(document.created_date))}
+
+                                    </TableCell>
                                 </TableRow>
                             ))}
                         </TableBody>
@@ -155,24 +199,77 @@ const DocumentManager: React.FC<DocManagerProps> = ({ authProps }) => {
                     <DialogTitle>Upload Document</DialogTitle>
                     <DialogContent>
                         <Stack spacing={2}>
-                            <TextField
+                            {/* <TextField
                                 label="File Name"
                                 value={fileName}
                                 onChange={(event) => setFileName(event.target.value)}
-                            />
-                            <input type="file" onChange={handleFileChange} />
+                            /> */}
+
+                            {/* {fileName} */}
+
+                            {
+                                !isThinking &&
+                                <input type="file" onChange={handleFileChange} />
+                            }
+
+                            {isThinking &&
+                                <>
+                                    Processing document upload, this might take a minute or two...
+                                    <LinearProgress sx={{ marginTop: 2 }} />
+                                </>
+                            }
+
+
                         </Stack>
                     </DialogContent>
+
+
+
+
                     <DialogActions>
-                        <Button onClick={handleCloseDialog} color="primary">
+                        <Button onClick={handleCloseDialog} color="primary" disabled={isThinking}>
                             Cancel
                         </Button>
-                        <Button onClick={handleSubmit} color="primary">
+                        <Button onClick={handleSubmit} color="primary" disabled={isThinking}>
                             Save
                         </Button>
                     </DialogActions>
                 </Dialog>
             </div>
+
+
+
+            <Snackbar
+                anchorOrigin={{
+                    vertical: 'bottom',
+                    horizontal: 'left',
+                }}
+                open={isSnackOpen}
+                autoHideDuration={6000}
+                onClose={handleSnackClose}
+                action={
+                    <>
+                        <IconButton
+                            size="small"
+                            aria-label="close"
+                            color="inherit"
+                            onClick={handleSnackClose}
+                        >
+                            <CloseIcon fontSize="small" />
+                        </IconButton>
+                    </>
+                }
+            >
+                <Alert
+                    onClose={handleSnackClose}
+                    severity={snackSeverity as AlertProps['severity']} // Change the type of snackSeverity
+                    variant="filled"
+                    sx={{ width: '100%' }}
+                >
+                    {snackErrorMsg}
+                </Alert>
+            </Snackbar>
+
         </Container>
     );
 };

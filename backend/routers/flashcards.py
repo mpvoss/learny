@@ -10,6 +10,7 @@ from pydantic import BaseModel
 from requests import Session
 from routers.api_models import (FlashcardDisplay, FlashcardReview)
 from sqlalchemy.orm import joinedload
+from fastapi import UploadFile, File
 
 router = APIRouter()
 
@@ -36,6 +37,11 @@ def get_flashcards(db: Session = Depends(get_db), tag: List[str] = Query(None), 
     
     to_review = []
     for flashcard in flashcards:
+
+        # print(flashcard.last_reviewed_date + datetime.timedelta(days=flashcard.interval))
+        # print(current_date)
+        # print('---------------')
+
         # Never been reviewed
         if not flashcard.last_reviewed_date:
             to_review.append(flashcard)
@@ -87,4 +93,38 @@ def review_flashcard(id: int, flascardReview: FlashcardReview, db: Session = Dep
 
     db.commit()
     return {"message": "Flashcard review saved successfully"}
+
+
+@router.post("/flashcards/upload", tags=["Flashcards"])
+def upload_flashcards(file: UploadFile = File(...), db: Session = Depends(get_db)):
+    # Read the contents of the uploaded file
+    contents = file.file.read().decode("utf-8")
+    
+    # Split the contents into lines
+    lines = contents.split("\n")
+    
+    # Remove any empty lines
+    lines = [line for line in lines if line.strip()]
+    
+    # Create the "prod" tag if it doesn't exist
+    tag_name = "prod"
+    db_tag = db.query(Tag).filter(Tag.name == tag_name).first()
+    if not db_tag:
+        new_tag = Tag(name=tag_name)
+        db.add(new_tag)
+        db.commit()
+        db.refresh(new_tag)
+    else:
+        new_tag = db_tag
+    
+    # Parse the flashcards and save them to the database
+    for line in lines:
+        term, description = line.split("\t")
+        flashcard = FlashCard(term=term, description=description)
+        flashcard.tags.append(new_tag)
+        db.add(flashcard)
+    
+    db.commit()
+    
+    return {"message": "Flashcards uploaded successfully"}
 

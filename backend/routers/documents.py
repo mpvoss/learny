@@ -32,16 +32,14 @@ async def upload_document(request: Request, db: Session = Depends(get_db),  file
             contents = await file.read()
             f.write(contents)
 
-        new_doc = Document(name=f.name)
+        new_doc = Document(name=os.path.basename(f.name))
         db.add(new_doc)
         db.commit()
         db.refresh(new_doc)
         documents = SimpleDirectoryReader(tmpdir).load_data()
         for doc in documents:
-            doc.metadata = {
-                "learny_id": new_doc.id,
-                "user_id": current_user.id
-            }
+            doc.metadata["learny_id"]= new_doc.id
+            doc.metadata["user_id"]= current_user.id
 
         try:
             index = VectorStoreIndex.from_documents(

@@ -1,8 +1,8 @@
 import Masonry from '@mui/lab/Masonry';
-import { Typography, Card, CardContent, Container, Chip } from '@mui/material';
+import { Typography, Card, CardContent, Container, Chip, Select, Checkbox, ListItemText, MenuItem, OutlinedInput, SelectChangeEvent, Theme, useTheme } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import { useEffect, useState } from 'react';
-import { TextField, Autocomplete, Stack, Fab, Button, Box } from '@mui/material';
+import { Stack, Fab, Button, Box } from '@mui/material';
 import { Link } from 'react-router-dom';
 import { AuthProps, Flashcard, Tag } from '../models';
 import { getEnv } from '../utils/EnvUtil';
@@ -16,6 +16,17 @@ const cardStyle = {
     padding: '10px',
     marginTop: '10px',
     margin: '10px',
+};
+
+const ITEM_HEIGHT = 48;
+const ITEM_PADDING_TOP = 8;
+const MenuProps = {
+  PaperProps: {
+    style: {
+      maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
+      width: 250,
+    },
+  },
 };
 
 const InformationCard = () => {
@@ -54,6 +65,8 @@ interface FlashcardHomeProps {
 }
 
 const FlashcardHome:React.FC<FlashcardHomeProps> = ({ authProps }) => {
+    const theme = useTheme();
+
     // const [inputValue, setInputValue] = useState('');
     const [selectedTags, setSelectedTags] = useState<string[]>([]);
     const [flashcards, setFlashcards] = useState<Flashcard[]>([]);
@@ -94,6 +107,25 @@ const FlashcardHome:React.FC<FlashcardHomeProps> = ({ authProps }) => {
         loadFlashcards();
     }, [selectedTags]);
 
+    const handleChange = (event: SelectChangeEvent<typeof selectedTags>) => {
+        const {
+          target: { value },
+        } = event;
+        setSelectedTags(
+          // On autofill we get a stringified value.
+          typeof value === 'string' ? value.split(',') : value,
+        );
+      };
+
+      function getStyles(name: string, personName: readonly string[], theme: Theme) {
+        return {
+          fontWeight:
+            personName.indexOf(name) === -1
+              ? theme.typography.fontWeightRegular
+              : theme.typography.fontWeightMedium,
+        };
+      }
+
     useEffect(() => {
         fetch(BACKEND_URL + '/api/tags',
             {
@@ -119,8 +151,43 @@ const FlashcardHome:React.FC<FlashcardHomeProps> = ({ authProps }) => {
 
             <Stack direction="row" justifyContent="space-between" alignItems="center" style={{ marginBottom: '10px' }}>
 
-                <Box sx={{ width: '75%' }}>
-                    <Autocomplete
+                <Box 
+                // sx={{ width: '75%' }}
+                >
+                <Select
+          labelId="demo-multiple-checkbox-label"
+          id="demo-multiple-checkbox"
+          multiple
+          displayEmpty
+          renderValue={(selected) => {
+            if (selected.length === 0) {
+              return <em>All</em>;
+            }
+
+            return selected.join(', ');
+          }}
+          value={selectedTags}
+          onChange={handleChange}
+        // sx={{width:'100%'}}
+          input={<OutlinedInput label="Tag" />}
+        //   renderValue={(selected) => selected.join(', ')}
+          MenuProps={MenuProps}
+        >
+            <MenuItem disabled value="">
+             <em>All</em>
+           </MenuItem>
+          {tags.map((name) => (
+             
+            <MenuItem key={name} value={name}
+            style={getStyles(name, [name], theme)}
+            >
+              <Checkbox checked={selectedTags.indexOf(name) > -1} />
+              <ListItemText primary={name} />
+            </MenuItem>
+          ))}
+        </Select>
+
+                    {/* <Autocomplete
                         multiple
                         options={tags}
 
@@ -136,7 +203,7 @@ const FlashcardHome:React.FC<FlashcardHomeProps> = ({ authProps }) => {
                                 fullWidth
                             />
                         )}
-                    />
+                    /> */}
                 </Box>
                 <Stack direction="row" spacing={1}>
                     <Box sx={{ width: '50%' }}>

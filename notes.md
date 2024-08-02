@@ -1,69 +1,36 @@
-Need to purge .env.docker etc from repo....api keys
+features for fc home page
+- Export would be cool
+- Study button needed
+- Edit seems imp
+-
 
-GIVE USER ABILITY TO MODIFY ALL PROMPTS???? that would be swag
-doc
+
+
+
+
+Pri1
+
+Pri2
+- Need to purge .env.docker etc from repo....api keys
 
 Matthew as a User
 - Page load flash thingy
 - Pagination
 - Chat have URL path thingy
 - FC
-  - Card is not center aligned
-  - Buttons are not in line correctly
-  - Flip is ugly
+  - Need loading... on flashcard load....it is slow sometimes
   - Not paginated
   - Drop down + study button ugly, lookup stuff to steal for UI
   - Plus button doesn't work, disable or add feature
   - Not using last studied to pull cards
   - Change design of page? list of cards with answers not that helpful...maybe pick a category and it tells you how many are there and due for study?? 
-- File upload needs more user feedback on success/fail
-
-
-Deploy latest to AWS
-- Enable RAG features?
-- Credentials for Qdrant in tf
-- Code review
-- Deploy
-- usage limits....? how to control budget NEVERMIND...just let Openai rate limit me, add feature later
-
-
-
-Features
--> Would be cool to go straight to flashcards instead of having to go thru conversation
------> Maybe on flashcard screen?
 
 //---------------------------------
-
-RAG
-- How to do more than Q&A on a doc? Extracting summaries etc?
-- Upload button has progress, closes itself, refreshes list
-- Request routing logic in chat screen about doc vs free form target
-- Backend update to integrate RAG on new endpoint
-
-
->>> More RAG
-- Qdrant seems to require fastembed
-- Can't fit that in lambda
-- Sure do like having easy lambda arch
-- If I could just do the embed from qdrant without fastembed it'd be cool...but doesn't seem possible
-- Alternate BM25 hybrid impl needed in this case
-
-------> OIGAN
-- Lancedb was suggestion from RAG expert bro
-- Super easy setup
-- Their cloud offering is cheap, don't have to host
-- Might need cohere rerank but that ok
-
 
 Using flashcards from learny
 -> Ability to import from my sheet...or at least sync
 - Can do that with python
 two way sync bro
-
-
-ALSO
-- Regarding personal project with AI journal stuff
-- 
 
 
 //-------------------------
@@ -150,6 +117,7 @@ Demo Wish list
 - Quiz generation...
 - ELI5 mode
 - Message pagination
+- Ability to generate flashcards from the Flashcard screen in addition to Chat screen
 - Stand up test env
 - Notes, Flashcards...CRUD, Edit button, delete button, ADD workflow
 - Socratic mode... Questions generated after each response? 
@@ -159,7 +127,7 @@ Demo Wish list
 - Perspective enhancer question maker 
 - Perspective enhancer - user gives their understanding and AI can give feedback
 - Force diagram with concepts - let it imagine the names of lines, then draw them for arbitraty concept maps
-
+- GIVE USER ABILITY TO MODIFY ALL PROMPTS???? that would be swag
 
 image support for ankii cards
 https://github.com/kerrickstaley/genanki?tab=readme-ov-file#media-files
