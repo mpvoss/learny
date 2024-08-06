@@ -5,7 +5,8 @@ features for fc home page
 
 
 Pri1
-- logs dir for docker distribution
+- Handle absense of 
+- Make LLM configurable
 - User sensitive features....
 - Fix docker and setup for wes
 - Share proj to reddit
