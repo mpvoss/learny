@@ -6,18 +6,16 @@ features for fc home page
 
 Pri1
 - logs dir for docker distribution
-- Docker image shoudl run db migration on load?
 - User sensitive features....
 - Fix docker and setup for wes
 - Share proj to reddit
 - Finish setting up discord, reference it in readme
 - Record demo video
-- fix help text on study screen
 - Notes: move action buttons to bottom, remove add button
 - PROD VS TEST DB...local db for test bro, prod is supabase
 - Pankaj demo
 Pri2
-- Need to purge .env.docker etc from repo....api keys
+- Chat context...last 2 or 3 messages
 
 Matthew as a User
 - Pagination

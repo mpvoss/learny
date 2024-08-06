@@ -1,23 +1,22 @@
-import json
 import random
-from fastapi.encoders import jsonable_encoder
-from fastapi_pagination import Page
-from llama_index.core import VectorStoreIndex, StorageContext
-from pydantic import BaseModel
-from llama_index.core import Settings
-from sqlalchemy import desc, func
-from utils import questions
-from utils.utils import get_current_user
-from database import get_db
-from models import Discussion, Message, MessageDiagram, RagSnippet, User
 from typing import List
 
-from fastapi_pagination.ext.sqlalchemy import paginate
+from database import get_db
 from fastapi import APIRouter, Depends, Query, Request
+from fastapi_pagination import Page
+from fastapi_pagination.ext.sqlalchemy import paginate
+from llama_index.core import Settings, VectorStoreIndex
+from models import (Discussion, Message, MessageDiagram, Note, RagSnippet, Tag,
+                    User)
+from pydantic import BaseModel
 from requests import Session
-from models import Note, Tag
-from routers.api_models import ChatMessage, CreateDiscussionRequest, CreateMessageRequest, CreateNoteRequest, DiscussionSuggestionResponse, NoteDisplay, CreateDiscussionModel
+from routers.api_models import (ChatMessage, CreateDiscussionModel,
+                                CreateDiscussionRequest, CreateMessageRequest,
+                                DiscussionSuggestionResponse, NoteDisplay)
+from sqlalchemy import desc, func
 from sqlalchemy.orm import joinedload
+from utils import questions
+from utils.utils import get_current_user
 
 router = APIRouter()
 

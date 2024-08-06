@@ -44,7 +44,7 @@ const Chat: React.FC<ChatProps> = ({ authProps, appState, setAppState, onNewDisc
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(0);
     const { id } = useParams<{ id: string }>();
-    const [discussionId, _setDiscussionId] = useState(-1);
+    const [discussionId, setDiscussionId] = useState(-1);
     const location = useLocation();
     const hasHandledInitialMessage = useRef(false);
     const navigate = useNavigate();
@@ -78,7 +78,7 @@ const Chat: React.FC<ChatProps> = ({ authProps, appState, setAppState, onNewDisc
     //-----------------------------------------------------------------
     const handleSendMessageBtn = () => {
         if (id != null) {
-            handleSendMessage(input, discussionId);
+            handleSendMessage(input, Number.parseInt(id));
         } else {
             setIsThinking(true);
             fetch(BACKEND_URL + '/api/discussions', {
@@ -190,7 +190,8 @@ const Chat: React.FC<ChatProps> = ({ authProps, appState, setAppState, onNewDisc
             event.preventDefault();
             // get current time
             const currentTime = new Date().toLocaleTimeString();
-            setInput(currentTime + " " + appState.isDocChatActive);
+            // setInput(currentTime + " " + appState.isDocChatActive);
+            setInput("Tell me a fun fact");
             console.log(appState.isDocChatActive)
             // setPage(2);
         }
@@ -240,6 +241,7 @@ const Chat: React.FC<ChatProps> = ({ authProps, appState, setAppState, onNewDisc
         if (id == null) {
             return;
         }
+        setDiscussionId(Number.parseInt(id));
 
         const loadMsgs = async () => {
             fetch(BACKEND_URL + '/api/discussions/' + id + '/messages?size=20&page=' + page, {

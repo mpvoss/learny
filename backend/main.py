@@ -1,11 +1,9 @@
-from functools import partial
 import logging
+from logging.handlers import RotatingFileHandler
 import os
 from contextlib import asynccontextmanager
-from typing import Callable, Union
 
-from fastapi import APIRouter, Depends, FastAPI, Request
-from fastapi.routing import APIRoute
+from fastapi import FastAPI, Request
 from fastapi_pagination import add_pagination
 from mangum import Mangum
 from llama_index.embeddings.openai import OpenAIEmbedding
@@ -25,9 +23,25 @@ from service.GptLLMService import GptLLMService
 from utils.utils import get_current_user
 import tiktoken
 
-# logging.basicConfig(level=logging.DEBUG)
+# Logging config
+log_level_str = os.getenv('LOG_LEVEL', 'ERROR')
+log_level = getattr(logging, log_level_str.upper(), logging.ERROR)
+log_path = os.getenv('LOG_PATH', None)
+
+logger = logging.getLogger()
+logger.setLevel(log_level)
+log_format = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+if log_path:
+    handler = RotatingFileHandler(log_path, maxBytes=10*1024*1024, backupCount=5)  # 10MB per file
+else:
+    handler = logging.StreamHandler()
+
+handler.setFormatter(log_format)
+handler.setLevel(log_level)
+logger.addHandler(handler)
 
 
+# Services config
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     ''' Run at startup
@@ -45,6 +59,7 @@ async def lifespan(app: FastAPI):
     yield
 
 
+# App config
 class StripStagePathMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
         # Strip '/prod' from the start of the path, API gw forwards this
@@ -60,7 +75,6 @@ add_pagination(app)
 # Only add the middleware if not running in local testing
 if os.getenv('LOCAL_TESTING') != 'true':
     app.add_middleware(StripStagePathMiddleware)
-
 
 
 app.include_router(discussions.router)

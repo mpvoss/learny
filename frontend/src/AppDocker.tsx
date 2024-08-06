@@ -29,7 +29,7 @@ export default function AppDocker() {
         email: "matthewpvoss@gmail.com", // TODO HACKY
         sub: '123345456'
     };
-    const secret = 'your-256-bit-secret'; // Use a secure way to handle your secret key in production
+    const secret = 'dummy_secret_for_local_docker'; 
 
     const sHeader = JSON.stringify(header);
     const sPayload = JSON.stringify(data);

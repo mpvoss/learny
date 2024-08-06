@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent, Button, Typography, Container, Box, DialogActions, DialogContentText } from '@mui/material';
+import { Card, CardContent, Button, Typography, Container, Box, DialogActions, DialogContentText} from '@mui/material';
 import { useLocation } from 'react-router-dom';
 import { Divider } from '@mui/material';
 import { AuthProps, Flashcard } from "../models";
@@ -103,7 +103,9 @@ const FlashcardComponent: React.FC<FlashcardComponentProps> = ({ authProps }) =>
                 </DialogTitle>
                 <DialogContent>
                     <DialogContentText id="alert-dialog-description">
-                        learn fast spaced repitition idk
+                    After you answer a flashcard, you'll rate your confidence in the answer using four levels: IDK, HARD, OK, and EASY
+<br></br><br></br>
+Learny uses your response to intelligently schedule when this card should appear next in your study session. The better you know the answer, the longer Learny will wait to show you the card again. If you're less sure, you'll see it sooner. This method helps to optimize your learning efficiency by focusing on cards you need more practice with.
                     </DialogContentText>
                 </DialogContent>
                 <DialogActions>

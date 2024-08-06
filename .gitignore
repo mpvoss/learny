@@ -185,3 +185,4 @@ backend/.env.localdocker
 qdrant_test_data/**
 backend/learny.db
 db_vol/learny.db
+logs/**
