@@ -75,6 +75,7 @@ def suggest_quesitons(request: Request, db: Session = Depends(get_db)):
     }
 
 class MessageDto(BaseModel):
+    id: int
     content: str
     sender: str
     show_actions: bool

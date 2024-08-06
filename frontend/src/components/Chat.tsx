@@ -306,7 +306,7 @@ const Chat: React.FC<ChatProps> = ({ authProps, appState, setAppState, onNewDisc
             >
                 <NoteSaveDialog authProps={authProps} open={isNoteSaveDialogOpen} saveWithTag={saveNoteWithTags} onClose={() => { handleNoteSaveDialogClose() }}></NoteSaveDialog>
 
-                {discussionId != null &&
+                {discussionId != null && actionMessageId!= null &&
                     <FlashCardSaveWizard authProps={authProps} open={isFlashcardSaveDialogOpen} discussionId={discussionId} messageId={actionMessageId} setOpen={setIsFlashcardSaveDialogOpen}></FlashCardSaveWizard>
                 }
                 <CssBaseline />
