@@ -189,7 +189,7 @@ const Chat: React.FC<ChatProps> = ({ authProps, appState, setAppState, onNewDisc
         if (event.key === '*') {
             event.preventDefault();
             // get current time
-            const currentTime = new Date().toLocaleTimeString();
+            // const currentTime = new Date().toLocaleTimeString();
             // setInput(currentTime + " " + appState.isDocChatActive);
             setInput("Tell me a fun fact");
             console.log(appState.isDocChatActive)
