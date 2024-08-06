@@ -5,6 +5,7 @@ features for fc home page
 
 
 Pri1
+- logs dir for docker distribution
 - Docker image shoudl run db migration on load?
 - User sensitive features....
 - Fix docker and setup for wes

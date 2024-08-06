@@ -126,7 +126,6 @@ def doc_chat(request: Request, discussion_id: int, msg: ChatMessage, db: Session
     )
 
     response= query_engine.query(msg.content)
-    print(response.source_nodes)
 
     msg = Message(content=response.response, discussion_id=discussion_id, sender="ai", show_actions=True)
     db.add(msg)
