@@ -1,9 +1,12 @@
 import json
+import random
 from fastapi.encoders import jsonable_encoder
 from fastapi_pagination import Page
 from llama_index.core import VectorStoreIndex, StorageContext
 from pydantic import BaseModel
 from llama_index.core import Settings
+from sqlalchemy import desc, func
+from utils import questions
 from utils.utils import get_current_user
 from database import get_db
 from models import Discussion, Message, MessageDiagram, RagSnippet, User
@@ -13,23 +16,45 @@ from fastapi_pagination.ext.sqlalchemy import paginate
 from fastapi import APIRouter, Depends, Query, Request
 from requests import Session
 from models import Note, Tag
-from routers.api_models import ChatMessage, CreateDiscussionRequest, CreateMessageRequest, CreateNoteRequest, NoteDisplay
+from routers.api_models import ChatMessage, CreateDiscussionRequest, CreateMessageRequest, CreateNoteRequest, DiscussionSuggestionResponse, NoteDisplay, CreateDiscussionModel
 from sqlalchemy.orm import joinedload
 
 router = APIRouter()
 
 @router.get("/discussions", tags=["Chat"])
 def chat(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    return db.query(Discussion).all()
+    latest_message_times = db.query(Message.discussion_id, func.max(Message.created_at).label('max_created_at')).\
+    group_by(Message.discussion_id).\
+    subquery()
+
+    # Then, join this with the Discussion table and order by the latest message time
+    discussions = db.query(Discussion).\
+    outerjoin(latest_message_times, Discussion.id == latest_message_times.c.discussion_id).\
+    order_by(desc(latest_message_times.c.max_created_at)).\
+    all()
+    return discussions
 
 
-@router.post("/discussions",  response_model=CreateDiscussionRequest, tags=["Chat"])
-def create_discussion(request: CreateDiscussionRequest, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    new_discussion = Discussion(topic=request.topic)
+
+
+@router.post("/discussions",  response_model=CreateDiscussionRequest, tags=["Chat"]) 
+def create_discussion(request: Request, create_discussion_request: CreateDiscussionModel, db: Session = Depends(get_db), current_user: User = Depends(get_current_user))-> Discussion:
+    txt = request.app.state.llm_service.summarize_discussion(create_discussion_request.topic)
+    txt = txt[0].upper() + txt[1:]  # Capitalize only the first letter
+    if txt.endswith('.'):
+        txt = txt[:-1]
+    new_discussion = Discussion(topic=txt)
     db.add(new_discussion)
     db.commit()
     db.refresh(new_discussion)
     return new_discussion
+
+
+@router.post("/discussions2",  response_model=CreateDiscussionRequest, tags=["Chat"])
+def create_discussion(request: Request, create_discussion_request: CreateDiscussionRequest, db: Session = Depends(get_db)):
+    txt = request.app.state.llm_service.summarize_discussion(create_discussion_request.topic)
+    return {'topic':txt}
+
 
 
 @router.post("/discussions/{id}/messages", response_model=CreateMessageRequest, tags=["Chat"])
@@ -44,6 +69,11 @@ def create_message(id: int,request: CreateMessageRequest, db: Session = Depends(
     return new_message
 
 
+@router.post("/discussions/suggest", response_model=DiscussionSuggestionResponse, tags=["Chat"])
+def suggest_quesitons(request: Request, db: Session = Depends(get_db)):
+    return {
+        'questions': random.sample(questions.get_topics(),3)
+    }
 
 class MessageDto(BaseModel):
     content: str
@@ -51,18 +81,16 @@ class MessageDto(BaseModel):
     show_actions: bool
 
 @router.get("/discussions/{id}/messages", tags=["Chat"])
-def get_msgs(request: Request, id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):#-> Page[MessageDto]:
-    messages = (
-        db.query(Message)
+def get_msgs(request: Request, id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user))-> Page[MessageDto]:
+    query=( db.query(Message)
         .options(joinedload(Message.diagrams), joinedload(Message.rag_snippets))  # Add joinedload for rag_snippets
         .filter(Message.discussion_id == id)
-        .order_by(Message.created_at)
-        .all()
+        .order_by(Message.created_at.desc())
     )
-    return messages
+        
+    # return messages
+    return paginate(query)
     # query = db.query(Message).options(joinedload(Message.diagrams)).filter(Message.discussion_id == id).order_by(Message.created_at.desc())
-    
-    # return paginate(query)
 
 
 @router.post("/discussions/{id}/chat", tags=["Chat"])

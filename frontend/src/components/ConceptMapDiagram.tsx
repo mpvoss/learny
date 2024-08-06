@@ -59,10 +59,11 @@ const getIcon = (name: string) => {
 
 interface ConceptMapDiagramProps {
     diagram: Diagram;
-    handleSendMessage: (msg: string) => void;
+    activeDiscussionId: number;
+    handleSendMessage: (msg: string, discussionId:number) => void;
 }
 
-const ConceptMapDiagram: React.FC<ConceptMapDiagramProps> = ({ diagram, handleSendMessage }) => {
+const ConceptMapDiagram: React.FC<ConceptMapDiagramProps> = ({ diagram, handleSendMessage, activeDiscussionId }) => {
     const [mapData, setMapData] = useState({} as { [key: string]: any });
 
 
@@ -71,14 +72,14 @@ const ConceptMapDiagram: React.FC<ConceptMapDiagramProps> = ({ diagram, handleSe
 
         let prompt = "On the topic of " + diagram.name + ", could you tell me more about " + name + "?";
         console.log(prompt);
-        handleSendMessage(prompt);
+        handleSendMessage(prompt, activeDiscussionId);
     };
 
     const handleQuestionClick = (item: string) => {
         if (mapData) {
             let joinedItems = (mapData[item]["items"] as [{ name: string }]).map((obj: any) => obj.name).join(', ')
             let prompt = "On the topic of " + diagram.name + ", could you tell me more about " + joinedItems + "?";
-            handleSendMessage(prompt);
+            handleSendMessage(prompt, activeDiscussionId);
         }
     };
 

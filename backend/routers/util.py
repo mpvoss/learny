@@ -1,20 +1,16 @@
 
-import csv
 import random
 import string
 
-import genanki
 from pydantic import BaseModel, TypeAdapter
 from utils.utils import get_current_user, get_current_user_simple
 from database import get_db
 from faker import Faker
 from fastapi import APIRouter, Depends, Request
-from models import Discussion, FlashCard, Message, Note, Tag, User
+from models import FlashCard, Note, Tag, User
 from requests import Session
-import datetime
 
 router = APIRouter()
-
 
 class UserSchema(BaseModel):
     first_name: str

@@ -86,6 +86,9 @@ class IncorrectResponses(BaseModel):
     response2:str
     response3:str
 
+class QuestionSuggestions(BaseModel):
+    questions: List[str]
+
 # class AspectItem(BaseModel):
 #     name: str
 #     summary: str
@@ -140,6 +143,19 @@ class AbstractLLMService(ABC):
         ]
         return self.call(messages)
 
+
+    def summarize_discussion(self, msg: str):
+        messages=[
+        {
+            'role': 'user',
+            'content': 'Extract the main theme or topic of the following in 4 words or less: ' + msg,
+        },  
+        ]
+        return self.call(messages)
+
+
+    def get_discussion_suggestions(self):
+        return self.structured_call('Suggest three interesting questions someone might ask about a variety of topics, such as history, science, social science, philosophy, economics, etc', QuestionSuggestions)
 
     def get_quiz(self, draft: str) -> Quiz:
         return self.structured_call(f'Your goal is to create a quiz from the following information: {draft}', Quiz)

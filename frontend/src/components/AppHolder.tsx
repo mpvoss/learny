@@ -2,7 +2,9 @@ import { AppBar, Toolbar, IconButton, Typography, Box, Avatar, Container, Menu, 
 import '../App.css'
 import Chat from './Chat'
 import { Menu as MenuIcon } from "@mui/icons-material";
-import { Route, Routes,  useNavigate } from 'react-router-dom';
+import { useRef } from 'react';
+
+import { Route, Routes, useNavigate, useParams } from 'react-router-dom';
 import MenuBookIcon from '@mui/icons-material/MenuBook';
 import React, { useEffect } from 'react';
 import NotesSearch from './NotesSearch';
@@ -28,19 +30,19 @@ interface MainContentProps {
 const MainContent = styled('main')<MainContentProps>(({ theme, isSmallScreen }) => ({
     flexGrow: 1,
     padding: theme.spacing(3),
-    marginLeft: (!isSmallScreen) ? DrawerWidth:0,
+    marginLeft: (!isSmallScreen) ? DrawerWidth : 0,
 }));
 
 function AppHolder({ authProps, userProps }: { authProps: AuthProps, userProps: UserProps }) {
     const [_anchorElNav, _setAnchorElNav] = React.useState<null | HTMLElement>(null);
     const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(null);
-    const [appState, setAppState] = React.useState<AppState>({activeDiscussionId:-1, isDocChatActive:false});
+    const [appState, setAppState] = React.useState<AppState>({ activeDiscussionId: -1, isDocChatActive: false });
     const [drawerOpen, setDrawerOpen] = React.useState(false);
     const navigate = useNavigate();
+    const appDrawerRef = useRef<any>();
 
     const handleOpenNavMenu = () => {
         setDrawerOpen(!drawerOpen);
-        // setAnchorElNav(event.currentTarget);
     }
 
     const handleOpenUserMenu = (event: React.MouseEvent<HTMLElement>) => {
@@ -55,6 +57,12 @@ function AppHolder({ authProps, userProps }: { authProps: AuthProps, userProps: 
         supabase.auth.signOut();
     }
 
+    const refreshDiscussions = () => {
+        if (appDrawerRef.current) {
+            appDrawerRef.current.refreshData();
+        }
+    };
+
     useEffect(() => {
         if (userProps.role === 'PENDING_USER') {
             navigate('/pendingAccess'); // Change '/pending' to the path you want to redirect to
@@ -64,7 +72,7 @@ function AppHolder({ authProps, userProps }: { authProps: AuthProps, userProps: 
 
     const theme = useTheme();
     const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
-    
+
 
 
     return (
@@ -72,7 +80,6 @@ function AppHolder({ authProps, userProps }: { authProps: AuthProps, userProps: 
             <AppBar
                 component="nav"
                 position="fixed"
-                // color="#392032"
                 sx={{
                     zIndex: (theme) => theme.zIndex.drawer + 1
                 }}
@@ -108,26 +115,6 @@ function AppHolder({ authProps, userProps }: { authProps: AuthProps, userProps: 
                             >
                                 <MenuIcon />
                             </IconButton>
-                            {/* <Menu
-                                id="menu-appbar"
-                                anchorEl={anchorElNav}
-                                anchorOrigin={{
-                                    vertical: 'bottom',
-                                    horizontal: 'left',
-                                }}
-                                keepMounted
-                                transformOrigin={{
-                                    vertical: 'top',
-                                    horizontal: 'left',
-                                }}
-                                open={Boolean(anchorElNav)}
-                                onClose={handleCloseNavMenu}
-                                sx={{
-                                    display: { xs: 'block', md: 'none' },
-                                }}
-                            >
-
-                            </Menu> */}
                         </Box>
                         <MenuBookIcon sx={{ display: { xs: 'flex', md: 'none' }, mr: 1 }} />
                         <Typography
@@ -158,7 +145,7 @@ function AppHolder({ authProps, userProps }: { authProps: AuthProps, userProps: 
                         <Box sx={{ flexGrow: 0 }}>
                             <Tooltip title="Open settings">
                                 <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                                    <Avatar alt="Remy Sharp" src="/static/images/avatar/2.jpg" />
+                                    <Avatar alt={userProps.email.toUpperCase()} src="/static/images/avatar/2.jpg" />
                                 </IconButton>
                             </Tooltip>
                             <Menu
@@ -178,12 +165,12 @@ function AppHolder({ authProps, userProps }: { authProps: AuthProps, userProps: 
                                 onClose={handleCloseUserMenu}
                             >
 
-                        {/* {settings.map((setting) => (
+                                {/* {settings.map((setting) => (
                                     <MenuItem key={setting} onClick={handleCloseUserMenu}>
                                         <Typography textAlign="center">{setting}</Typography>
                                     </MenuItem>
                                 ))}  */}
-                        <MenuItem key='logout' onClick={handleLogout}>
+                                <MenuItem key='logout' onClick={handleLogout}>
                                     <Typography textAlign="center">Logout</Typography>
                                 </MenuItem>
                             </Menu>
@@ -191,22 +178,18 @@ function AppHolder({ authProps, userProps }: { authProps: AuthProps, userProps: 
                     </Toolbar>
                 </Container>
             </AppBar>
-
-
-            <AppDrawer authProps={authProps} userProps={userProps} appState={appState} setAppState={setAppState} drawerOpen={drawerOpen} setDrawerOpen={setDrawerOpen}></AppDrawer>
-
+            <AppDrawer authProps={authProps} ref={appDrawerRef} userProps={userProps} appState={appState} setAppState={setAppState} drawerOpen={drawerOpen} setDrawerOpen={setDrawerOpen}></AppDrawer>
             <MainContent theme={theme} isSmallScreen={isSmallScreen}>
-
-
                 <Routes>
-                    <Route path="/" element={<Chat authProps={authProps} appState={appState} setAppState={setAppState} />} /> 
+                    <Route path="/" element={<Chat key={useParams().id || 'home'} authProps={authProps} appState={appState} setAppState={setAppState} onNewDiscussion={refreshDiscussions} />} />
+                    <Route path="/chats/:id" element={<Chat key={useParams().id} authProps={authProps} appState={appState} setAppState={setAppState} onNewDiscussion={refreshDiscussions} />} />
                     <Route path="/notes" element={<NotesSearch authProps={authProps} />} />
                     <Route path="/flashcards" element={<FlashcardHome authProps={authProps} />} />
                     <Route path="/documents" element={<DocumentManager authProps={authProps} />} />
                     <Route path="/diagrams" element={<DiagramList authProps={authProps} />} />
                     <Route path="/study" element={<Study authProps={authProps} />} />
-                    <Route path="/quizzes" element={<QuizListView  />} />
-                    <Route path="/quizzes/:id" element={<QuizTakeView  />} />
+                    <Route path="/quizzes" element={<QuizListView />} />
+                    <Route path="/quizzes/:id" element={<QuizTakeView />} />
                     <Route path="/pendingAccess" element={<PendingUserScreen />} />
                 </Routes>
             </MainContent>

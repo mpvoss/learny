@@ -6,6 +6,10 @@ from pydantic import BaseModel
 
 class CreateDiscussionRequest(BaseModel):
     topic: str
+    id: int
+
+class CreateDiscussionModel(BaseModel):
+    topic: str
 
 class CreateNoteRequest(BaseModel):
     content: str
@@ -25,6 +29,12 @@ class CreateMessageRequest(BaseModel):
     content: str
     discussion_id: int
     sender: str
+
+
+class DiscussionSuggestionResponse(BaseModel):
+    questions: List[str]
+
+
 
 class CreateTagRequest(BaseModel):
     name: str

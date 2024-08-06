@@ -19,7 +19,7 @@ interface BasicSpeedDialProps {
     setSuggestedQuestions: (suggestedQuestions: string[]) => void;
     setSnackErrorMsg: (msg: string) => void;
     setIsSnackOpen: (isSnackOpen: boolean) => void;
-    saveUserMessage: (message: string) => void;
+    saveUserMessage: (message: string, discussionId:number) => void;
     activeDiscussionId: number;
     handleNewMessage: (message: Message) => void;
 }
@@ -74,7 +74,7 @@ const BasicSpeedDial: React.FC<BasicSpeedDialProps> = ({ authProps, setIsThinkin
     }, []);
 
     const getTimeline = () => {
-        saveUserMessage("Can you make a timeline diagram over this topic? " + dialogInput)
+        saveUserMessage("Can you make a timeline diagram over this topic? " + dialogInput, activeDiscussionId)
 
         fetch(BACKEND_URL + '/api/discussions/' + activeDiscussionId + '/timeline', {
             method: "POST",
@@ -104,7 +104,7 @@ const BasicSpeedDial: React.FC<BasicSpeedDialProps> = ({ authProps, setIsThinkin
 
     const getDiagram = () => {
         console.log(authProps);
-        saveUserMessage("Can you make a concept map over this topic: " + dialogInput + "?")
+        saveUserMessage("Can you make a concept map over this topic: " + dialogInput + "?", activeDiscussionId)
         fetch(BACKEND_URL + '/api/discussions/' + activeDiscussionId + '/concept_map', {
             method: "POST",
             credentials: "include",

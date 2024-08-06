@@ -21,10 +21,11 @@ interface ChatMessageProps {
     index: number;
     handleFlashcardSaveDialogOpen: (id: number) => void;
     handleNoteSaveDialogOpen: (id: number) => void;
-    handleSendMessage: (msg: string) => void;
+    handleSendMessage: (msg: string, dicussionId:number) => void;
+    activeDiscussionId:number;
 }
 
-const ChatMessage: React.FC<ChatMessageProps> = ({ msg, index, handleFlashcardSaveDialogOpen, handleNoteSaveDialogOpen, handleSendMessage }) => {
+const ChatMessage: React.FC<ChatMessageProps> = ({ msg, index, handleFlashcardSaveDialogOpen, handleNoteSaveDialogOpen, handleSendMessage, activeDiscussionId }) => {
 
     const [visibleSnippet, setVisibleSnippet] = useState(false);
     const theme = useTheme();
@@ -141,7 +142,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ msg, index, handleFlashcardSa
                 </Box>
             </Box>
             {msg.diagrams && msg.diagrams.length > 0 && msg.diagrams.map((diagram, _index) => {
-                return <MessageDiagram diagram={diagram} handleSendMessage={handleSendMessage}></MessageDiagram>
+                return <MessageDiagram diagram={diagram} handleSendMessage={handleSendMessage} activeDiscussionId={activeDiscussionId}></MessageDiagram>
             }
             )}
         </>);

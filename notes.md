@@ -1,10 +1,30 @@
+Docker image shoudl run db migration on load?
+
+TODO delete docs in qdrant....need clean slate
+
 features for fc home page
 - Export would be cool
 - Study button needed
 - Edit seems imp
--
+
+First users
+- Wes friend
+- Sam's wife
+- Megan (wes roomate)
+- Wes
+- ???
 
 
+
+Generate a diverse and engaging list of discussion topics suitable for someone looking to expand their knowledge and understanding in various fields. These topics should be broad enough to encourage in-depth study and discussion, yet specific enough to offer a focused exploration. Include topics from the following categories:
+
+Science and Technology: Cover important inventions, discoveries, theories.
+History and Culture: Discuss significant events, significant individuals, cultural shifts, and historical interpretations.
+Philosophy and Ethics: Explore philosophical theories.
+Economics and Politics: Analyze economic theories, and political ideologies.
+Art and Literature: Consider impact of influential literary works, artistic movements, and cross-cultural influences.
+Health and Psychology: Address medical conditions, processes and mechanisms of biology, and psychological theories.
+Each topic should be framed to spark curiosity and encourage critical thinking, aiming to provide a balanced perspective and cater to both beginners and those with more advanced understanding. List the topics in a list only, do not introduce your answer or summarize it. Only reply with a list of topics
 
 
 
@@ -16,7 +36,6 @@ Pri2
 Matthew as a User
 - Page load flash thingy
 - Pagination
-- Chat have URL path thingy
 - FC
   - Need loading... on flashcard load....it is slow sometimes
   - Not paginated

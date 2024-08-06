@@ -11,22 +11,25 @@ import {
     Alert,
 } from "@mui/material";
 import { Send as SendIcon } from "@mui/icons-material";
-import { AppState, AuthProps, Message } from "../models";
+import { AppState, AuthProps, Discussion, Message } from "../models";
 import CloseIcon from "@mui/icons-material/Close";
 import NoteSaveDialog from "./NoteSaveDialog";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import FlashCardSaveWizard from "./FlashCardSaveWizard";
 import { getEnv } from '../utils/EnvUtil';
 import BasicSpeedDial from "./Speeddial";
 import ChatMessage from "./ChatMessage";
+import ChatWelcome from "./ChatWelcome";
 const BACKEND_URL = getEnv('VITE_BACKEND_URL');
 
 interface ChatProps {
     authProps: AuthProps;
     appState: AppState;
     setAppState: (appState: AppState) => void;
+    onNewDiscussion: () => void;
 }
 
-const Chat: React.FC<ChatProps> = ({ authProps, appState, setAppState }) => {
+const Chat: React.FC<ChatProps> = ({ authProps, appState, setAppState, onNewDiscussion }) => {
 
     const [input, setInput] = useState("");
     const [messages, setMessages] = useState<Message[]>([]);
@@ -38,8 +41,13 @@ const Chat: React.FC<ChatProps> = ({ authProps, appState, setAppState }) => {
     const [isNoteSaveDialogOpen, setIsNoteSaveDialogOpen] = useState(false);
     const [isFlashcardSaveDialogOpen, setIsFlashcardSaveDialogOpen] = useState(false);
     const [actionMessageId, setActionMessageId] = useState<number>(-1);
-    const [page, _setPage] = useState(1);
-    // const [totalPages, setTotalPages] = useState(0);
+    const [page, setPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(0);
+    const { id } = useParams<{ id: string }>();
+    const [discussionId, _setDiscussionId] = useState(-1);
+    const location = useLocation();
+    const hasHandledInitialMessage = useRef(false);
+    const navigate = useNavigate();
 
 
 
@@ -69,16 +77,38 @@ const Chat: React.FC<ChatProps> = ({ authProps, appState, setAppState }) => {
     // Workers
     //-----------------------------------------------------------------
     const handleSendMessageBtn = () => {
-        handleSendMessage(input);
+        if (id != null) {
+            handleSendMessage(input, discussionId);
+        } else {
+            setIsThinking(true);
+            fetch(BACKEND_URL + '/api/discussions', {
+                method: "POST",
+                credentials: 'include',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${authProps.token}`
+                },
+                body: JSON.stringify({ topic: input })
+            })
+                .then(result => result.json())
+
+                .then((data: Discussion) => {
+                    navigate(`/chats/${data.id}`, { state: { firstMessage: input } });
+                })
+        }
     }
 
-    const handleSendMessage = (input: string) => {
-        saveUserMessage(input);
+    const handleSendMessage = (input: string, discussionId: number | undefined) => {
+        if (discussionId == null) {
+            discussionId = discussionId;
+        }
+        saveUserMessage(input, discussionId);
 
         // Get AI Response
         let secondMessage = { content: input };
 
-        fetch(BACKEND_URL + '/api/discussions/' + appState.activeDiscussionId + (appState.isDocChatActive ? '/docchat' : '/chat'), {
+        fetch(BACKEND_URL + '/api/discussions/' + discussionId + (appState.isDocChatActive ? '/docchat' : '/chat'), {
             method: "POST",
             credentials: "include",
             headers: {
@@ -93,7 +123,6 @@ const Chat: React.FC<ChatProps> = ({ authProps, appState, setAppState }) => {
             }
             return result.json()
         }).then(result => {
-
             setMessages(prevMessages => [...prevMessages, result]);
         }).catch(error => {
             console.log(error);
@@ -110,11 +139,15 @@ const Chat: React.FC<ChatProps> = ({ authProps, appState, setAppState }) => {
         setMessages(prevMessages => [...prevMessages, result]);
     }
 
-    const saveUserMessage = (input: string) => {
-        let firstMessage = { sender: "user", content: input, discussion_id: appState.activeDiscussionId };
+    const saveUserMessage = (input: string, discussionId: number | undefined) => {
+        if (discussionId == null) {
+            discussionId = discussionId;
+        }
+
+        let firstMessage = { sender: "user", content: input, discussion_id: discussionId };
         setIsThinking(true);
         // Save user message to db
-        fetch(BACKEND_URL + '/api/discussions/' + appState.activeDiscussionId + '/messages', {
+        fetch(BACKEND_URL + '/api/discussions/' + discussionId + '/messages', {
             method: "POST",
             credentials: "include",
             headers: {
@@ -141,7 +174,7 @@ const Chat: React.FC<ChatProps> = ({ authProps, appState, setAppState }) => {
     // ai reply from button click causes purge
     const handleSuggestedQuestionClick = (id: number) => {
         if (suggestedQuestions) {
-            handleSendMessage(suggestedQuestions[id]);
+            handleSendMessage(suggestedQuestions[id], discussionId);
         }
 
         setInput("");
@@ -202,49 +235,63 @@ const Chat: React.FC<ChatProps> = ({ authProps, appState, setAppState }) => {
         }
     }, [messages]);
 
-
     useEffect(() => {
-        if (appState == null || appState.activeDiscussionId == null) {
+        let isCancelled = false;
+        if (id == null) {
             return;
         }
 
-        // TODO FIX THIS
-        fetch(BACKEND_URL + '/api/discussions/' + appState.activeDiscussionId + '/messages?size=10&page=' + page, {
-            credentials: 'include',
-            headers: {
-                'Authorization': `Bearer ${authProps.token}`
+        const loadMsgs = async () => {
+            fetch(BACKEND_URL + '/api/discussions/' + id + '/messages?size=20&page=' + page, {
+                credentials: 'include',
+                headers: {
+                    'Authorization': `Bearer ${authProps.token}`
+                }
+            })
+                .then(result => result.json())
+                .then(result => {
+                    setTotalPages(result.pages);
+
+                    if (!isCancelled) {
+                        setMessages([...result.items.reverse()]);
+                    }
+                }
+                )
+        }
+
+        if (!hasHandledInitialMessage.current && location.state != null && location.state.firstMessage != null) {
+            handleSendMessage(location.state.firstMessage, Number.parseInt(id));
+            hasHandledInitialMessage.current = true;
+            onNewDiscussion();
+        } else if (location.state == null || (location.state != null && location.state.firstMessage == null)) {
+            loadMsgs();
+        }
+
+        return () => {
+            isCancelled = true;
+        };
+
+    }, [id]);
+
+    const handleScroll = (event: { currentTarget: { scrollTop: any; clientHeight: any; scrollHeight: any; }; }) => {
+        const { scrollTop, clientHeight, scrollHeight } = event.currentTarget;
+        // console.log(scrollHeight-scrollTop)
+        // console.log(scrollHeight-scrollTop)
+        console.log('scrollTop ' + scrollTop)
+        console.log('clientHeight ' + clientHeight)
+        console.log('scrollHeight ' + scrollHeight)
+        // console.log(clientHeight)
+        // console.log(scrollTop)
+        console.log("0000000000000000000000")
+
+
+
+        if (scrollTop === 0) {
+            if (page < totalPages) {
+                setPage(oldPage => oldPage + 1);
             }
-        })
-            .then(result => result.json())
-            .then(result => {
-                // setTotalPages(result.pages);
-                // setMessages([...result.reverse(), ...messages]);
-                setMessages([...result]);
-
-            }
-            )
-    }, [appState])
-
-
-    // const handleScroll = (event: { currentTarget: { scrollTop: any; clientHeight: any; scrollHeight: any; }; }) => {
-    //     const { scrollTop, clientHeight, scrollHeight } = event.currentTarget;
-    //     // console.log(scrollHeight-scrollTop)
-    //     // console.log(scrollHeight-scrollTop)
-    //     console.log('scrollTop ' + scrollTop)
-    //     console.log('clientHeight ' + clientHeight)
-    //     console.log('scrollHeight ' + scrollHeight)
-    //     // console.log(clientHeight)
-    //     // console.log(scrollTop)
-    //     console.log("0000000000000000000000")
-
-
-
-    //     if (scrollTop === 0) {
-    //         if (page < totalPages) {
-    //             setPage(oldPage => oldPage + 1);
-    //         }
-    //     }
-    // };
+        }
+    };
 
     //-----------------------------------------------------------------
     // Render
@@ -252,38 +299,40 @@ const Chat: React.FC<ChatProps> = ({ authProps, appState, setAppState }) => {
     return (
 
         appState ? (
-            <Box sx={{ display: "flex" }}
+            <Box
+            // sx={{ display: "flex" }}
             >
                 <NoteSaveDialog authProps={authProps} open={isNoteSaveDialogOpen} saveWithTag={saveNoteWithTags} onClose={() => { handleNoteSaveDialogClose() }}></NoteSaveDialog>
 
-                {appState.activeDiscussionId != null &&
-                    <FlashCardSaveWizard authProps={authProps} open={isFlashcardSaveDialogOpen} discussionId={appState.activeDiscussionId} messageId={actionMessageId} setOpen={setIsFlashcardSaveDialogOpen}></FlashCardSaveWizard>
+                {discussionId != null &&
+                    <FlashCardSaveWizard authProps={authProps} open={isFlashcardSaveDialogOpen} discussionId={discussionId} messageId={actionMessageId} setOpen={setIsFlashcardSaveDialogOpen}></FlashCardSaveWizard>
                 }
                 <CssBaseline />
                 <Box
-                
+                      onScroll={handleScroll}
                     component="main"
                     sx={{
-                        flexGrow: 1,
+                        // flexGrow: 1,
                         // p: 3,
                         //  width: { sm: `calc(100% - ${drawerWidth}px)` }
                     }}
                 >
                     <Toolbar />
                     <Box
-                    
+
                         sx={{
                             display: "flex",
                             flexDirection: "column",
                             justifyContent: "space-between",
-                            // height: "calc(100vh - 112px)"
+                            height: "calc(100vh - 112px)"
+                            // height: '100vh',
                         }}
                     >
                         <Box
-//   onScroll={handleScroll}
+
                             sx={{
-                                flexGrow: 1,
-                                 overflowY: "auto",
+                                // flexGrow: 1,
+                                //  overflowY: "auto",
                                 marginBottom: "8px",
                                 // border: "1px solid lightgray",
                                 borderRadius: "8px",
@@ -294,13 +343,22 @@ const Chat: React.FC<ChatProps> = ({ authProps, appState, setAppState }) => {
                                     margin: "auto"
                                 },
 
-                              
+
 
 
                                 // padding: "8px"
                             }}
                         >
-                          {/* <div onScroll={handleScroll} style={{ overflow: 'auto', height: '100%' }}> */}
+
+                            {
+                                id == null ? <ChatWelcome authProps={authProps} ></ChatWelcome> : null
+                            }
+
+
+                            <div
+                            //    onScroll={handleScroll} 
+                            //    style={{ overflow: 'auto', height: '100%' }}
+                            >
                                 {messages.map((msg, index) => (
                                     <ChatMessage
                                         msg={msg}
@@ -308,12 +366,14 @@ const Chat: React.FC<ChatProps> = ({ authProps, appState, setAppState }) => {
                                         handleFlashcardSaveDialogOpen={handleFlashcardSaveDialogOpen}
                                         handleNoteSaveDialogOpen={handleNoteSaveDialogOpen}
                                         handleSendMessage={handleSendMessage}
+                                        activeDiscussionId={discussionId}
                                     ></ChatMessage>
                                 ))}
 
 
-                            {/* </div> */}
-                            {/* {page} */}
+                            </div>
+                            {/* page={page}<br></br>
+                            appstate= {appState.activeDiscussionId} */}
 
                             {suggestedQuestions?.map((msg, index) => (
                                 <Button
@@ -336,7 +396,10 @@ const Chat: React.FC<ChatProps> = ({ authProps, appState, setAppState }) => {
                                 alignItems: "center",
                                 // border: "1px solid lightgray",
                                 borderRadius: "8px",
-                                padding: "8px"
+                                padding: "8px",
+                                // flexDirection: 'column', // Stack the children vertically
+                                // justifyContent: 'space-between',
+                                // height: '100vh',
                             }}
                         >
                             <TextField
@@ -374,7 +437,7 @@ const Chat: React.FC<ChatProps> = ({ authProps, appState, setAppState }) => {
                                 setSnackErrorMsg={setSnackErrorMsg}
                                 setIsSnackOpen={setIsSnackOpen}
                                 saveUserMessage={saveUserMessage}
-                                activeDiscussionId={appState.activeDiscussionId}
+                                activeDiscussionId={discussionId}
                                 handleNewMessage={handleNewMessage}
                             ></BasicSpeedDial>
                         </Box>
