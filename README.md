@@ -59,6 +59,12 @@ Seeing how concepts fit together, making study materials and practicing has neve
 <i>Flashcards organized by tagging</i>
 </p>
 
+## 🛣️ Roadmap
+- ~~Dockerize project~~  
+- Quizzes
+- ANKI flashcard import/export
+
+
 ##  📝 Feedback
 
 Feel free to get in touch by [filing an issue](https://github.com/mpvoss/learny/issues/new). Feature requests are always welcome!

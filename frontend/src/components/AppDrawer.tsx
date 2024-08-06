@@ -4,8 +4,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useEffect, useImperativeHandle, useState, forwardRef } from 'react';
 import ChatIcon from '@mui/icons-material/Chat';
 import DescriptionIcon from '@mui/icons-material/Description';
-import AccountTreeIcon from '@mui/icons-material/AccountTree';
-import RuleIcon from '@mui/icons-material/Rule';
+// import AccountTreeIcon from '@mui/icons-material/AccountTree';
+// import RuleIcon from '@mui/icons-material/Rule';
 import FolderCopyIcon from '@mui/icons-material/FolderCopy';
 import FilterNoneIcon from '@mui/icons-material/FilterNone';
 import { getEnv } from '../utils/EnvUtil';
@@ -95,7 +95,7 @@ const AppDrawer = forwardRef((props: DrawerProps, ref) => {
                     <ListItemText>Documents</ListItemText>
                 </ListItemButton>
 
-                <ListItemButton to="/quizzes" component={Link} onClick={() => props.setDrawerOpen(false)}>
+                {/* <ListItemButton to="/quizzes" component={Link} onClick={() => props.setDrawerOpen(false)}>
                     <ListItemIcon>
                         <RuleIcon></RuleIcon>
                     </ListItemIcon>
@@ -107,7 +107,7 @@ const AppDrawer = forwardRef((props: DrawerProps, ref) => {
                         <AccountTreeIcon></AccountTreeIcon>
                     </ListItemIcon>
                     <ListItemText>Diagrams</ListItemText>
-                </ListItemButton>
+                </ListItemButton> */}
 
                 <ListItemButton to="/notes" component={Link} divider={true} onClick={() => props.setDrawerOpen(false)}>
                     <ListItemIcon>

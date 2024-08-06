@@ -181,6 +181,7 @@ infra_azure/terraform.tfstate.backup
 frontend/.env.dev
 frontend/.env.prod
 backend/.env.prod
+backend/.env.localdocker
 qdrant_test_data/**
 backend/learny.db
 db_vol/learny.db
