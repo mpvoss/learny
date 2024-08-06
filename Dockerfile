@@ -19,7 +19,7 @@ COPY --from=build /app/dist /var/www/html
 COPY nginx.conf /etc/nginx/sites-available/default
 
 # Copy uvicorn config
-COPY uvicorn.conf /
+COPY uvicorn.ini /
 
 # # Install FastAPI and any other dependencies
 COPY backend/requirements.txt ./
