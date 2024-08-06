@@ -16,6 +16,8 @@ Pri1
 - Pankaj demo
 Pri2
 - Chat context...last 2 or 3 messages
+- Flashcard study empty screen: "all cards studied" message
+- Flash card load screen..actual "loading..." msg vs empty all the time
 
 Matthew as a User
 - Pagination

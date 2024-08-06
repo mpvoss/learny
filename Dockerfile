@@ -18,6 +18,9 @@ COPY --from=build /app/dist /var/www/html
 # Copy the nginx configuration file
 COPY nginx.conf /etc/nginx/sites-available/default
 
+# Copy uvicorn config
+COPY uvicorn.conf /
+
 # # Install FastAPI and any other dependencies
 COPY backend/requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
