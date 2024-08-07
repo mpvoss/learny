@@ -25,6 +25,9 @@ def load_deploy_env():
 def build_db_url():
 
     env = os.getenv('ENV')
+    
+    if env == 'PYTEST':
+        return f"sqlite:///test.db"
     if env == 'LOCAL_DOCKER':
         db_path = os.environ['DB_PATH']
         return f"sqlite:///{db_path}"

@@ -6,12 +6,13 @@ from openai import OpenAI
 
 
 class GptLLMService(AbstractLLMService):
-    def __init__(self):
+    def __init__(self, model:str):
         self.client = OpenAI()
+        self.model = model
 
     def call(self, messages) -> str:
         # logging.debug(f"Calling OpenAI chat with: {msg}")
-        completion = self.client.chat.completions.create(model="gpt-3.5-turbo", messages=messages)
+        completion = self.client.chat.completions.create(model=self.model, messages=messages)
         return completion.choices[0].message.content
     
     def structured_call(self, prompt: str, model):
@@ -21,7 +22,7 @@ class GptLLMService(AbstractLLMService):
         )
 
         resp = client.chat.completions.create(
-            model="gpt-3.5-turbo",
+            model=self.model,
             messages=[
                 {
                     "role": "user",
@@ -31,15 +32,5 @@ class GptLLMService(AbstractLLMService):
             response_model=model,
             max_retries=3
         )
+
         return resp
-
-    # completion = client.chat.completions.create(
-    #     model="gpt-3.5-turbo",
-    #     messages=[
-    #         {"role": "system",
-    #          "content": "You are a poetic assistant, skilled in explaining complex programming concepts with creative flair."},
-    #         {"role": "user", "content": "Compose a poem that explains the concept of recursion in programming."}
-    #     ]
-    # )
-
-    # return completion.choices[0].message.content

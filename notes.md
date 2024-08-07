@@ -5,8 +5,6 @@ features for fc home page
 
 
 Pri1
-- Handle absense of 
-- Make LLM configurable
 - User sensitive features....
 - Fix docker and setup for wes
 - Share proj to reddit
@@ -186,3 +184,7 @@ https://pashpashpash.substack.com/p/understanding-long-documents-with
 providing context based on the drill down seems important
 
 could do that via a cache...but langchain probably has a better way
+
+
+# Gotta run pytest with python path and env set...
+PYTHONPATH=/home/mpvoss/Cloud/learny/backend ENV=PYTEST pytest

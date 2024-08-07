@@ -35,20 +35,17 @@ def get_flashcards(db: Session = Depends(get_db), tag: List[str] = Query(None), 
     if not due_filter:
         return flashcards
     
+    return filter_flashcards_due(flashcards, current_date)
+
+
+def filter_flashcards_due(flashcards:List[FlashCard], current_date: datetime.date):
     to_review = []
     for flashcard in flashcards:
-
-        # print(flashcard.last_reviewed_date + datetime.timedelta(days=flashcard.interval))
-        # print(current_date)
-        # print('---------------')
-
-        # Never been reviewed
         if not flashcard.last_reviewed_date:
             to_review.append(flashcard)
         elif flashcard.last_reviewed_date + datetime.timedelta(days=flashcard.interval) <= current_date:
             to_review.append(flashcard)
-        
-    return to_review
+    return to_review    
 
 
 @router.post("/flashcards", tags=["Flashcards"])
@@ -79,11 +76,16 @@ def review_flashcard(id: int, flascardReview: FlashcardReview, db: Session = Dep
     if not flashcard:
         raise HTTPException(status_code=404, detail="Item not found")
 
-    # todo test this, chatgpt just winged it
+    # 0: complete blackout,    -
+    # 1: incorrect response;    -
+    # 2: correct response after a hesitation; 
+    # 3: correct response recalled with serious difficulty;   -
+    # 4: correct response after a hesitation; 
+    # 5: perfect response   -
     flashcard.quality_of_last_review = quality
     if quality < 3:
         flashcard.repetition = 0
-        flashcard.interval = 1
+        flashcard.interval = 0
     else:
         flashcard.repetition += 1
         flashcard.easiness_factor = max(1.3, flashcard.easiness_factor - 0.8 + 0.28 * quality - 0.02 * quality ** 2)

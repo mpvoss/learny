@@ -46,12 +46,13 @@ logger.addHandler(handler)
 async def lifespan(app: FastAPI):
     ''' Run at startup
     '''
+    model = os.getenv("LLM_MODEL", "gpt-3.5-turbo")
     if os.getenv("LLM_BACKEND","openai") == 'openai':
-        app.state.llm_service = GptLLMService()
+        app.state.llm_service = GptLLMService(model)
     else:
         app.state.llm_service = LocalLLMService()
 
-    Settings.tokenizer = tiktoken.encoding_for_model("gpt-3.5-turbo").encode
+    Settings.tokenizer = tiktoken.encoding_for_model(model).encode
 
     Settings.embed_model = OpenAIEmbedding()
     if os.getenv("QDRANT_API_KEY", None) != None:
