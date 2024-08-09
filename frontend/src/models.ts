@@ -82,6 +82,7 @@ interface Flashcard {
     description: string;
     id: number;
     tags: Tag[];
+    didForget: boolean | null;
 }
 
 

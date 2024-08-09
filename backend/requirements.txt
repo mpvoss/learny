@@ -211,7 +211,6 @@ starlette==0.37.2
 statsd==4.0.1
 stevedore==5.2.0
 striprtf==0.0.26
-supermemo2==2.0.0
 sympy==1.12.1
 taskflow==5.8.0
 tenacity==8.3.0

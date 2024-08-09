@@ -5,6 +5,9 @@ features for fc home page
 
 
 Pri1
+- Helper text on Docs page (Upload dos here to use DocChat feature in Chat screen whatever)
+- Error text/tooltip on DocChat btn
+- Make a new favicon
 - User sensitive features....
 - Fix docker and setup for wes
 - Share proj to reddit
@@ -188,3 +191,5 @@ could do that via a cache...but langchain probably has a better way
 
 # Gotta run pytest with python path and env set...
 PYTHONPATH=/home/mpvoss/Cloud/learny/backend ENV=PYTEST pytest
+
+simplescreenrecorder

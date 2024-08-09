@@ -1,11 +1,11 @@
 import Masonry from '@mui/lab/Masonry';
 import { Typography, Card, CardContent, Container, Chip, Select, Checkbox, ListItemText, MenuItem, OutlinedInput, SelectChangeEvent, Theme, useTheme } from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
 import { useEffect, useState } from 'react';
-import { Stack, Fab, Button, Box } from '@mui/material';
+import { Stack, Button, Box } from '@mui/material';
 import { Link } from 'react-router-dom';
 import { AuthProps, Flashcard, Tag } from '../models';
 import { getEnv } from '../utils/EnvUtil';
+import ScaleLoader from 'react-spinners/ScaleLoader';
 const BACKEND_URL = getEnv('VITE_BACKEND_URL');
 
 const cardStyle = {
@@ -70,6 +70,7 @@ const FlashcardHome:React.FC<FlashcardHomeProps> = ({ authProps }) => {
     // const [inputValue, setInputValue] = useState('');
     const [selectedTags, setSelectedTags] = useState<string[]>([]);
     const [flashcards, setFlashcards] = useState<Flashcard[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
     
 
     const [tags, setTags] = useState<string[]>([]);
@@ -82,7 +83,7 @@ const FlashcardHome:React.FC<FlashcardHomeProps> = ({ authProps }) => {
 
     const loadFlashcards = () => {
         const queryParams = new URLSearchParams();
-
+        setIsLoading(true);
         selectedTags.forEach((tag) => {
             queryParams.append('tag', tag);
         });
@@ -98,6 +99,7 @@ const FlashcardHome:React.FC<FlashcardHomeProps> = ({ authProps }) => {
             .then((data) => {
                 setFlashcards(data);
             })
+            .then(()=>setIsLoading(false))
             .catch((error) => {
                 console.error('Error fetching notes:', error);
             });
@@ -224,16 +226,21 @@ const FlashcardHome:React.FC<FlashcardHomeProps> = ({ authProps }) => {
                 </Stack>
             </Stack>
 
-            {flashcards.length === 0 && <InformationCard />}
+            {!isLoading && flashcards.length === 0 && <InformationCard />}
 
+            {isLoading && <><ScaleLoader width={10} color="grey" speedMultiplier={0.7} /></>}
+
+
+{!isLoading &&
             <Masonry columns={{ xs: 1, md: 3, lg:4 }} spacing={3}>
             {flashcards.map((flashcard) => (
                     <FlashcardComponent flashcard={flashcard} />
             ))}
         </Masonry>
-            <Fab color="primary" aria-label="add" style={{ position: 'fixed', bottom: '16px', right: '16px' }}>
+        }
+            {/* <Fab color="primary" aria-label="add" style={{ position: 'fixed', bottom: '16px', right: '16px' }}>
                 <AddIcon />
-            </Fab>
+            </Fab> */}
         </Container>
     );
 };

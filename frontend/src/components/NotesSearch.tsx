@@ -1,7 +1,5 @@
-
-import AddIcon from '@mui/icons-material/Add';
 import { useEffect, useState } from 'react';
-import { TextField, Autocomplete, Chip, Stack, Fab, Container } from '@mui/material';
+import { TextField, Autocomplete, Chip, Stack, Container } from '@mui/material';
 import NoteCard from './NoteCard';
 import { AuthProps, Note, Tag } from '../models';
 import { getEnv } from '../utils/EnvUtil';
@@ -117,9 +115,9 @@ loadNotes();
                     />
                 ))}
             </Stack>
-            <Fab color="primary" aria-label="add" style={{ position: 'fixed', bottom: '16px', right: '16px' }}>
+            {/* <Fab color="primary" aria-label="add" style={{ position: 'fixed', bottom: '16px', right: '16px' }}>
                 <AddIcon />
-            </Fab>
+            </Fab> */}
         </Container>
     );
 };

@@ -1,6 +1,4 @@
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
-import { Box, Card, CardContent, Chip, IconButton, Link, Typography} from '@mui/material';
+import { Box, Card, CardContent, Chip, Link, Typography} from '@mui/material';
 import React, { useState } from 'react';
 import { Note } from '../models';
 
@@ -40,12 +38,12 @@ const NoteCard: React.FC<Note> = ({ title, content, tags }) => {
                     {title}
                 </Typography>
                 <div>
-                    <IconButton>
+                    {/* <IconButton>
                         <EditIcon />
                     </IconButton>
                     <IconButton>
                         <DeleteIcon />
-                    </IconButton>
+                    </IconButton> */}
                 </div>
             </div>
                 <Typography style={contentStyle} variant="body2" color="textSecondary" textAlign="left">

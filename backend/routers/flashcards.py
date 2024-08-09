@@ -11,6 +11,8 @@ from requests import Session
 from routers.api_models import (FlashcardDisplay, FlashcardReview)
 from sqlalchemy.orm import joinedload
 from fastapi import UploadFile, File
+from supermemo2 import first_review, review
+import time
 
 router = APIRouter()
 
@@ -82,16 +84,27 @@ def review_flashcard(id: int, flascardReview: FlashcardReview, db: Session = Dep
     # 3: correct response recalled with serious difficulty;   -
     # 4: correct response after a hesitation; 
     # 5: perfect response   -
-    flashcard.quality_of_last_review = quality
-    if quality < 3:
-        flashcard.repetition = 0
-        flashcard.interval = 0
+    # if quality < 3:
+    #     flashcard.repetition = 0
+    #     flashcard.interval = 0
+    # else:
+    #     flashcard.repetition += 1
+    #     flashcard.easiness_factor = max(1.3, flashcard.easiness_factor - 0.8 + 0.28 * quality - 0.02 * quality ** 2)
+    #     flashcard.interval = 1 if flashcard.repetition == 1 else 6 if flashcard.repetition == 2 else round(
+    #         flashcard.interval * flashcard.easiness_factor)
+    
+
+
+    if not flashcard.last_reviewed_date:
+        stats = first_review(quality)
     else:
-        flashcard.repetition += 1
-        flashcard.easiness_factor = max(1.3, flashcard.easiness_factor - 0.8 + 0.28 * quality - 0.02 * quality ** 2)
-        flashcard.interval = 1 if flashcard.repetition == 1 else 6 if flashcard.repetition == 2 else round(
-            flashcard.interval * flashcard.easiness_factor)
+        stats = review(quality, flashcard.easiness_factor,flashcard.interval, flashcard.repetition)
+
+    flashcard.repetition = stats["repetitions"]
+    flashcard.easiness_factor = stats["easiness"]
+    flashcard.interval = stats["interval"]
     flashcard.last_reviewed_date = datetime.datetime.now(datetime.timezone.utc)
+    flashcard.quality_of_last_review = quality
 
     db.commit()
     return {"message": "Flashcard review saved successfully"}
