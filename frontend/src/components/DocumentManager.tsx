@@ -20,12 +20,14 @@ import {
     IconButton,
     LinearProgress,
     AlertProps,
+    DialogContentText,
 } from '@mui/material';
 import CloseIcon from "@mui/icons-material/Close";
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { AuthProps } from '../models';
 import { getEnv } from '../utils/EnvUtil';
+import { HelpOutline } from '@mui/icons-material';
 const BACKEND_URL = getEnv('VITE_BACKEND_URL');
 
 interface Document {
@@ -42,6 +44,7 @@ interface DocManagerProps {
 const DocumentManager: React.FC<DocManagerProps> = ({ authProps }) => {
     const [documents, setDocuments] = useState<Document[]>([]);
     const [openDialog, setOpenDialog] = useState(false);
+    const [openInfoDialog, setOpenInfoDialog] = useState(false);
     const [isSnackOpen, setIsSnackOpen] = React.useState<boolean>(false);
     const [snackErrorMsg, setSnackErrorMsg] = React.useState<string>("");
     const [fileName, setFileName] = useState('');
@@ -93,6 +96,14 @@ const DocumentManager: React.FC<DocManagerProps> = ({ authProps }) => {
         setOpenDialog(false);
     };
 
+    const handleCloseInfoDialog = () => {
+        setOpenInfoDialog(false);
+    };
+
+    const handleOpenInfoDialog = () => {
+        setOpenInfoDialog(true);
+    };
+
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
         if (file) {
@@ -142,25 +153,56 @@ const DocumentManager: React.FC<DocManagerProps> = ({ authProps }) => {
         }
     };
 
-    const getUTCTimestamp = (dateIn:Date)=> {
+    const getUTCTimestamp = (dateIn: Date) => {
         const d = dateIn.toISOString().split('T')
         const date = d[0];
         const time = d[1].split('.')[0];
-        
+
         return `${date} ${time}`
     }
 
     return (
         <Container maxWidth="lg" style={{ paddingTop: '90px' }}>
+            <Dialog open={openInfoDialog} onClose={handleCloseInfoDialog}
+                aria-labelledby="alert-dialog-title"
+                aria-describedby="alert-dialog-description"
+            >
+                <DialogTitle id="alert-dialog-title">
+                    {"Help"}
+                </DialogTitle>
+                <DialogContent>
+                    <DialogContentText id="alert-dialog-description">
+                        On this screen you can manage the documents Learny knows about. Once uploaded, you can chat with the AI about these documents by going to the Chat screen and toggling on DocChat in the AI menu.
+                    </DialogContentText>
+                </DialogContent>
+                <DialogActions>
+
+                    <Button onClick={handleCloseInfoDialog} autoFocus>
+                        Close
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
+
+
+
+
             <div>
-                <div style={{ display: 'flex', margin: 5, padding: 5, justifyContent: 'flex-end' }}>
-                    <Button variant="contained" color="error" style={{ marginRight: 10 }} onClick={handleOpenDialog} startIcon={<DeleteIcon />}>
-                        Delete
-                    </Button>
-                    <Button variant="contained" color="primary" onClick={handleOpenDialog} startIcon={<CloudUploadIcon />}>
-                        Upload
-                    </Button>
+                <div style={{ display: 'flex', margin: 5, padding: 5, justifyContent: 'space-between' }}>
+                    <IconButton onClick={handleOpenInfoDialog}>
+                        <HelpOutline />
+                    </IconButton>
+
+                    <div>
+                        <Button variant="contained" color="error" style={{ marginRight: 10 }} onClick={handleOpenDialog} startIcon={<DeleteIcon />}>
+                            Delete
+                        </Button>
+                        <Button variant="contained" color="primary" onClick={handleOpenDialog} startIcon={<CloudUploadIcon />}>
+                            Upload
+                        </Button>
+                    </div>
                 </div>
+
 
                 <TableContainer component={Paper}>
                     <Table>

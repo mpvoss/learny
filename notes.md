@@ -5,15 +5,12 @@ features for fc home page
 
 
 Pri1
-- Helper text on Docs page (Upload dos here to use DocChat feature in Chat screen whatever)
-- Error text/tooltip on DocChat btn
 - Make a new favicon
 - User sensitive features....
 - Fix docker and setup for wes
 - Share proj to reddit
 - Finish setting up discord, reference it in readme
 - Record demo video
-- Notes: move action buttons to bottom, remove add button
 - PROD VS TEST DB...local db for test bro, prod is supabase
 - Pankaj demo
 Pri2

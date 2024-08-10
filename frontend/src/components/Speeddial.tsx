@@ -181,9 +181,11 @@ const BasicSpeedDial: React.FC<BasicSpeedDialProps> = ({ authProps, setIsThinkin
     // }
 
     const handleDocsClick = () =>{
-        console.log("want to set to " + !appState.isDocChatActive)
-        setAppState({...appState, isDocChatActive: !appState.isDocChatActive});
-        // setIsSwitchOn(!isSwitchOn);
+        if(!docChatEnabled){
+            setDocumentDialogOpen(true);
+        }else{
+            setAppState({...appState, isDocChatActive: !appState.isDocChatActive});
+        }
     }
 
     const handleDiagramClick = () => {
@@ -253,31 +255,14 @@ const BasicSpeedDial: React.FC<BasicSpeedDialProps> = ({ authProps, setIsThinkin
                     },
                 }}
             >
-                <DialogTitle>DocChat</DialogTitle>
+                <DialogTitle> No documents available</DialogTitle>
                 <DialogContent>
                     <DialogContentText>
-                        Pick the doc to talk to, also on button
+                        To use the DocChat feature, first go to the Documents screen and upload one oe more documents.
                     </DialogContentText>
-{/* 
-                    {docChatEnabled && (
-                        <FormControlLabel
-                            control={<Switch 
-                                checked={isSwitchOn} 
-                                onChange={handleSwitchChange} 
-                                color="primary" />}
-                            label="On/Off"
-                        />
-                    )} */}
-                    {!docChatEnabled && (
-                       <p>bro you don't have docs</p>
-                    )}
-
-
-
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={handleDocDialogClose}>Cancel</Button>
-                    <Button onClick={handleDocDialogSubmit} type="submit">Submit</Button>
+                    <Button onClick={handleDocDialogClose}>Close</Button>
                 </DialogActions>
             </Dialog>
 
