@@ -28,7 +28,7 @@ def upgrade() -> None:
         with op.batch_alter_table(t, schema=None) as batch_op:
             batch_op.add_column(sa.Column('user_id', sa.String(), nullable=True))
 
-    op.execute('COMMIT')
+    # op.execute('COMMIT')
 
     for t in tables_to_update:
         with op.batch_alter_table(t, schema=None) as batch_op:
