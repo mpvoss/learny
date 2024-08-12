@@ -25,11 +25,11 @@ def upgrade() -> None:
     sa.Column('user_id', sa.String(), nullable=False),
     sa.Column('prompt_tokens', sa.Integer(), nullable=False),
     sa.Column('completion_tokens', sa.Integer(), nullable=False),
-    sa.Column('timestamp', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
+    sa.Column('timestamp', sa.DateTime(timezone=True), server_default=sa.text('(CURRENT_TIMESTAMP)'), nullable=True),
     sa.Column('activity', sa.String(), nullable=False),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
     sa.PrimaryKeyConstraint('id')
-    )
+)
     # ### end Alembic commands ###
 
 
