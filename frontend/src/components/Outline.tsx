@@ -86,7 +86,7 @@ const BACKEND_URL = getEnv('VITE_BACKEND_URL');
 
 
 
-export default function ConceptMap(authProps:AuthProps) {
+export default function Outline(authProps:AuthProps) {
   // const { fitView } = useReactFlow();
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
@@ -100,7 +100,7 @@ export default function ConceptMap(authProps:AuthProps) {
 
   const handleSubmit = async () => {
     try {
-      const response = await fetch(BACKEND_URL + `/api/conceptmap?topic=${inputValue}`,
+      const response = await fetch(BACKEND_URL + `/api/outline?topic=${inputValue}`,
         {
           credentials: 'include',
           headers: {

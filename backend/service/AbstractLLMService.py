@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from pydantic import BaseModel, Field
-from typing import List
+from typing import Callable, List
 
 
 class Fields(BaseModel):
@@ -89,27 +89,13 @@ class IncorrectResponses(BaseModel):
 class QuestionSuggestions(BaseModel):
     questions: List[str]
 
-# class AspectItem(BaseModel):
-#     name: str
-#     summary: str
-
-# class Aspect(BaseModel):
-#     name: str
-#     items: List[AspectItem]
-
-
-# class Concept(BaseModel):
-#     name: str
-#     description: str
-#     aspects: List[Aspect]
-
 
 class Connection(BaseModel):
     name: str
     source: str
     destination: str
 
-class ConceptMap(BaseModel):
+class Outline(BaseModel):
     name: str
     description: str
 
@@ -134,65 +120,65 @@ class AbstractLLMService(ABC):
         return self.call(messages)
 
 
-    def chat(self, msg: str):
+    def chat(self, msg: str, token_tracker:Callable[[dict],None]):
         messages=[
         {
             'role': 'user',
             'content': msg,
         },  
         ]
-        return self.call(messages)
+        return self.call(messages,token_tracker)
 
 
-    def summarize_discussion(self, msg: str):
+    def summarize_discussion(self, msg: str, token_tracker:Callable[[dict],None]):
         messages=[
         {
             'role': 'user',
             'content': 'Extract the main theme or topic of the following in 4 words or less: ' + msg,
         },  
         ]
-        return self.call(messages)
+        return self.call(messages, token_tracker)
 
 
-    def get_discussion_suggestions(self):
-        return self.structured_call('Suggest three interesting questions someone might ask about a variety of topics, such as history, science, social science, philosophy, economics, etc', QuestionSuggestions)
+    # def get_discussion_suggestions(self):
+    #     return self.structured_call('Suggest three interesting questions someone might ask about a variety of topics, such as history, science, social science, philosophy, economics, etc', QuestionSuggestions, token_tracker)
 
-    def get_quiz(self, draft: str) -> Quiz:
-        return self.structured_call(f'Your goal is to create a quiz from the following information: {draft}', Quiz)
+    def get_quiz(self, draft: str, token_tracker:Callable[[dict],None]) -> Quiz:
+        return self.structured_call(f'Your goal is to create a quiz from the following information: {draft}', Quiz, token_tracker)
 
-    def get_wrong_answers(self, question: str, answer:str) -> IncorrectResponses:
-        return self.structured_call(f'The following question is on a test: {question}. The following is the correct answer: {answer}. Provide several incorrect options for the same question, including ur mom jokes wherever possible, as well as snarky or sarcastic options that fit the theme.', IncorrectResponses)
+    def get_wrong_answers(self, question: str, answer:str, token_tracker:Callable[[dict],None]) -> IncorrectResponses:
+        return self.structured_call(f'The following question is on a test: {question}. The following is the correct answer: {answer}. Provide several incorrect options for the same question, including ur mom jokes wherever possible, as well as snarky or sarcastic options that fit the theme.', IncorrectResponses, token_tracker)
 
-    def get_concept_map(self, info: str):
-        return self.structured_call(f'Your goal is to break down this concept into its constituent parts, identify the relations between these parts, and show how they connect to related concepts in the broader knowledge domain. You are working on a Large Language Model (LLM) that has been trained on diverse sources, including scientific papers, books, articles, and other texts. The topic that you should decompose is {info}', Concept)
+    def get_outline(self, info: str, token_tracker:Callable[[dict],None]):
+        return self.structured_call(f'Your goal is to break down this concept into its constituent parts, identify the relations between these parts, and show how they connect to related concepts in the broader knowledge domain. You are working on a Large Language Model (LLM) that has been trained on diverse sources, including scientific papers, books, articles, and other texts. The topic that you should decompose is {info}', Concept, token_tracker)
 
-    def get_concept_mapv2(self, summary: str):
-        return self.structured_call(f'''Summarize the following information while keeping as many details as possible: {summary}''', Ecosystem)
+    def get_concept_mapv2(self, summary: str, token_tracker:Callable[[dict],None]):
+        return self.structured_call(f'''Summarize the following information while keeping as many details as possible: {summary}''', Ecosystem, token_tracker)
 
-    def get_concept_mapv2_nodes(self, topic: str) -> EntityList:
-        return self.structured_call(f'''Your goal is to identify all the important relationships with other entities, concepts, or phenomena that you can for this topic: {topic}. Please be exhaustive''', EntityList)
+    def get_concept_mapv2_nodes(self, topic: str, token_tracker:Callable[[dict],None]) -> EntityList:
+        return self.structured_call(f'''Your goal is to identify all the important relationships with other entities, concepts, or phenomena that you can for this topic: {topic}. Please be exhaustive''', EntityList, token_tracker)
 
-    def get_concept_mapv2_relationships(self, subject: str, objects:str) -> RelationshipList:
-        return self.structured_call(f'''Your goal is to identify all the important relationships between {subject} and entities in this list: {objects}. Please be exhaustive''', RelationshipList)
+    def get_concept_mapv2_relationships(self, subject: str, objects:str, token_tracker:Callable[[dict],None]) -> RelationshipList:
+        return self.structured_call(f'''Your goal is to identify all the important relationships between {subject} and entities in this list: {objects}. Please be exhaustive''', RelationshipList, token_tracker)
 
-    def get_concept_mapv2_node_categories(self, objects:str) -> EntityObjList:
-        return self.structured_call(f'''Your goal is to label each of the following into categories so it's clear which are in like groups: {objects}. Examples include People (George Washington, Cleopatra), Places/Countries/Empires (Persian Empire, Germany), Technology/Innovation (Steam Engine, Internet), Movement (Enlightenment, Civil Rights Movement), Event (Renaissance, Industrial Revolution)''', EntityObjList)
+    def get_concept_mapv2_node_categories(self, objects:str, token_tracker:Callable[[dict],None]) -> EntityObjList:
+        return self.structured_call(f'''Your goal is to label each of the following into categories so it's clear which are in like groups: {objects}. Examples include People (George Washington, Cleopatra), Places/Countries/Empires (Persian Empire, Germany), Technology/Innovation (Steam Engine, Internet), Movement (Enlightenment, Civil Rights Movement), Event (Renaissance, Industrial Revolution)''', EntityObjList, token_tracker)
 
-    def get_timeline_item(self, topic:str) -> TimelineItem:
-        return self.structured_call(f'''Your goal is to provide information on this event, use succint names: {topic}''', TimelineItem)
+    def get_timeline_item(self, topic:str, token_tracker:Callable[[dict],None]) -> TimelineItem:
+        return self.structured_call(f'''Your goal is to provide information on this event, use succint names: {topic}''', TimelineItem, token_tracker)
 
-    def get_timeline_events(self, topic:str) -> SegmentList:
-        return self.structured_call(f'''Your goal is to list the important events or periods of which would provide a comprehensive understanding of the following topic: {topic}. Please be exhaustive.''', SegmentList)
+    def get_timeline_events(self, topic:str, token_tracker:Callable[[dict],None]) -> SegmentList:
+        return self.structured_call(f'''Your goal is to list the important events or periods of which would provide a comprehensive understanding of the following topic: {topic}. Please be exhaustive.''', SegmentList, token_tracker)
 
-    def get_flashcards(self, info: str):
-        return self.structured_call(f'You are an expert tutor and your goal is to help students better understand the topics they study using flashcards. Generate flashcards based on the following info: {info}', FlashcardResponse)
+    def get_flashcards(self, info: str, token_tracker:Callable[[dict],None]):
+        return self.structured_call(f'You are an expert tutor and your goal is to help students better understand the topics they study using flashcards. Generate flashcards based on the following info: {info}', FlashcardResponse, token_tracker)
 
-    def get_questions(self, topic: str):
-        return self.structured_call(f'Provide a list of 5 questions I could study on the topic of {topic}', SuggestedQuestions)
+    def get_questions(self, topic: str, token_tracker:Callable[[dict],None]):
+        return self.structured_call(f'Provide a list of 5 questions I could study on the topic of {topic}', SuggestedQuestions, token_tracker)
 
-    def call(self, prompt: str):
+    def call(self, prompt: str, token_tracker:Callable[[dict],None]):
         raise Exception("Not implemented")
 
-    def structured_call(self, prompt: str):
+    def structured_call(self, prompt: str, token_tracker:Callable[[dict],None]):
         raise Exception("Not implemented")
 

@@ -17,30 +17,30 @@ router = APIRouter()
 # POST Quiz results
 
 
-@router.post("/quizzes/draft", tags=["Quizzes"])
-def draft_quiz(request: Request, db: Session = Depends(get_db)):
-    # quiz_draft_request: QuizDraftRequest,
-    # if quiz_draft_request.type == 'tags':
-    #     return 'ok'
-    # elif quiz_draft_request.type == 'wizard':
-    prompt = "generate questions and answers on the topic of Rome" #+ quiz_draft_request.topic
-    reply = request.app.state.llm_service.chat(prompt)
-    reply = request.app.state.llm_service.get_quiz(reply)
+# @router.post("/quizzes/draft", tags=["Quizzes"])
+# def draft_quiz(request: Request, db: Session = Depends(get_db)):
+#     # quiz_draft_request: QuizDraftRequest,
+#     # if quiz_draft_request.type == 'tags':
+#     #     return 'ok'
+#     # elif quiz_draft_request.type == 'wizard':
+#     prompt = "generate questions and answers on the topic of Rome" #+ quiz_draft_request.topic
+#     reply = request.app.state.llm_service.chat(prompt)
+#     reply = request.app.state.llm_service.get_quiz(reply)
 
 
-    res  = []
-    for problem in reply.problems:
-        reply = request.app.state.llm_service.get_wrong_answers(problem.question, problem.answer)
-        res.append({
-            "question": problem.question,
-            "answer": problem.answer,
-            "wrong1": reply.response1,
-            "wrong2": reply.response2,
-            "wrong3": reply.response3,
-        })
+    # res  = []
+    # for problem in reply.problems:
+    #     reply = request.app.state.llm_service.get_wrong_answers(problem.question, problem.answer)
+    #     res.append({
+    #         "question": problem.question,
+    #         "answer": problem.answer,
+    #         "wrong1": reply.response1,
+    #         "wrong2": reply.response2,
+    #         "wrong3": reply.response3,
+    #     })
             
 
-    return res
+    # return res
     # else:
     #     return 'invalid type'    
     

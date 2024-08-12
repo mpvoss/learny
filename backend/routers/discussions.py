@@ -1,8 +1,9 @@
+from functools import partial
 import random
 from typing import List
 
 from database import get_db
-from fastapi import APIRouter, Depends, Query, Request
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from fastapi_pagination import Page
 from fastapi_pagination.ext.sqlalchemy import paginate
 from llama_index.core import Settings, VectorStoreIndex
@@ -17,17 +18,23 @@ from sqlalchemy import desc, func
 from sqlalchemy.orm import joinedload
 from utils import questions
 from utils.utils import get_current_user
+from utils.utils import capitalize_and_remove_period
+from utils.utils import save_token_usage
 
 router = APIRouter()
 
 @router.get("/discussions", tags=["Chat"])
 def chat(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    
     latest_message_times = db.query(Message.discussion_id, func.max(Message.created_at).label('max_created_at')).\
+    join(Discussion, Discussion.id == Message.discussion_id).\
+    filter(Discussion.user_id == current_user.id).\
     group_by(Message.discussion_id).\
     subquery()
 
     # Then, join this with the Discussion table and order by the latest message time
     discussions = db.query(Discussion).\
+    filter(Discussion.user_id == current_user.id).\
     outerjoin(latest_message_times, Discussion.id == latest_message_times.c.discussion_id).\
     order_by(desc(latest_message_times.c.max_created_at)).\
     all()
@@ -38,28 +45,20 @@ def chat(db: Session = Depends(get_db), current_user: User = Depends(get_current
 
 @router.post("/discussions",  response_model=CreateDiscussionRequest, tags=["Chat"]) 
 def create_discussion(request: Request, create_discussion_request: CreateDiscussionModel, db: Session = Depends(get_db), current_user: User = Depends(get_current_user))-> Discussion:
-    txt = request.app.state.llm_service.summarize_discussion(create_discussion_request.topic)
-    txt = txt[0].upper() + txt[1:]  # Capitalize only the first letter
-    if txt.endswith('.'):
-        txt = txt[:-1]
-    new_discussion = Discussion(topic=txt)
+    txt = request.app.state.llm_service.summarize_discussion(create_discussion_request.topic,  partial(save_token_usage, db, current_user.id, "summarize"))
+    txt = capitalize_and_remove_period(txt)
+    new_discussion = Discussion(topic=txt, user_id=current_user.id)
     db.add(new_discussion)
     db.commit()
     db.refresh(new_discussion)
     return new_discussion
 
 
-@router.post("/discussions2",  response_model=CreateDiscussionRequest, tags=["Chat"])
-def create_discussion(request: Request, create_discussion_request: CreateDiscussionRequest, db: Session = Depends(get_db)):
-    txt = request.app.state.llm_service.summarize_discussion(create_discussion_request.topic)
-    return {'topic':txt}
-
-
 
 @router.post("/discussions/{id}/messages", response_model=CreateMessageRequest, tags=["Chat"])
 def create_message(id: int,request: CreateMessageRequest, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    # Create a new discussion
-
+    find_discussion_or_404(db, id, current_user)
+    
     # Continue with creating the new message
     new_message = Message(content=request.content, discussion_id=request.discussion_id, sender=request.sender)
     db.add(new_message)
@@ -69,19 +68,37 @@ def create_message(id: int,request: CreateMessageRequest, db: Session = Depends(
 
 
 @router.post("/discussions/suggest", response_model=DiscussionSuggestionResponse, tags=["Chat"])
-def suggest_quesitons(request: Request, db: Session = Depends(get_db)):
+def suggest_quesitons(request: Request, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     return {
         'questions': random.sample(questions.get_topics(),3)
     }
+
+class MessageDiagramDto(BaseModel):
+    name: str
+    type: str
+    data: dict
+    message_id: int
+
+class RagSnippetDto(BaseModel):
+    snippet: str
+    document_name: str
+    page_id: str
+    message_id: int
 
 class MessageDto(BaseModel):
     id: int
     content: str
     sender: str
     show_actions: bool
+    diagrams: List[MessageDiagramDto]
+    rag_snippets: List[RagSnippetDto]
+
+
 
 @router.get("/discussions/{id}/messages", tags=["Chat"])
-def get_msgs(request: Request, id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user))-> Page[MessageDto]:
+def get_msgs(request: Request, id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)) -> Page[MessageDto]:
+    find_discussion_or_404(db, id, current_user)
+    
     query=( db.query(Message)
         .options(joinedload(Message.diagrams), joinedload(Message.rag_snippets))  # Add joinedload for rag_snippets
         .filter(Message.discussion_id == id)
@@ -95,7 +112,9 @@ def get_msgs(request: Request, id: int, db: Session = Depends(get_db), current_u
 
 @router.post("/discussions/{id}/chat", tags=["Chat"])
 def chat(request: Request, id:int,msg: ChatMessage,db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    reply = request.app.state.llm_service.chat(msg.content)
+    find_discussion_or_404(db, id, current_user)
+    
+    reply = request.app.state.llm_service.chat(msg.content, partial(save_token_usage, db, current_user.id, "chat"))
 
     new_message = Message(content=reply, discussion_id=id, sender="ai", show_actions=True)
     db.add(new_message)
@@ -106,18 +125,20 @@ def chat(request: Request, id:int,msg: ChatMessage,db: Session = Depends(get_db)
 
 @router.post("/discussions/{discussion_id}/messages/{message_id}/flashcards", tags=["Chat"])
 def chat(request: Request, discussion_id: int, message_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    find_discussion_or_404(db, discussion_id, current_user)
     message = db.query(Message).filter(Message.id == message_id).first()
-    reply = request.app.state.llm_service.get_flashcards(message.content)
-    asdf = []
-    for x in reply.cards:
-        asdf.append({'term':x.question,'description':x.answer})
+    reply = request.app.state.llm_service.get_flashcards(message.content,  partial(save_token_usage, db, current_user.id, "flashcard_gen"))
+    flashcards = []
+    for card in reply.cards:
+        flashcards.append({'term':card.question, 'description':card.answer})
 
 
-    return {'cards':asdf}
+    return {'cards': flashcards}
 
 
 @router.post("/discussions/{discussion_id}/docchat")
-def doc_chat(request: Request, discussion_id: int, msg: ChatMessage, db: Session = Depends(get_db)):
+def doc_chat(request: Request, discussion_id: int, msg: ChatMessage, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    find_discussion_or_404(db, discussion_id, current_user)
     index = VectorStoreIndex.from_vector_store(request.app.state.qdrant_service.vector_store,  embed_model=Settings.embed_model)
 
     # Note: Can pass in LLM here
@@ -148,12 +169,13 @@ def doc_chat(request: Request, discussion_id: int, msg: ChatMessage, db: Session
 
 @router.post("/discussions/{discussion_id}/timeline", tags=["Chat"])
 def timeline(request: Request,msg: ChatMessage,  discussion_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    events = request.app.state.llm_service.get_timeline_events(msg.content)
+    find_discussion_or_404(db, discussion_id, current_user)
+    events = request.app.state.llm_service.get_timeline_events(msg.content,  partial(save_token_usage, db, current_user.id, "timeline_events"))
     res = []
     
     for idx,x in enumerate(events.segments):
         print(str(idx) + "/" + str(len(events.segments)) + ": "  + x)
-        res.append(request.app.state.llm_service.get_timeline_item(x).model_dump(mode='json'))   
+        res.append(request.app.state.llm_service.get_timeline_item(x, partial(save_token_usage, db, current_user.id, "timeline_items"))).model_dump(mode='json')   
     
 
     new_message = Message(content=f"Sure, here's a timeline for the topic '{msg.content}'", discussion_id=discussion_id, sender="ai")
@@ -168,19 +190,31 @@ def timeline(request: Request,msg: ChatMessage,  discussion_id: int, db: Session
     return new_message
 
 
-@router.post("/discussions/{discussion_id}/concept_map", tags=["Chat"])
+@router.post("/discussions/{discussion_id}/outline", tags=["Chat"])
 def timeline(request: Request,msg: ChatMessage,  discussion_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    entityList = request.app.state.llm_service.get_concept_mapv2_nodes(msg.content)
-    entity_object_list = request.app.state.llm_service.get_concept_mapv2_node_categories(entityList.entities)
+    find_discussion_or_404(db, discussion_id, current_user)
+    entityList = request.app.state.llm_service.get_concept_mapv2_nodes(msg.content, partial(save_token_usage, db, current_user.id, "outline_nodes"))
+    entity_object_list = request.app.state.llm_service.get_concept_mapv2_node_categories(entityList.entities,  partial(save_token_usage, db, current_user.id, "outline_categories"))
     
+    for entity in entity_object_list.entities:
+        entity.name = capitalize_and_remove_period(entity.name)
+        entity.category = capitalize_and_remove_period(entity.category)
+        
     
-    new_message = Message(content=f"Sure, here's a concept map for the topic '{msg.content}'. Click any subtopic to learn more.", discussion_id=discussion_id, sender="ai")
+    new_message = Message(content=f"Sure, here's an outline for the topic '{msg.content}'. Click any subtopic to learn more.", discussion_id=discussion_id, sender="ai")
     db.add(new_message)
     db.commit()
 
-    msg_diagram = MessageDiagram(name = msg.content,type = 'concept_map',data = entity_object_list, message_id = new_message.id)
+    msg_diagram = MessageDiagram(name = msg.content,type = 'outline',data = entity_object_list, message_id = new_message.id)
     db.add(msg_diagram)
     db.commit()
 
     new_message = db.query(Message).options(joinedload(Message.diagrams)).filter(Message.id == new_message.id).first()
     return new_message
+
+
+def find_discussion_or_404(db, discussion_id, current_user):
+    discussion = db.query(Discussion).filter(Discussion.id == discussion_id, Discussion.user_id == current_user.id).first()
+    if not discussion:
+        raise HTTPException(status_code=404, detail="Discussion not found")
+    return discussion

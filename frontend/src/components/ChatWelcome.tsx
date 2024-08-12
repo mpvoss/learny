@@ -3,6 +3,7 @@ import { Typography, Box } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { getEnv } from '../utils/EnvUtil';
 import { AuthProps, Discussion } from '../models';
+import ScaleLoader from 'react-spinners/ScaleLoader';
 const BACKEND_URL = getEnv('VITE_BACKEND_URL');
 
 
@@ -18,9 +19,11 @@ interface ChatWelcomeProps {
 
 const ChatWelcome: React.FC<ChatWelcomeProps> = ({ authProps }) => {
     const [buttonData, setButtonData] = useState<string[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
     const navigate = useNavigate();
 
     useEffect(() => {
+        setIsLoading(true);
         fetch(BACKEND_URL + '/api/discussions/suggest', {
             method: "POST",
             credentials: 'include',
@@ -31,7 +34,8 @@ const ChatWelcome: React.FC<ChatWelcomeProps> = ({ authProps }) => {
             .then(result => result.json())
             .then((data) => {
                 setButtonData(data.questions);
-            });
+            })
+            .then(() => setIsLoading(false));
     }, []);
 
 
@@ -64,7 +68,8 @@ const ChatWelcome: React.FC<ChatWelcomeProps> = ({ authProps }) => {
                     justifyContent: 'space-between',
                     flexWrap: 'wrap'
                 }}>
-                {buttonData.map((buttonText, index) => (
+                      {isLoading && <><ScaleLoader width={10} color="grey" speedMultiplier={0.7} /></>}
+                {!isLoading && buttonData.map((buttonText, index) => (
                     <Box
                         key={index}
                         sx={{

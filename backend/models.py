@@ -1,7 +1,7 @@
 import datetime
 import os
 
-from sqlalchemy import JSON, Boolean, Column, Integer, String, DateTime, ForeignKey, create_engine, Table, Float, Date
+from sqlalchemy import JSON, Boolean, Column, Integer, String, DateTime, ForeignKey, create_engine, Table, Float, Date, func
 from sqlalchemy.orm import relationship, declarative_base, sessionmaker
 from utils.env_init import build_db_url
 
@@ -20,6 +20,8 @@ class Discussion(Base):
     topic = Column(String, index=True)
     created_at = Column(DateTime, default=datetime.datetime.now(datetime.UTC))
     messages = relationship("Message", back_populates="discussion")
+    user_id = Column(String, ForeignKey('users.id'), nullable=False)
+    user = relationship("User", back_populates="discussions")
 
 
 class Message(Base):
@@ -65,6 +67,8 @@ class Note(Base):
     title = Column(String, nullable=False)
     tags = relationship("Tag", secondary=note_tag_association_table, back_populates="notes", lazy='select')
     created_date = Column(Date, default=datetime.datetime.now(datetime.UTC))
+    user_id = Column(String, ForeignKey('users.id'), nullable=False)
+    user = relationship("User", back_populates="notes")
 
 
 class FlashCard(Base):
@@ -79,14 +83,18 @@ class FlashCard(Base):
     last_reviewed_date = Column(Date)
     quality_of_last_review = Column(Integer, default=0)
     created_date = Column(Date, default=datetime.datetime.now(datetime.UTC))
+    user_id = Column(String, ForeignKey('users.id'), nullable=False)
+    user = relationship("User", back_populates="flashcards")
 
 
 class Tag(Base):
     __tablename__ = 'tags'
     id = Column(Integer, primary_key=True)
-    name = Column(String, nullable=False, unique=True)
+    name = Column(String, nullable=False)
     notes = relationship("Note", secondary=note_tag_association_table, back_populates="tags", lazy='select')
     flashcards = relationship("FlashCard", secondary=flashcard_tag_association_table, back_populates="tags", lazy='select')
+    user_id = Column(String, ForeignKey('users.id'), nullable=False)
+    user = relationship("User", back_populates="tags")
 
     # How to cinldue lazy stuff in select
     # flashcard = db.query(Flashcard).options(selectinload(Flashcard.tags)).filter(Flashcard.id == flashcard_id).first()
@@ -99,6 +107,12 @@ class User(Base):
     email = Column(String, nullable=False, unique=True)
     first_name = Column(String, nullable=False)
     last_name = Column(String, nullable=False)
+    discussions = relationship("Discussion", back_populates="user")
+    notes = relationship("Note", back_populates="user")
+    documents = relationship("Document", back_populates="user")
+    flashcards = relationship("FlashCard", back_populates="user")
+    tags = relationship("Tag", back_populates="user")
+    token_usages = relationship("TokenUsage", back_populates="user")
 
 
 class Document(Base):
@@ -107,6 +121,8 @@ class Document(Base):
     # user = Column(Integer, nullable=False)
     name = Column(String, nullable=False)
     created_date = Column(DateTime, default=lambda: datetime.datetime.now(datetime.UTC))
+    user_id = Column(String, ForeignKey('users.id'), nullable=False)
+    user = relationship("User", back_populates="documents")
 
 
 class RagSnippet(Base):
@@ -117,3 +133,15 @@ class RagSnippet(Base):
     page_id = Column(String)
     document_name = Column(String)
     message = relationship("Message", back_populates="rag_snippets")
+
+
+class TokenUsage(Base):
+    __tablename__ = 'token_usages'
+    id = Column(Integer, primary_key=True)
+    user_id = Column(String, ForeignKey('users.id'), nullable=False)
+    prompt_tokens = Column(Integer, nullable=False)
+    completion_tokens = Column(Integer, nullable=False)
+    timestamp = Column(DateTime(timezone=True), server_default=func.now())
+    activity = Column(String, nullable=False)
+
+    user = relationship("User", back_populates="token_usages")

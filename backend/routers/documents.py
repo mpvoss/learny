@@ -2,24 +2,22 @@
 import os
 import tempfile
 from typing import List
-from llama_index.core import VectorStoreIndex, StorageContext
+from llama_index.core import VectorStoreIndex
 from llama_index.core import Settings
 from utils.utils import get_current_user
 from database import get_db
 from fastapi import APIRouter, Depends, File, Query, Request, Response, UploadFile
-from models import Document, Note, Tag, User
+from models import Document, User
 from requests import Session
-from routers.api_models import ChatMessage, CreateNoteRequest, NoteDisplay
 from sqlalchemy.orm import joinedload
 from llama_index.core import SimpleDirectoryReader
 router = APIRouter()
 
+
 @router.get("/documents", tags=["RAG"])
 def get_notes(db: Session = Depends(get_db), tag: List[str] = Query(None), current_user: User = Depends(get_current_user)):
-    docs = db.query(Document).all()
+    docs = db.query(Document).filter(Document.user_id == current_user.id).all()
     return docs
-
-
 
 
 @router.post("/documents")
@@ -32,7 +30,7 @@ async def upload_document(request: Request, db: Session = Depends(get_db),  file
             contents = await file.read()
             f.write(contents)
 
-        new_doc = Document(name=os.path.basename(f.name))
+        new_doc = Document(name=os.path.basename(f.name), user_id=current_user.id)
         db.add(new_doc)
         db.commit()
         db.refresh(new_doc)
@@ -52,7 +50,5 @@ async def upload_document(request: Request, db: Session = Depends(get_db),  file
             db.commit()
             print(e)
             return Response(content="Could not process file upload", status_code=500)
-
-
             
     return 'ok'

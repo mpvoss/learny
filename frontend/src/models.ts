@@ -26,13 +26,13 @@ interface Diagram {
     name: string;
 }
 
-interface ConceptMapEntity {
+interface OutlineEntity {
     name: string;
     category: string;
 }
 
-interface ConceptMapDiagramData {
-    entities: ConceptMapEntity
+interface OutlineDiagramData {
+    entities: OutlineEntity
 }
 
 interface Event {
@@ -130,6 +130,6 @@ export type {
     TimelineData,
     AppState,
     TimelineDiagramData,
-    ConceptMapDiagramData,
-    ConceptMapEntity
+    OutlineDiagramData,
+    OutlineEntity
 }

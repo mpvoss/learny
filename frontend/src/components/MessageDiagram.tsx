@@ -1,7 +1,7 @@
 import React from 'react';
 import { Diagram } from '../models';
 import TimelineDiagram from './TimelineDiagram';
-import ConceptMapDiagram from './ConceptMapDiagram';
+import OutlineDiagram from './OutlineDiagram';
 
 interface MessageDiagramProps{
     diagram: Diagram;
@@ -14,8 +14,8 @@ const MessageDiagram: React.FC<MessageDiagramProps> = ({diagram, handleSendMessa
     if (diagram.type === 'timeline') {
         return <TimelineDiagram {...diagram} />;
     }
-    if (diagram.type === 'concept_map') {
-        return <ConceptMapDiagram diagram={diagram} handleSendMessage={handleSendMessage} activeDiscussionId={activeDiscussionId} />;
+    if (diagram.type === 'outline') {
+        return <OutlineDiagram diagram={diagram} handleSendMessage={handleSendMessage} activeDiscussionId={activeDiscussionId} />;
     }
 };
 

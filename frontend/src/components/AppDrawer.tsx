@@ -116,7 +116,7 @@ const AppDrawer = forwardRef((props: DrawerProps, ref) => {
                     <ListItemText>Notes</ListItemText>
                 </ListItemButton>
                
-                {discussions.map((discussion) => (
+                {discussions!=null && discussions.length>0 && discussions.map((discussion) => (
                     <ListItem
                         key={discussion.id}
                         disablePadding

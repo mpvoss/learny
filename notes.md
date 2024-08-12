@@ -1,3 +1,4 @@
+
 features for fc home page
 - Export would be cool
 - Study button needed
@@ -5,6 +6,7 @@ features for fc home page
 
 
 Pri1
+- close speed dial after button click
 - Make a new favicon
 - User sensitive features....
 - Fix docker and setup for wes
@@ -15,17 +17,29 @@ Pri1
 - Pankaj demo
 Pri2
 - Chat context...last 2 or 3 messages
-- Flashcard study empty screen: "all cards studied" message
-- Flash card load screen..actual "loading..." msg vs empty all the time
+
+
+
+Permission stuff....
+- I think Group access is gonna be a thing
+- This can be implemented via creating groups, adding users to groups, and each resource having group associations
+- If you're ina  group which is associated with a resource, you have access
+- That way you can share your tag with a group you're in, they get all your flashcards. Not true for chats ofc
+- Everything still has an owner. 
+WTF FLASHCARD STATUS LOL....needs to be denormalized I guess
+That will come later
+The point is that RLS might interfere with the other features
+Like, it's a committment
+Don't want to code it that way until I know more about requirements
+Easy to put stuff in app logic now and modify later if a clear way to simply is found
+
+
 
 Matthew as a User
 - Pagination
 - FC
-  - Need loading... on flashcard load....it is slow sometimes
   - Not paginated
   - Drop down + study button ugly, lookup stuff to steal for UI
-  - Plus button doesn't work, disable or add feature
-  - Not using last studied to pull cards
   - Change design of page? list of cards with answers not that helpful...maybe pick a category and it tells you how many are there and due for study?? 
 
 //---------------------------------
@@ -82,35 +96,7 @@ Data models
 
 
 //-------------------------
-Easy deploy design
-docker image
- - react files served on one port
- - fast api on another port
- - sqllite db?
-
-docker compose
-- supabase (auth + postgres)
-- fastapi with static files
-
-docker steps
-- Want supabase to come up. Check it's happy
-- Then can try to turn on learny and talk to db
-- Then can test react -> learny -> db
-
-Let's take a few steps back
-- Docker != docker compose
-- Like...if we're distributing this with docker compose then 
-- I think I'll have a sep folder
-- Clone project, cd in, run docker-compose-up
-There's just one image I'll put on dockerhub and then it's free
-supabase is there already
-
-
-
-
-//-------------------------
 MVP
-- App should be user-sensitive (different data for different users)
 - Timeline -> give min width and scroll
 - Timeline editing
 - Diagrams screen? Able to save from chat
@@ -162,7 +148,7 @@ Might need this first
 
 Create migration 
 
-`alembic revision --autogenerate -m "Initial migration"`  
+`alembic revision --autogenerate -m "001_Initial migration"`  
 
 Run it
 

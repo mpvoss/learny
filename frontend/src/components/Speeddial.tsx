@@ -1,3 +1,4 @@
+import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted';
 import AccountTreeIcon from '@mui/icons-material/AccountTree';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import PsychologyAltIcon from '@mui/icons-material/PsychologyAlt';
@@ -33,7 +34,20 @@ const BasicSpeedDial: React.FC<BasicSpeedDialProps> = ({ authProps, setIsThinkin
     const [dialogDesc, setDialogDesc] = React.useState('');
     const [activeDialog, setActiveDialog] = React.useState('');
     const [docChatEnabled, setDocChatEnabled] = React.useState(false);
-    // const [isSwitchOn, setIsSwitchOn] = React.useState(false);
+    const [speedDialOpen, setSpeedDialOpen] = React.useState(false);
+
+    const handleSpeeddialOpen = () => {
+        console.log("gonna open bro")
+        // if (!isThinking){
+
+        //     setSpeedDialOpen(true);
+        // }
+    };
+    
+    const handleSpeeddialClose = () => {
+        console.log("gonna close bro")
+        setSpeedDialOpen(false);
+    };
 
     const handleTextChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setDialogInput(event.target.value);
@@ -41,16 +55,17 @@ const BasicSpeedDial: React.FC<BasicSpeedDialProps> = ({ authProps, setIsThinkin
 
     const handleSubmit = () => {
         setIsThinking(true);
-
+        setSpeedDialOpen(false);
         if (activeDialog === "questionHelper") {
             getQuestions();
         }
         else if (activeDialog === "timeline") {
             getTimeline();
         }
-        else if (activeDialog === "diagram") {
-            getDiagram();
+        else if (activeDialog === "outline") {
+            getOutline();
         }
+     
     }
 
     useEffect(() => {
@@ -102,10 +117,10 @@ const BasicSpeedDial: React.FC<BasicSpeedDialProps> = ({ authProps, setIsThinkin
         )
     }
 
-    const getDiagram = () => {
+    const getOutline = () => {
         console.log(authProps);
-        saveUserMessage("Can you make a concept map over this topic: " + dialogInput + "?", activeDiscussionId)
-        fetch(BACKEND_URL + '/api/discussions/' + activeDiscussionId + '/concept_map', {
+        saveUserMessage("Can you make a outline over this topic: " + dialogInput + "?", activeDiscussionId)
+        fetch(BACKEND_URL + '/api/discussions/' + activeDiscussionId + '/outline', {
             method: "POST",
             credentials: "include",
             headers: {
@@ -188,10 +203,10 @@ const BasicSpeedDial: React.FC<BasicSpeedDialProps> = ({ authProps, setIsThinkin
         }
     }
 
-    const handleDiagramClick = () => {
-        setActiveDialog("diagram")
-        setDialogTitle("Generate Diagram");
-        setDialogDesc("Choose a topic to get a Concept Map from the AI");
+    const handleOutlineClick = () => {
+        setActiveDialog("outline")
+        setDialogTitle("Generate Outline");
+        setDialogDesc("Choose a topic to get an outline from the AI");
         setOpen(true);
     }
 
@@ -219,7 +234,7 @@ const BasicSpeedDial: React.FC<BasicSpeedDialProps> = ({ authProps, setIsThinkin
                     },
                 }}
             >
-                <DialogTitle>{dialogTitle}</DialogTitle>
+                {/* <DialogTitle>{dialogTitle}</DialogTitle> */}
                 <DialogContent>
                     <DialogContentText>
                         {dialogDesc}
@@ -272,6 +287,8 @@ const BasicSpeedDial: React.FC<BasicSpeedDialProps> = ({ authProps, setIsThinkin
 
             <SpeedDial
                 ariaLabel="SpeedDial basic example"
+                onOpen={handleSpeeddialOpen}
+                onClose={handleSpeeddialClose}
                 sx={{ position: 'fixed', bottom: 100, right: 32 }}
                 icon={<AutoAwesomeIcon />}
             >
@@ -290,11 +307,11 @@ const BasicSpeedDial: React.FC<BasicSpeedDialProps> = ({ authProps, setIsThinkin
                     tooltipTitle="Timeline"
                 />
                 <SpeedDialAction
-                    key="diagram"
-                    icon={<AccountTreeIcon />}
+                    key="outline"
+                    icon={<FormatListBulletedIcon />}
                     tooltipOpen
-                    onClick={handleDiagramClick}
-                    tooltipTitle="Diagram"
+                    onClick={handleOutlineClick}
+                    tooltipTitle="Outline"
                 />
                  <SpeedDialAction
                     key="docs"

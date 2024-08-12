@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Box, Card, CardContent, IconButton, Tooltip, Typography } from '@mui/material';
-import { ConceptMapEntity, Diagram } from '../models';
+import { OutlineEntity, Diagram } from '../models';
 import Masonry from '@mui/lab/Masonry';
 import { Link } from '@mui/material';
 import PeopleIcon from '@mui/icons-material/People';
@@ -57,13 +57,13 @@ const getIcon = (name: string) => {
 }
 
 
-interface ConceptMapDiagramProps {
+interface OutlineDiagramProps {
     diagram: Diagram;
     activeDiscussionId: number;
     handleSendMessage: (msg: string, discussionId:number) => void;
 }
 
-const ConceptMapDiagram: React.FC<ConceptMapDiagramProps> = ({ diagram, handleSendMessage, activeDiscussionId }) => {
+const OutlineDiagram: React.FC<OutlineDiagramProps> = ({ diagram, handleSendMessage, activeDiscussionId }) => {
     const [mapData, setMapData] = useState({} as { [key: string]: any });
 
 
@@ -88,7 +88,7 @@ const ConceptMapDiagram: React.FC<ConceptMapDiagramProps> = ({ diagram, handleSe
             return;
         }
 
-        let entities = diagram.data.entities as ConceptMapEntity[];
+        let entities = diagram.data.entities as OutlineEntity[];
 
         const groupByType = entities.reduce((acc: { [key: string]: any }, entity) => {
             const category = entity['category'];
@@ -144,5 +144,5 @@ const ConceptMapDiagram: React.FC<ConceptMapDiagramProps> = ({ diagram, handleSe
     );
 };
 
-export default ConceptMapDiagram;
+export default OutlineDiagram;
 

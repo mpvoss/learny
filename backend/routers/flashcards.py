@@ -28,9 +28,9 @@ class FlashcardSaveRequest(BaseModel):
 @router.get("/flashcards", response_model=List[FlashcardDisplay], tags=["Flashcards"])
 def get_flashcards(db: Session = Depends(get_db), tag: List[str] = Query(None), due_filter: bool=False, current_user: User = Depends(get_current_user)):
     if tag:
-        flashcards = db.query(FlashCard).join(FlashCard.tags).filter(Tag.name.in_(tag)).options(joinedload(FlashCard.tags)).all()
+        flashcards = db.query(FlashCard).join(FlashCard.tags).filter(Tag.name.in_(tag)).filter(FlashCard.user_id == current_user.id).options(joinedload(FlashCard.tags)).all()
     else:
-        flashcards = db.query(FlashCard).options(joinedload(FlashCard.tags)).all()
+        flashcards = db.query(FlashCard).filter(FlashCard.user_id == current_user.id).options(joinedload(FlashCard.tags)).all()
     
     current_date = datetime.datetime.now(datetime.timezone.utc).date()
     
@@ -53,8 +53,9 @@ def filter_flashcards_due(flashcards:List[FlashCard], current_date: datetime.dat
 @router.post("/flashcards", tags=["Flashcards"])
 def save_flashcards(flashcardSaveRequest: FlashcardSaveRequest, db: Session = Depends(get_db), tag: List[str] = Query(None), current_user: User = Depends(get_current_user)):
     # if tag doesn't exist, create it
-    new_tag = Tag(name=flashcardSaveRequest.tag)
-    db_tag = db.query(Tag).filter(Tag.name == new_tag.name).first()
+    new_tag = Tag(name=flashcardSaveRequest.tag, user_id=current_user.id)
+    
+    db_tag = db.query(Tag).filter(Tag.name == new_tag.name, Tag.user_id==current_user.id).first()
     
     if not db_tag:
         db.add(new_tag)
@@ -64,7 +65,7 @@ def save_flashcards(flashcardSaveRequest: FlashcardSaveRequest, db: Session = De
         new_tag = db_tag
 
     for flashcard in flashcardSaveRequest.flashCards:
-        new_flashcard = FlashCard(description=flashcard.description, term=flashcard.term)
+        new_flashcard = FlashCard(description=flashcard.description, term=flashcard.term, user_id=current_user.id)
         new_flashcard.tags.append(new_tag)
         db.add(new_flashcard)
     db.commit()
@@ -73,7 +74,7 @@ def save_flashcards(flashcardSaveRequest: FlashcardSaveRequest, db: Session = De
 
 @router.post("/flashcards/{id}/review", tags=["Flashcards"])
 def review_flashcard(id: int, flascardReview: FlashcardReview, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    flashcard = db.query(FlashCard).filter(FlashCard.id == id).first()
+    flashcard = db.query(FlashCard).filter(FlashCard.id == id, FlashCard.user_id==current_user.id).first()
     quality = flascardReview.quality
     if not flashcard:
         raise HTTPException(status_code=404, detail="Item not found")
@@ -110,36 +111,36 @@ def review_flashcard(id: int, flascardReview: FlashcardReview, db: Session = Dep
     return {"message": "Flashcard review saved successfully"}
 
 
-@router.post("/flashcards/upload", tags=["Flashcards"])
-def upload_flashcards(file: UploadFile = File(...), db: Session = Depends(get_db)):
-    # Read the contents of the uploaded file
-    contents = file.file.read().decode("utf-8")
+# @router.post("/flashcards/upload", tags=["Flashcards"])
+# def upload_flashcards(file: UploadFile = File(...), db: Session = Depends(get_db)):
+#     # Read the contents of the uploaded file
+#     contents = file.file.read().decode("utf-8")
     
-    # Split the contents into lines
-    lines = contents.split("\n")
+#     # Split the contents into lines
+#     lines = contents.split("\n")
     
-    # Remove any empty lines
-    lines = [line for line in lines if line.strip()]
+#     # Remove any empty lines
+#     lines = [line for line in lines if line.strip()]
     
-    # Create the "prod" tag if it doesn't exist
-    tag_name = "prod"
-    db_tag = db.query(Tag).filter(Tag.name == tag_name).first()
-    if not db_tag:
-        new_tag = Tag(name=tag_name)
-        db.add(new_tag)
-        db.commit()
-        db.refresh(new_tag)
-    else:
-        new_tag = db_tag
+#     # Create the "prod" tag if it doesn't exist
+#     tag_name = "prod"
+#     db_tag = db.query(Tag).filter(Tag.name == tag_name).first()
+#     if not db_tag:
+#         new_tag = Tag(name=tag_name)
+#         db.add(new_tag)
+#         db.commit()
+#         db.refresh(new_tag)
+#     else:
+#         new_tag = db_tag
     
-    # Parse the flashcards and save them to the database
-    for line in lines:
-        term, description = line.split("\t")
-        flashcard = FlashCard(term=term, description=description)
-        flashcard.tags.append(new_tag)
-        db.add(flashcard)
+#     # Parse the flashcards and save them to the database
+#     for line in lines:
+#         term, description = line.split("\t")
+#         flashcard = FlashCard(term=term, description=description)
+#         flashcard.tags.append(new_tag)
+#         db.add(flashcard)
     
-    db.commit()
+#     db.commit()
     
-    return {"message": "Flashcards uploaded successfully"}
+#     return {"message": "Flashcards uploaded successfully"}
 

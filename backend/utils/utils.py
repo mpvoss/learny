@@ -7,7 +7,7 @@ from fastapi import Depends, HTTPException, Request, status
 from jose import JWTError, jwt
 from requests import Session
 from database import get_db
-from models import User
+from models import TokenUsage, User
 
 SECRET_KEY = os.getenv("SUPABASE_JWT_SECRET_KEY", None)
 ALGORITHM = "HS256" 
@@ -18,9 +18,8 @@ def get_current_user(request: Request, db: Session = Depends(get_db)):
     try:
         user = get_current_user_work(token, db)
 
-        # TODO add real rbac
-        if user.email != 'matthewpvoss@gmail.com':
-            logging.error("Not matthew, rejecting")
+        if user.role != 'USER' and user.role != 'SUPER_USER':
+            logging.error("Invalid role, rejecting")
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Insufficient permissions",
@@ -59,9 +58,10 @@ def get_current_user_work( token: Optional[str], db: Session):
 
         user = db.query(User).filter(User.id == uuid).first()
 
+        # If there are no users, create a super user (otherwise create a pending user)
         if not user:
-            logging.error("User not found, creating")
-            role = 'SUPER_USER' if email == 'matthewpvoss@gmail.com' else 'PENDING_USER'
+            total_count = db.query(User).count()
+            role = 'SUPER_USER' if total_count == 0 else 'PENDING_USER'
             user = User(id=uuid, email=email, role=role, first_name='firstname', last_name='lastname')
             db.add(user)
             db.commit()
@@ -76,3 +76,15 @@ def get_current_user_work( token: Optional[str], db: Session):
             headers={"WWW-Authenticate": "Bearer"},
         )
 
+
+def capitalize_and_remove_period(txt: str):
+    txt = txt[0].upper() + txt[1:]  # Capitalize only the first letter
+    if txt.endswith('.'):
+        txt = txt[:-1]
+    return txt
+
+
+def save_token_usage(db: Session, user_id: str, activity:str, usage:dict):
+    tc = TokenUsage(user_id=user_id, prompt_tokens=usage.prompt_tokens, completion_tokens=usage.completion_tokens, activity=activity)
+    db.add(tc)
+    db.commit()
