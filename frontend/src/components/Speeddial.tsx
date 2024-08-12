@@ -1,5 +1,4 @@
 import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted';
-import AccountTreeIcon from '@mui/icons-material/AccountTree';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import PsychologyAltIcon from '@mui/icons-material/PsychologyAlt';
 import FolderSpecialIcon from '@mui/icons-material/FolderSpecial';
@@ -30,11 +29,10 @@ const BasicSpeedDial: React.FC<BasicSpeedDialProps> = ({ authProps, setIsThinkin
     const [open, setOpen] = React.useState(false);
     const [documentDialogOpen, setDocumentDialogOpen] = React.useState(false);
     const [dialogInput, setDialogInput] = React.useState('');
-    const [dialogTitle, setDialogTitle] = React.useState('');
     const [dialogDesc, setDialogDesc] = React.useState('');
     const [activeDialog, setActiveDialog] = React.useState('');
     const [docChatEnabled, setDocChatEnabled] = React.useState(false);
-    const [speedDialOpen, setSpeedDialOpen] = React.useState(false);
+    const [_speedDialOpen, setSpeedDialOpen] = React.useState(false);
 
     const handleSpeeddialOpen = () => {
         console.log("gonna open bro")
@@ -176,14 +174,12 @@ const BasicSpeedDial: React.FC<BasicSpeedDialProps> = ({ authProps, setIsThinkin
 
     const handleQuestionHelperClick = () => {
         setActiveDialog("questionHelper")
-        setDialogTitle("Question Helper");
         setDialogDesc("Enter a topic to get suggested questions");
         setOpen(true);
     }
 
     const handleTimelineClick = () => {
         setActiveDialog("timeline")
-        setDialogTitle("Generate Timeline");
         setDialogDesc("Enter a topic to get an AI Generated Timeline");
         setOpen(true);
     }
@@ -205,7 +201,6 @@ const BasicSpeedDial: React.FC<BasicSpeedDialProps> = ({ authProps, setIsThinkin
 
     const handleOutlineClick = () => {
         setActiveDialog("outline")
-        setDialogTitle("Generate Outline");
         setDialogDesc("Choose a topic to get an outline from the AI");
         setOpen(true);
     }
@@ -217,9 +212,7 @@ const BasicSpeedDial: React.FC<BasicSpeedDialProps> = ({ authProps, setIsThinkin
         setDocumentDialogOpen(false);
     }
 
-    const handleDocDialogSubmit = () => {
-        // todo
-    }
+
 
     return (
         <>
