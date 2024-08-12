@@ -32,7 +32,9 @@ def upgrade() -> None:
             CREATE TABLE tags_new (
                 id INTEGER NOT NULL,
                 name VARCHAR,
-                PRIMARY KEY (id)
+                user_id INTEGER,
+                PRIMARY KEY (id),
+                FOREIGN KEY(user_id) REFERENCES users(id)
             );
         """)
         op.execute("INSERT INTO tags_new SELECT * FROM tags;")
