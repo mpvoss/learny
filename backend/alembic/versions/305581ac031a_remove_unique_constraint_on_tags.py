@@ -27,23 +27,18 @@ def upgrade() -> None:
             batch_op.drop_constraint('tags_name_key', type_='unique')
     # Sql lite...can't drop constraints so we have to recreate the table
     else:
+        op.execute("PRAGMA foreign_keys=off;")
         op.execute("""
-        PRAGMA foreign_keys=off;
-
-        CREATE TABLE tags_new (
-            id INTEGER NOT NULL,
-            name VARCHAR,
-            PRIMARY KEY (id)
-        );
-
-        INSERT INTO tags_new SELECT * FROM tags;
-
-        DROP TABLE tags;
-
-        ALTER TABLE tags_new RENAME TO tags;
-
-        PRAGMA foreign_keys=on;
-    """)
+            CREATE TABLE tags_new (
+                id INTEGER NOT NULL,
+                name VARCHAR,
+                PRIMARY KEY (id)
+            );
+        """)
+        op.execute("INSERT INTO tags_new SELECT * FROM tags;")
+        op.execute("DROP TABLE tags;")
+        op.execute("ALTER TABLE tags_new RENAME TO tags;")
+        op.execute("PRAGMA foreign_keys=on;")
 
     # ### end Alembic commands ###
 
