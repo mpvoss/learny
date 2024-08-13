@@ -69,7 +69,7 @@ def get_current_user_work( token: Optional[str], db: Session):
 
         return user
     except JWTError as e:
-        logging.error("Invalid token", e)
+        logging.error("Invalid token: %s", e)
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Could not validate credentials",
