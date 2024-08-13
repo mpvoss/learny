@@ -16,35 +16,48 @@ export default function AppMain() {
   const [session, setSession] = useState<Session>()
   const [userProps, setUserProps] = useState<UserProps>()
   const [isLoading, setIsLoading] = useState(true);
+  const [getSessionToggle, setGetSessionToggle] = useState(false);
+
+
+
+  const loadSesh = () => {
+   
+    fetch(backendUrl + '/api/session', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${session?.access_token}`
+      },
+      credentials: 'include',
+      body: JSON.stringify({ session }),
+    })
+      .then(response => response.json())
+      .then(data => {
+        // Handle the response data
+        const userPropsData = data as UserProps;
+        setUserProps(userPropsData);
+        setIsLoading(false);
+      })
+      .catch(error => {
+        // Handle any errors
+        console.error('Error:', error);
+        setIsLoading(false);
+      });
+  }
+
+  useEffect(() => {
+    loadSesh();
+  }, [getSessionToggle])
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
 
       if (session != null) {
         setSession(session);
+        setGetSessionToggle(!getSessionToggle)
       }
+      
 
-      fetch(backendUrl + '/api/session', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${session?.access_token}`
-        },
-        credentials: 'include',
-        body: JSON.stringify({ session }),
-      })
-        .then(response => response.json())
-        .then(data => {
-          // Handle the response data
-          const userPropsData = data as UserProps;
-          setUserProps(userPropsData);
-          setIsLoading(false);
-        })
-        .catch(error => {
-          // Handle any errors
-          console.error('Error:', error);
-          setIsLoading(false);
-        });
 
     })
 
@@ -53,6 +66,7 @@ export default function AppMain() {
     } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session != null) {
         setSession(session)
+        setGetSessionToggle(!getSessionToggle)
       }
     })
 
@@ -96,7 +110,7 @@ export default function AppMain() {
             </Toolbar>
           </Container>
         </AppBar>
-
+        
         <ScaleLoader width={10} color="grey" speedMultiplier={0.7} />
       </Box>
     )
@@ -113,14 +127,14 @@ export default function AppMain() {
         }}
       >
         <Box bgcolor="background.paper" p={2}>
-          <Auth supabaseClient={supabase} appearance={{ theme: ThemeSupa }} />
+          <Auth supabaseClient={supabase} redirectTo={import.meta.env.VITE_SUPABASE_REDIRECT_TO} appearance={{ theme: ThemeSupa }} />
         </Box>
       </Box>
 
     )
   }
   else {
-    return userProps != null && session != null &&
-      <AppHolder authProps={{ token: session.access_token }} userProps={userProps}></AppHolder>
+    return userProps != null && session != null &&     
+      <AppHolder authProps={{ token: session.access_token }} userProps={userProps}> </AppHolder>
   }
 }

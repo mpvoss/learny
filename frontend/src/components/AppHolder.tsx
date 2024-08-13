@@ -55,6 +55,9 @@ function AppHolder({ authProps, userProps }: { authProps: AuthProps, userProps: 
 
     const handleLogout = () => {
         supabase.auth.signOut();
+        setTimeout(() => {
+            location.reload();
+        }, 2000);
     }
 
     const refreshDiscussions = () => {
@@ -145,7 +148,10 @@ function AppHolder({ authProps, userProps }: { authProps: AuthProps, userProps: 
                         <Box sx={{ flexGrow: 0 }}>
                             <Tooltip title="Open settings">
                                 <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
+                                    {userProps && userProps.email &&
                                     <Avatar alt={userProps.email.toUpperCase()} src="/static/images/avatar/2.jpg" />
+                                    }
+
                                 </IconButton>
                             </Tooltip>
                             <Menu

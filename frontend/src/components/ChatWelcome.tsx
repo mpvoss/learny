@@ -51,9 +51,9 @@ const ChatWelcome: React.FC<ChatWelcomeProps> = ({ authProps }) => {
             body: JSON.stringify({ topic: topic })
         })
             .then(result => result.json())
-            
+
             .then((data: Discussion) => {
-                navigate(`/chats/${data.id}`,{ state: { firstMessage: 'Can you tell me more about the following: ' + topic }});
+                navigate(`/chats/${data.id}`, { state: { firstMessage: 'Can you tell me more about the following: ' + topic } });
             })
     }
 
@@ -68,7 +68,17 @@ const ChatWelcome: React.FC<ChatWelcomeProps> = ({ authProps }) => {
                     justifyContent: 'space-between',
                     flexWrap: 'wrap'
                 }}>
-                      {isLoading && <><ScaleLoader width={10} color="grey" speedMultiplier={0.7} /></>}
+                {isLoading && (
+                    <Box
+                        sx={{
+                            display: 'flex',
+                            justifyContent: 'center',
+                            width: '100%',
+                        }}
+                    >
+                        <ScaleLoader width={10} color="grey" speedMultiplier={0.7} />
+                    </Box>
+                )}
                 {!isLoading && buttonData.map((buttonText, index) => (
                     <Box
                         key={index}
