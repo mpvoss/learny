@@ -10,5 +10,5 @@ if (import.meta.env.VITE_APP_MODE != 'docker') {
 
     supabase = createClient(supabaseUrl, supabaseKey);
 }
-export default supabase
+export default supabase as ReturnType<typeof createClient>;
         
