@@ -71,6 +71,7 @@ jobs:
       env:
         VITE_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
         VITE_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+        VITE_SUPABASE_REDIRECT_TO: https://mpvoss.com
         VITE_BACKEND_URL: https://mpvoss.com
       run: |
         cd frontend
