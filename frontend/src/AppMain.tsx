@@ -135,6 +135,6 @@ export default function AppMain() {
   }
   else {
     return userProps != null && session != null &&     
-      <AppHolder authProps={{ token: session.access_token }} userProps={userProps}> </AppHolder>
+      <AppHolder authProps={{ token: session.access_token }} userProps={userProps}></AppHolder>
   }
 }
