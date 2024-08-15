@@ -430,6 +430,7 @@ const Chat: React.FC<ChatProps> = ({ authProps, appState, setAppState, onNewDisc
                             >
                                 <SendIcon fontSize="inherit" />
                             </IconButton>
+                            {location.pathname !=='/' &&
                             <BasicSpeedDial
                                 authProps={authProps}
                                 appState={appState}
@@ -442,6 +443,7 @@ const Chat: React.FC<ChatProps> = ({ authProps, appState, setAppState, onNewDisc
                                 activeDiscussionId={discussionId}
                                 handleNewMessage={handleNewMessage}
                             ></BasicSpeedDial>
+                        }
                         </Box>
                     </Box>
                 </Box>
