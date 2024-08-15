@@ -79,7 +79,7 @@ const ChatWelcome: React.FC<ChatWelcomeProps> = ({ authProps }) => {
                         <ScaleLoader width={10} color="grey" speedMultiplier={0.7} />
                     </Box>
                 )}
-                {!isLoading && buttonData.map((buttonText, index) => (
+                {!isLoading && buttonData && buttonData.map((buttonText, index) => (
                     <Box
                         key={index}
                         sx={{

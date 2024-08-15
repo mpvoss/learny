@@ -1,3 +1,62 @@
+Email...
+- SES has good reputation, is cheap, already using AWS
+- Want to use Supabase, want SMTP support
+----> THIS IS SEND ONLY
+Forwarding? 
+
+Basically...being able to send emails programattically and having an inbox are two diff things
+
+https://aws.amazon.com/blogs/messaging-and-targeting/forward-incoming-email-to-an-external-destination/
+
+So this is an a+ long term solution
+
+What is a fast and easy one that will get me notifications from supabase
+
+zoho - bad reputation, cheap
+mxroute - pricy but good
+cloud fare - have to have domain registered thru them
+aight - purelymail is dirt cheap. I like it. 
+
+
+Step 1: Sign Up for Purelymail
+First, you need to create an account with Purelymail if you haven't already done so. During the setup process, you'll be asked to add your domain.
+
+Step 2: Configure DNS Settings in Route 53
+After adding your domain to Purelymail, you will receive a set of DNS records to configure. These typically include:
+
+MX Records: These records tell other mail servers how to find your email server. Purelymail will provide the values you need to enter.
+
+SPF Record (TXT): This DNS record helps prevent other people from sending mail on behalf of your domain. It’s a form of email validation.
+
+DKIM Record (CNAME): DomainKeys Identified Mail (DKIM) records increase the security of your emails by allowing receiving servers to check that the email was indeed sent from your domain and hasn't been tampered with.
+
+DMARC Record (TXT): Domain-based Message Authentication, Reporting & Conformance (DMARC) uses SPF and DKIM to determine the authenticity of an email message.
+
+Here’s how you can add these records in AWS Route 53:
+
+Log in to the AWS Management Console
+Go to the Route 53 service.
+Edit DNS Settings for Your Domain
+Navigate to the Hosted Zones page and select your domain.
+Click Create Record Set or Add record depending on your console version.
+For each record provided by Purelymail (MX, SPF, DKIM, DMARC), add the corresponding type (MX, TXT, CNAME), provide the values given by Purelymail, and save the record.
+Example:
+Type: MX
+Value: 10 mx1.purelymail.com.
+Step 3: Verify the Setup
+After updating the DNS records, it might take some time (up to 48 hours) for these changes to propagate across the internet. You can verify the setup in your Purelymail dashboard, which often features tools to check if the DNS records are correctly set.
+
+Step 4: Configure Your Email Client
+Once your DNS settings are correctly configured and propagated, you can use your admin@mydomain.com email with any standard email client (like Outlook, Apple Mail, or Thunderbird), or access it via webmail provided by Purelymail.
+
+Final Considerations
+Propagation Time: DNS changes may take some time to propagate. It’s normal for this to take anywhere from a few minutes to several hours.
+Testing: Send a few test emails to and from your new admin@mydomain.com to ensure everything is working correctly.
+Security Settings: Review the security features offered by Purelymail and ensure you configure them to protect your email communications.
+https://purelymail.com/docs/setup/phone#:~:text=Gmail%20App%20%23,from%20our%20technical%20setup%20page.
+
+
+
 
 features for fc home page
 - Export would be cool
