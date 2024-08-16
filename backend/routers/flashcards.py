@@ -121,6 +121,8 @@ def review_flashcard(id: int, flascardReview: FlashcardReview, db: Session = Dep
     
 #     # Remove any empty lines
 #     lines = [line for line in lines if line.strip()]
+
+
     
 #     # Create the "prod" tag if it doesn't exist
 #     tag_name = "prod"
@@ -136,7 +138,10 @@ def review_flashcard(id: int, flascardReview: FlashcardReview, db: Session = Dep
 #     # Parse the flashcards and save them to the database
 #     for line in lines:
 #         term, description = line.split("\t")
-#         flashcard = FlashCard(term=term, description=description)
+#         existing_flashcard = db.query(FlashCard).filter(FlashCard.term == term).first()
+#         if existing_flashcard:
+#             continue  # Skip this flashcard if it already exists
+#         flashcard = FlashCard(term=term, description=description, user_id='000262e7-84ad-4a35-ad64-282d0f031123')
 #         flashcard.tags.append(new_tag)
 #         db.add(flashcard)
     

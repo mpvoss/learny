@@ -20,7 +20,7 @@ docker run -v ./learny_vol:/learny_vol -p 8005:8005 --env-file sample.env -t lea
 
 ##  🌟 Introduction
 
-Language models are vast oceans of knowledge, and Learny is your compass. Spark curiosity, visualize with concept maps, build mastery with spaced repition flash cards, measure progress with quizzes. 
+Language models are vast oceans of knowledge, and Learny is your compass. Spark curiosity, visualize with outlines, build mastery with spaced repition flash cards, measure progress with quizzes. 
 
 <p align="center">
   <img src = "./docs/chat.png" >
@@ -45,7 +45,7 @@ asdf
 
 Seeing how concepts fit together, making study materials and practicing has never been easier.
 - **Curiosity Engine:** Auto-generate questions that probe deep and unveiling insights to expand your knowledge
-- **Concept Maps:** Outline the breadth of a topic in one click and see the whole picture
+- **Outlines:** Outline the breadth of a topic in one click and see the whole picture
 - **Flash Cards:** Instantly transform any AI response into flashcards with just a few clicks
 - **Spaced Repition Study:** Master new material effectively using SuperMemo spaced repetition algorithms
 - **Quizzes:** Evaluate your understanding and track your progress with auto-generated quizzes 

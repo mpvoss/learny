@@ -1,3 +1,31 @@
+1. About writeup for github
+2. Video recording for demo
+4. Dockerhub setup
+6. Test docker pull on laptop
+2.1 GB starting point...
+
+
+14M	openstackclient
+15M	grpc
+15M	uvloop
+17M	networkx
+20M	openstack
+24M	onnxruntime
+37M	numpy.libs
+39M	numpy
+63M	llama_index
+68M	onnx
+68M	sympy
+75M	pandas
+
+gone
+129M	pyarrow
+81M	lance
+66M	lancedb
+23M	faker
+
+19	AR 95-1 - annotated.pdf	2024-08-06 16:59:24.889	000262e7-84ad-4a35-ad64-282d0f031123
+123345456
 Email...
 - SES has good reputation, is cheap, already using AWS
 - Want to use Supabase, want SMTP support
@@ -77,7 +105,7 @@ Pri1
 Pri2
 - Chat context...last 2 or 3 messages
 
-
+Test query: what are nvg currency requirements?
 
 Permission stuff....
 - I think Group access is gonna be a thing

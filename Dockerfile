@@ -7,10 +7,10 @@ COPY frontend .
 RUN npm run build:docker
 
 # Stage 2: Serve the React application and the FastAPI backend
-FROM tiangolo/uvicorn-gunicorn-fastapi:python3.11
+FROM tiangolo/uvicorn-gunicorn-fastapi:python3.11-slim
 WORKDIR /app
 
-RUN apt-get update && apt-get install -y nginx
+RUN apt-get update && apt-get install -y gcc nginx && rm -rf /var/lib/apt/lists/*
 
 # Copy the static React site to the appropriate directory
 COPY --from=build /app/dist /var/www/html
