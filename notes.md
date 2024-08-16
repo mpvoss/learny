@@ -2,7 +2,8 @@
 2. Video recording for demo
 4. Dockerhub setup
 6. Test docker pull on laptop
-2.1 GB starting point...
+
+Pylance is a dep dependency, brings in pyarrow et all
 
 
 14M	openstackclient

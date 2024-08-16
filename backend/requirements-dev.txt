@@ -75,6 +75,7 @@ jsonschema-specifications==2023.12.1
 keystoneauth1==5.6.0
 keystonemiddleware==10.7.0
 kombu==5.3.7
+lancedb==0.11.0
 langchain-core==0.1.52
 langchain-openai==0.1.7
 langchain-text-splitters==0.0.2
@@ -168,6 +169,7 @@ pydantic_core==2.18.2
 pydot==2.0.0
 Pygments==2.18.0
 PyJWT==2.8.0
+pylance==0.15.0
 pyOpenSSL==24.1.0
 pyparsing==3.1.2
 pypdf==4.2.0
