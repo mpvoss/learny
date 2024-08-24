@@ -1,50 +1,63 @@
 from typing import List
 from pydantic import BaseModel
 
+
 class CreateDiscussionRequest(BaseModel):
     topic: str
     id: int
 
+
 class CreateDiscussionModel(BaseModel):
     topic: str
 
+
 class CreateNoteRequest(BaseModel):
     content: str
-    tag: str 
+    tag: str
+
 
 class ChatMessage(BaseModel):
     content: str
+
 
 class QuizDraftRequest(BaseModel):
     type: str
     topic: str
 
+
 class FlashcardReview(BaseModel):
     quality: int
+
 
 class CreateMessageRequest(BaseModel):
     content: str
     discussion_id: int
     sender: str
 
+
 class DiscussionSuggestionResponse(BaseModel):
     questions: List[str]
+
 
 class CreateTagRequest(BaseModel):
     name: str
 
+
 class TagBase(BaseModel):
     id: int
     name: str
+
 
 class FlashcardBase(BaseModel):
     id: int
     question: str
     answer: str
 
+
 class NoteBase(BaseModel):
     id: int
     content: str
+
 
 # Nested Pydantic models for API output
 class FlashcardDisplay(BaseModel):
@@ -53,6 +66,7 @@ class FlashcardDisplay(BaseModel):
     description: str
     tags: List[TagBase] = []
 
+
 class NoteDisplay(BaseModel):
     id: int
     content: str
@@ -60,8 +74,9 @@ class NoteDisplay(BaseModel):
     tags: List[TagBase] = []
 
     class Config:
-        from_attributes=True
-        orm_mode=True
+        from_attributes = True
+        orm_mode = True
+
 
 class TagDisplay(BaseModel):
     id: int

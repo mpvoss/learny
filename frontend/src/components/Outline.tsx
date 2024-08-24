@@ -1,16 +1,12 @@
-import { Button } from '@mui/material';
-import React, { useState } from 'react';
-import { TextField } from '@mui/material';
-import ReactFlow, {
-  ReactFlowProvider,
-  useNodesState,
-  useEdgesState,
-} from 'reactflow';
+import { Button } from "@mui/material";
+import React, { useState } from "react";
+import { TextField } from "@mui/material";
+import ReactFlow, { ReactFlowProvider, useNodesState, useEdgesState } from "reactflow";
 
-import 'reactflow/dist/style.css';
-import { AuthProps } from '../models';
-import { getEnv } from '../utils/EnvUtil';
-const BACKEND_URL = getEnv('VITE_BACKEND_URL');
+import "reactflow/dist/style.css";
+import { AuthProps } from "../models";
+import { getEnv } from "../utils/EnvUtil";
+const BACKEND_URL = getEnv("VITE_BACKEND_URL");
 
 // import 'reactflow/dist/style.css';
 
@@ -82,16 +78,12 @@ const BACKEND_URL = getEnv('VITE_BACKEND_URL');
 //     }, [initialised]);
 // };
 
-
-
-
-export default function Outline(authProps:AuthProps) {
+export default function Outline(authProps: AuthProps) {
   // const { fitView } = useReactFlow();
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
-  const [inputValue, setInputValue] = useState('ww2');
+  const [inputValue, setInputValue] = useState("ww2");
   const [responseData, _setResponseData] = useState<any>(null);
-
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setInputValue(event.target.value);
@@ -99,14 +91,12 @@ export default function Outline(authProps:AuthProps) {
 
   const handleSubmit = async () => {
     try {
-      const response = await fetch(BACKEND_URL + `/api/outline?topic=${inputValue}`,
-        {
-          credentials: 'include',
-          headers: {
-            'Authorization': `Bearer ${authProps.token}`
-          }
-        }
-      );
+      const response = await fetch(BACKEND_URL + `/api/outline?topic=${inputValue}`, {
+        credentials: "include",
+        headers: {
+          Authorization: `Bearer ${authProps.token}`,
+        },
+      });
       const obj = await response.json();
 
       // find the max length of all arrays in obj.aspects.items
@@ -117,48 +107,43 @@ export default function Outline(authProps:AuthProps) {
         }
       });
 
-      let new_nodes: any = []
-      let new_edges: any = []
+      let new_nodes: any = [];
+      let new_edges: any = [];
 
       // // create initial node
       let initial = {
-        id: '0',
+        id: "0",
         type: "input",
-        data: { label: obj['name'] },//resp['name'] },
-        position: { x: (obj.aspects.length * 100 - 50), y: 0 },
-      }
+        data: { label: obj["name"] }, //resp['name'] },
+        position: { x: obj.aspects.length * 100 - 50, y: 0 },
+      };
 
       new_nodes.push(initial);
       let childIndex = 0;
 
-
-
-
       //   const children = obj.aspects.map((aspect: any, idx) => ());
-      let child_ids: any = []
+      let child_ids: any = [];
       // loop over obj.aspects.items
       // create nodes for each item
       // create edges between aspect and item
       obj.aspects.forEach((child: any, idx: any) => {
-
         // create group
         let groupId = "" + Math.floor(Math.random() * 9999999);
         child_ids.push(groupId);
-        let group =
-        {
+        let group = {
           id: groupId,
           data: { label: child.name },
           position: { x: idx * 250, y: 100 },
           draggable: false,
-          style: { backgroundColor: 'rgba(100, 100, 100, 0.2)', width: 200, height: maxLength * 75 },
-        }
+          style: { backgroundColor: "rgba(100, 100, 100, 0.2)", width: 200, height: maxLength * 75 },
+        };
         new_nodes.push(group);
 
         child.items.forEach((item: any, idx: any) => {
           console.log(item);
           let grandchild = {
             parentId: groupId,
-            extent: 'parent',
+            extent: "parent",
             id: "" + Math.floor(Math.random() * 9999999),
             data: { label: item },
             type: "default",
@@ -169,25 +154,18 @@ export default function Outline(authProps:AuthProps) {
             //         opacity: 0;
             //       }"
             // }
-
-          }
+          };
           new_nodes.push(grandchild);
-
-
         });
-
 
         // new_nodes.push(child);
         // new_edges.push({ id: `e${childIndex}`, source: '0', target: ""+child.id, animated: true });
         // childIndex++;
       });
 
-
-
-
       // // create edges between initial node and children
       child_ids.forEach((child: any) => {
-        new_edges.push({ id: `e${childIndex}`, source: '0', target: "" + child, animated: true });
+        new_edges.push({ id: `e${childIndex}`, source: "0", target: "" + child, animated: true });
         childIndex++;
       });
 
@@ -195,42 +173,33 @@ export default function Outline(authProps:AuthProps) {
       setNodes(new_nodes);
       setEdges(new_edges);
 
-      // // Loop over "aspects" key in json response, 
+      // // Loop over "aspects" key in json response,
       // // and create nodes and edges from the data
-
-
 
       // setResponseData(data);
 
       // toggle();
     } catch (error) {
-      console.error('Error:', error);
+      console.error("Error:", error);
     }
   };
   return (
     <ReactFlowProvider>
-      <div style={{ paddingTop: '64px', height: 800, width: 1200 }} >
-
-
-
-
+      <div style={{ paddingTop: "64px", height: 800, width: 1200 }}>
         <TextField value={inputValue} onChange={handleInputChange} />
-        <Button variant="outlined" onClick={handleSubmit}>Submit</Button>
-        <br></br><br></br><br></br>
+        <Button variant="outlined" onClick={handleSubmit}>
+          Submit
+        </Button>
+        <br></br>
+        <br></br>
+        <br></br>
         {responseData && <pre>{JSON.stringify(responseData, null, 2)}</pre>}
 
-        <ReactFlow
-          nodes={nodes}
-          edges={edges}
-          onNodesChange={onNodesChange}
-          onEdgesChange={onEdgesChange}
-        >
-
+        <ReactFlow nodes={nodes} edges={edges} onNodesChange={onNodesChange} onEdgesChange={onEdgesChange}>
           {/* <Button variant="outlined" onClick={() => onLayout('TB')}>TB</Button>
             <Button variant="outlined" onClick={() => onLayout('LR')}>LR</Button> */}
-
         </ReactFlow>
       </div>
     </ReactFlowProvider>
   );
-};
+}

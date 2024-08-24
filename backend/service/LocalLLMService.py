@@ -9,17 +9,15 @@ class LocalLLMService(AbstractLLMService):
     # def __init__(self):
 
     def call(self, messages) -> str:
-        logging.info(f"Calling local llm with: {msg}")
+        logging.info(f"Calling local llm with: {messages}")
         response = ollama.chat(model="eas/nous-hermes-2-solar-10.7b", messages=messages)
-        return response['message']['content']
-
-
+        return response["message"]["content"]
 
     def structured_call(self, prompt: str, model):
         client = instructor.from_openai(
             OpenAI(
                 base_url="http://localhost:11434/v1",
-                api_key="ollama", 
+                api_key="ollama",
             ),
             mode=instructor.Mode.JSON,
         )
@@ -33,6 +31,6 @@ class LocalLLMService(AbstractLLMService):
                 }
             ],
             response_model=model,
-            max_retries=3
+            max_retries=3,
         )
         return resp

@@ -13,14 +13,14 @@
 
 #     def __init__(self):
 #         self.client = QdrantClient(
-#             url=os.environ["QDRANT_URL"], 
+#             url=os.environ["QDRANT_URL"],
 #             api_key= os.environ["QDRANT_API_KEY"],
 #         )
 #         # self.client.se
 #         self.vector_store = QdrantVectorStore(
 #             "learny_docs",
 #             client=self.client,
-            
+
 #             enable_hybrid=True,
 #             batch_size=20,
 #         )

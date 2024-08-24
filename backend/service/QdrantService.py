@@ -10,12 +10,18 @@ from llama_index.core import Settings
 client = OpenAI()
 
 
-def sparse_doc_vectors(texts: List[str],) -> Tuple[List[List[int]], List[List[float]]]:
+def sparse_doc_vectors(
+    texts: List[str],
+) -> Tuple[List[List[int]], List[List[float]]]:
     indices_list = []
     values_list = []
 
     for text in texts:
-        embedding = client.embeddings.create(input = [text], model="text-embedding-ada-002").data[0].embedding
+        embedding = (
+            client.embeddings.create(input=[text], model="text-embedding-ada-002")
+            .data[0]
+            .embedding
+        )
         indices = []
         values = []
 
@@ -31,17 +37,19 @@ def sparse_doc_vectors(texts: List[str],) -> Tuple[List[List[int]], List[List[fl
     return indices_list, values_list
 
 
-def sparse_query_vectors(texts: List[str],) -> Tuple[List[List[int]], List[List[float]]]:
+def sparse_query_vectors(
+    texts: List[str],
+) -> Tuple[List[List[int]], List[List[float]]]:
     return sparse_doc_vectors(texts)
 
 
-class QDrantService():
+class QDrantService:
     vector_store: QdrantVectorStore = None
     client: QdrantClient = None
 
     def __init__(self):
         self.client = QdrantClient(
-            url=os.environ["QDRANT_URL"], 
+            url=os.environ["QDRANT_URL"],
             api_key=os.environ["QDRANT_API_KEY"],
         )
 
@@ -54,5 +62,7 @@ class QDrantService():
             batch_size=20,
         )
 
-        self.storage_context = StorageContext.from_defaults(vector_store=self.vector_store)
+        self.storage_context = StorageContext.from_defaults(
+            vector_store=self.vector_store
+        )
         Settings.chunk_size = 512

@@ -1,11 +1,4 @@
-from typing import List
-
-from utils.utils import get_current_user
-from database import get_db
-from fastapi import APIRouter, Depends, Request
-from models import Tag, User
-from requests import Session
-from routers.api_models import ChatMessage, CreateTagRequest, QuizDraftRequest, TagBase, TagDisplay
+from fastapi import APIRouter
 
 router = APIRouter()
 
@@ -28,63 +21,64 @@ router = APIRouter()
 #     reply = request.app.state.llm_service.get_quiz(reply)
 
 
-    # res  = []
-    # for problem in reply.problems:
-    #     reply = request.app.state.llm_service.get_wrong_answers(problem.question, problem.answer)
-    #     res.append({
-    #         "question": problem.question,
-    #         "answer": problem.answer,
-    #         "wrong1": reply.response1,
-    #         "wrong2": reply.response2,
-    #         "wrong3": reply.response3,
-    #     })
-            
+# res  = []
+# for problem in reply.problems:
+#     reply = request.app.state.llm_service.get_wrong_answers(problem.question, problem.answer)
+#     res.append({
+#         "question": problem.question,
+#         "answer": problem.answer,
+#         "wrong1": reply.response1,
+#         "wrong2": reply.response2,
+#         "wrong3": reply.response3,
+#     })
 
-    # return res
-    # else:
-    #     return 'invalid type'    
-    
+
+# return res
+# else:
+#     return 'invalid type'
 
 
 @router.get("/quizzes/1", tags=["Quizzes"])
 def get_quiz():
     return [
-  {
-    "question": "What is the significance of Rome in history?",
-    "answer": "Rome is known for being the center of the powerful Roman Empire, which greatly influenced Western civilization through its advancements in government, engineering, architecture, and culture.",
-    "wrong1": "Rome is just a city that had good pasta",
-    "wrong2": "Who cares about Rome? Let's talk about my mom instead",
-    "wrong3": "Rome? Oh, you mean that place where they used to wear bed sheets and call themselves emperors?"
-  },
-  {
-    "question": "What were the major achievements of the Roman Empire?",
-    "answer": "The Roman Empire achieved significant advancements in law, engineering, architecture, literature, and art. They also developed an extensive network of roads, aqueducts, and public buildings.",
-    "wrong1": "The Roman Empire invented spaghetti and meatballs, obviously.",
-    "wrong2": "The Romans spent most of their time perfecting the art of statue-making. Because, you know, everyone needs a mini-me.",
-    "wrong3": "The Roman Empire's greatest achievement was discovering that Caesar salad goes well with a side of betrayal."
-  },
-  {
-    "question": "What role did Julius Caesar play in Roman history?",
-    "answer": "Julius Caesar was a Roman general and statesman who played a pivotal role in the transition of Rome from a republic to an empire. He was assassinated in 44 BC, leading to the rise of his adopted heir, Octavian, who later became Emperor Augustus.",
-    "wrong1": "Julius Caesar was a Roman pastry chef who introduced the empire to the world-famous Caesar salad, complete with croutons and parmesan cheese dressing.",
-    "wrong2": "Julius Caesar was a Roman hairstylist who invented the iconic 'Caesar haircut' that became a trend among senators and gladiators.",
-    "wrong3": "Julius Caesar was a Roman beach bum who spent his days lounging by the Tiber River, sipping on fruity cocktails and watching the boats go by."
-  },
-  {
-    "question": "What were the main reasons for the fall of the Roman Empire?",
-    "answer": "The fall of the Roman Empire was a complex process influenced by factors such as political instability, economic problems, invasions by barbarian tribes, and the division of the empire into eastern and western halves.",
-    "wrong1": "The Roman Empire fell because Julius Caesar forgot to pay the barbarians their taxes.",
-    "wrong2": "The Roman Empire crumbled because they ran out of pizza and pasta.",
-    "wrong3": "The fall of the Roman Empire was caused by Caesar getting distracted by a toga party and forgetting to defend his borders."
-  },
-  {
-    "question": "What is the legacy of Rome in modern society?",
-    "answer": "Rome's legacy can be seen in the architecture, language, legal systems, and governmental structures of modern societies influenced by Roman culture. The Roman Empire's impact on the world is still felt today in various fields such as politics, art, and law.",
-    "wrong1": "Rome is famous for inventing pizza before Italy was even a country. So, obviously, the legacy of Rome in modern society is being able to enjoy a delicious slice of pepperoni while watching Netflix.",
-    "wrong2": "The legacy of Rome in modern society can be summed up in one word: togas. Yes, because we all know that every modern person wears a toga to work every day and shouts 'Hail Caesar!' before meetings.",
-    "wrong3": "Oh, you want to know about Rome's legacy in modern society? Well, it's pretty simple. Rome's legacy is that people still occasionally use the phrase 'When in Rome, do as the Romans do' while completely ignoring what the actual Romans did."
-  }
-]
+        {
+            "question": "What is the significance of Rome in history?",
+            "answer": "Rome is known for being the center of the powerful Roman Empire, which greatly influenced Western civilization through its advancements in government, engineering, architecture, and culture.",
+            "wrong1": "Rome is just a city that had good pasta",
+            "wrong2": "Who cares about Rome? Let's talk about my mom instead",
+            "wrong3": "Rome? Oh, you mean that place where they used to wear bed sheets and call themselves emperors?",
+        },
+        {
+            "question": "What were the major achievements of the Roman Empire?",
+            "answer": "The Roman Empire achieved significant advancements in law, engineering, architecture, literature, and art. They also developed an extensive network of roads, aqueducts, and public buildings.",
+            "wrong1": "The Roman Empire invented spaghetti and meatballs, obviously.",
+            "wrong2": "The Romans spent most of their time perfecting the art of statue-making. Because, you know, everyone needs a mini-me.",
+            "wrong3": "The Roman Empire's greatest achievement was discovering that Caesar salad goes well with a side of betrayal.",
+        },
+        {
+            "question": "What role did Julius Caesar play in Roman history?",
+            "answer": "Julius Caesar was a Roman general and statesman who played a pivotal role in the transition of Rome from a republic to an empire. He was assassinated in 44 BC, leading to the rise of his adopted heir, Octavian, who later became Emperor Augustus.",
+            "wrong1": "Julius Caesar was a Roman pastry chef who introduced the empire to the world-famous Caesar salad, complete with croutons and parmesan cheese dressing.",
+            "wrong2": "Julius Caesar was a Roman hairstylist who invented the iconic 'Caesar haircut' that became a trend among senators and gladiators.",
+            "wrong3": "Julius Caesar was a Roman beach bum who spent his days lounging by the Tiber River, sipping on fruity cocktails and watching the boats go by.",
+        },
+        {
+            "question": "What were the main reasons for the fall of the Roman Empire?",
+            "answer": "The fall of the Roman Empire was a complex process influenced by factors such as political instability, economic problems, invasions by barbarian tribes, and the division of the empire into eastern and western halves.",
+            "wrong1": "The Roman Empire fell because Julius Caesar forgot to pay the barbarians their taxes.",
+            "wrong2": "The Roman Empire crumbled because they ran out of pizza and pasta.",
+            "wrong3": "The fall of the Roman Empire was caused by Caesar getting distracted by a toga party and forgetting to defend his borders.",
+        },
+        {
+            "question": "What is the legacy of Rome in modern society?",
+            "answer": "Rome's legacy can be seen in the architecture, language, legal systems, and governmental structures of modern societies influenced by Roman culture. The Roman Empire's impact on the world is still felt today in various fields such as politics, art, and law.",
+            "wrong1": "Rome is famous for inventing pizza before Italy was even a country. So, obviously, the legacy of Rome in modern society is being able to enjoy a delicious slice of pepperoni while watching Netflix.",
+            "wrong2": "The legacy of Rome in modern society can be summed up in one word: togas. Yes, because we all know that every modern person wears a toga to work every day and shouts 'Hail Caesar!' before meetings.",
+            "wrong3": "Oh, you want to know about Rome's legacy in modern society? Well, it's pretty simple. Rome's legacy is that people still occasionally use the phrase 'When in Rome, do as the Romans do' while completely ignoring what the actual Romans did.",
+        },
+    ]
+
+
 #     return [
 #   {
 #     "question": "What was the foundation myth of Rome?",
@@ -135,7 +129,6 @@ def get_quiz():
 # def get_notes(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
 #     tags = db.query(Tag).all()
 #     return tags
-
 
 
 # @router.post("/tags", response_model=TagDisplay)

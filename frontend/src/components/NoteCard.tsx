@@ -1,4 +1,4 @@
-import { Box, Card, CardContent, Chip, Link, Typography} from '@mui/material';
+import { Box, Card, CardContent, Chip, Link, Typography } from '@mui/material';
 import React, { useState } from 'react';
 import { Note } from '../models';
 
@@ -30,22 +30,22 @@ const NoteCard: React.FC<Note> = ({ title, content, tags }) => {
     return (
         <Card style={cardStyle}>
             <CardContent>
-                
-               
 
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <Typography style={titleStyle} variant="h4" component="h4">
-                    {title}
-                </Typography>
-                <div>
-                    {/* <IconButton>
+
+
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <Typography style={titleStyle} variant="h4" component="h4">
+                        {title}
+                    </Typography>
+                    <div>
+                        {/* <IconButton>
                         <EditIcon />
                     </IconButton>
                     <IconButton>
                         <DeleteIcon />
                     </IconButton> */}
+                    </div>
                 </div>
-            </div>
                 <Typography style={contentStyle} variant="body2" color="textSecondary" textAlign="left">
                     {showMore ? content : `${content.slice(0, 200)}...`}
                     {!showMore && (
@@ -55,10 +55,10 @@ const NoteCard: React.FC<Note> = ({ title, content, tags }) => {
                     )}
                 </Typography>
                 <Box display="flex" paddingTop={1} flexDirection="row" flexWrap="wrap" alignItems="flex-start">
-                {tags.map((tag) => (
-                    <Chip label={tag.name} variant="outlined" style={{ margin: '4px' }} />
-                ))}
-            </Box>
+                    {tags.map((tag) => (
+                        <Chip label={tag.name} variant="outlined" style={{ margin: '4px' }} />
+                    ))}
+                </Box>
             </CardContent>
         </Card>
     );

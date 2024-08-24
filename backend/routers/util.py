@@ -8,15 +8,24 @@ from utils.utils import get_current_user, get_current_user_simple, save_token_us
 
 router = APIRouter()
 
+
 class UserSchema(BaseModel):
     first_name: str
     last_name: str
     email: str
     role: str
 
+
 @router.get("/questions", tags=["Util"])
-def get_topics(request: Request, topic: str, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    return request.app.state.llm_service.get_questions(topic, partial(save_token_usage, db, current_user.id, "suggest_questions"))
+def get_topics(
+    request: Request,
+    topic: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    return request.app.state.llm_service.get_questions(
+        topic, partial(save_token_usage, db, current_user.id, "suggest_questions")
+    )
 
 
 @router.post("/session", tags=["Auth"])

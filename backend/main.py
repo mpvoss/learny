@@ -17,22 +17,31 @@ from utils.env_init import load_deploy_env
 
 load_deploy_env()
 
-from routers import discussions, flashcards, notes, tags, util, documents, quizzes
-from service.QdrantService import QDrantService
-from service.GptLLMService import GptLLMService
-from utils.utils import get_current_user
-import tiktoken
+from routers import (  # noqa402
+    discussions,
+    flashcards,
+    notes,
+    tags,
+    util,
+    documents,
+    quizzes,
+)
+from service.QdrantService import QDrantService  # noqa402
+from service.GptLLMService import GptLLMService  # noqa402
+import tiktoken  # noqa402
 
 # Logging config
-log_level_str = os.getenv('LOG_LEVEL', 'ERROR')
+log_level_str = os.getenv("LOG_LEVEL", "ERROR")
 log_level = getattr(logging, log_level_str.upper(), logging.ERROR)
-log_path = os.getenv('LOG_PATH', None)
+log_path = os.getenv("LOG_PATH", None)
 
 logger = logging.getLogger()
 logger.setLevel(log_level)
-log_format = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+log_format = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
 if log_path:
-    handler = RotatingFileHandler(log_path, maxBytes=10*1024*1024, backupCount=5)  # 10MB per file
+    handler = RotatingFileHandler(
+        log_path, maxBytes=10 * 1024 * 1024, backupCount=5
+    )  # 10MB per file
 else:
     handler = logging.StreamHandler()
 
@@ -44,10 +53,9 @@ logger.addHandler(handler)
 # Services config
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    ''' Run at startup
-    '''
+    """Run at startup"""
     model = os.getenv("LLM_MODEL", "gpt-3.5-turbo")
-    if os.getenv("LLM_BACKEND","openai") == 'openai':
+    if os.getenv("LLM_BACKEND", "openai") == "openai":
         app.state.llm_service = GptLLMService(model)
     else:
         app.state.llm_service = LocalLLMService()
@@ -55,7 +63,7 @@ async def lifespan(app: FastAPI):
     Settings.tokenizer = tiktoken.encoding_for_model(model).encode
 
     Settings.embed_model = OpenAIEmbedding()
-    if os.getenv("QDRANT_API_KEY", None) != None:
+    if os.getenv("QDRANT_API_KEY", None) is not None:
         app.state.qdrant_service = QDrantService()
     yield
 
@@ -64,8 +72,8 @@ async def lifespan(app: FastAPI):
 class StripStagePathMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
         # Strip '/prod' from the start of the path, API gw forwards this
-        if request.url.path.startswith('/prod') or request.url.path.startswith('/test'):
-            request.scope['path'] = request.url.path[5:]
+        if request.url.path.startswith("/prod") or request.url.path.startswith("/test"):
+            request.scope["path"] = request.url.path[5:]
         response: Response = await call_next(request)
         return response
 
@@ -74,7 +82,7 @@ app = FastAPI(lifespan=lifespan, root_path="/api")
 add_pagination(app)
 
 # Only add the middleware if not running in local testing
-if os.getenv('LOCAL_TESTING') != 'true':
+if os.getenv("LOCAL_TESTING") != "true":
     app.add_middleware(StripStagePathMiddleware)
 
 
@@ -132,7 +140,9 @@ app.include_router(quizzes.router)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],  # Allows all origins, replace with your frontend URL for production
+    allow_origins=[
+        "http://localhost:3000"
+    ],  # Allows all origins, replace with your frontend URL for production
     allow_credentials=True,
     allow_methods=["*"],  # Allows all methods
     allow_headers=["*"],  # Allows all headers
@@ -140,4 +150,3 @@ app.add_middleware(
 
 
 handler = Mangum(app)
-
