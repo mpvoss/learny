@@ -1,8 +1,5 @@
-
-
 from typing import List
 from pydantic import BaseModel
-
 
 class CreateDiscussionRequest(BaseModel):
     topic: str
@@ -30,15 +27,11 @@ class CreateMessageRequest(BaseModel):
     discussion_id: int
     sender: str
 
-
 class DiscussionSuggestionResponse(BaseModel):
     questions: List[str]
 
-
-
 class CreateTagRequest(BaseModel):
     name: str
-
 
 class TagBase(BaseModel):
     id: int
@@ -75,4 +68,3 @@ class TagDisplay(BaseModel):
     name: str
     flashcards: List[FlashcardBase] = []
     notes: List[NoteBase] = []
-

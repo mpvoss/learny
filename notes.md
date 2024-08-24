@@ -1,32 +1,18 @@
 1. About writeup for github
 2. Video recording for demo
-4. Dockerhub setup
-6. Test docker pull on laptop
+4. Dockerhub documentation/writeup
+make an actual tsv uploald lol
 
-Pylance is a dep dependency, brings in pyarrow et all
+Docker process
+# Build with tag version, add latest tag
+docker build -t mpvoss/learny:0.0.0-rc.0 .
+docker tag mpvoss/learny:0.0.0-rc.0 mpvoss/learny:latest
+
+# Push both
+docker push mpvoss/learny:0.0.0-rc.0
+docker push mpvoss/learny:latest
 
 
-14M	openstackclient
-15M	grpc
-15M	uvloop
-17M	networkx
-20M	openstack
-24M	onnxruntime
-37M	numpy.libs
-39M	numpy
-63M	llama_index
-68M	onnx
-68M	sympy
-75M	pandas
-
-gone
-129M	pyarrow
-81M	lance
-66M	lancedb
-23M	faker
-
-19	AR 95-1 - annotated.pdf	2024-08-06 16:59:24.889	000262e7-84ad-4a35-ad64-282d0f031123
-123345456
 Email...
 - SES has good reputation, is cheap, already using AWS
 - Want to use Supabase, want SMTP support
@@ -105,6 +91,7 @@ Pri1
 - Pankaj demo
 Pri2
 - Chat context...last 2 or 3 messages
+- Rerank not being used right now....add Cohere?
 
 Test query: what are nvg currency requirements?
 

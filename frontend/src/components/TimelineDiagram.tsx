@@ -38,7 +38,7 @@ const TimelineDiagram: React.FC<TimelineDiagramData> = (diagram) => {
             return;
         }
 
-        const diagramCopy = diagram.data;
+        const diagramCopy = diagram.data.events;
         let dataraw = diagramCopy.sort((a, b) => b.start_year - a.start_year);
 
         const regions = Array.from(new Set(dataraw.map(item => item.region)));
@@ -88,7 +88,7 @@ const TimelineDiagram: React.FC<TimelineDiagramData> = (diagram) => {
 
         const legend = svg.append('g')
             .attr('class', 'legend')
-            .attr('transform', `translate(${width + margin.left - 100}, ${margin.top})`);
+            .attr('transform', `translate(${width + margin.left - 200}, ${margin.top})`);
 
         const legendItems = legend.selectAll('.legend-item')
             .data(regions)

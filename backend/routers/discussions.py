@@ -1,19 +1,17 @@
 from functools import partial
 import random
 from typing import List
-
 from database import get_db
-from fastapi import APIRouter, Depends, HTTPException, Query, Request
+from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi_pagination import Page
 from fastapi_pagination.ext.sqlalchemy import paginate
 from llama_index.core import Settings, VectorStoreIndex
-from models import (Discussion, Message, MessageDiagram, Note, RagSnippet, Tag,
-                    User)
+from models import (Discussion, Message, MessageDiagram, RagSnippet, User)
 from pydantic import BaseModel
 from requests import Session
 from routers.api_models import (ChatMessage, CreateDiscussionModel,
                                 CreateDiscussionRequest, CreateMessageRequest,
-                                DiscussionSuggestionResponse, NoteDisplay)
+                                DiscussionSuggestionResponse)
 from sqlalchemy import desc, func
 from sqlalchemy.orm import joinedload
 from utils import questions
@@ -41,8 +39,6 @@ def chat(db: Session = Depends(get_db), current_user: User = Depends(get_current
     return discussions
 
 
-
-
 @router.post("/discussions",  response_model=CreateDiscussionRequest, tags=["Chat"]) 
 def create_discussion(request: Request, create_discussion_request: CreateDiscussionModel, db: Session = Depends(get_db), current_user: User = Depends(get_current_user))-> Discussion:
     txt = request.app.state.llm_service.summarize_discussion(create_discussion_request.topic,  partial(save_token_usage, db, current_user.id, "summarize"))
@@ -52,7 +48,6 @@ def create_discussion(request: Request, create_discussion_request: CreateDiscuss
     db.commit()
     db.refresh(new_discussion)
     return new_discussion
-
 
 
 @router.post("/discussions/{id}/messages", response_model=CreateMessageRequest, tags=["Chat"])
@@ -175,14 +170,14 @@ def timeline(request: Request,msg: ChatMessage,  discussion_id: int, db: Session
     
     for idx,x in enumerate(events.segments):
         print(str(idx) + "/" + str(len(events.segments)) + ": "  + x)
-        res.append(request.app.state.llm_service.get_timeline_item(x, partial(save_token_usage, db, current_user.id, "timeline_items"))).model_dump(mode='json')   
+        res.append(request.app.state.llm_service.get_timeline_item(x, partial(save_token_usage, db, current_user.id, "timeline_items")).model_dump(mode='json'))
     
 
     new_message = Message(content=f"Sure, here's a timeline for the topic '{msg.content}'", discussion_id=discussion_id, sender="ai")
     db.add(new_message)
     db.commit()
 
-    msg_diagram = MessageDiagram(name = msg.content,type = 'timeline',data = res, message_id = new_message.id)
+    msg_diagram = MessageDiagram(name = msg.content,type = 'timeline',data = {'events':res}, message_id = new_message.id)
     db.add(msg_diagram)
     db.commit()
 
